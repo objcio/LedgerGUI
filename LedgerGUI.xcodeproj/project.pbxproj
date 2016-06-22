@@ -1,0 +1,527 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03CDEDBA3DA8D4EDDFBBAF1F /* Pods_LedgerGUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E7B88251E977F15D517116B /* Pods_LedgerGUI.framework */; };
+		17A47E101D1AC04D0010998A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E0F1D1AC04D0010998A /* AppDelegate.swift */; };
+		17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E111D1AC04D0010998A /* Assets.xcassets */; };
+		17A47E151D1AC04E0010998A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E131D1AC04E0010998A /* MainMenu.xib */; };
+		17A47E201D1AC04E0010998A /* LedgerGUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E1F1D1AC04E0010998A /* LedgerGUITests.swift */; };
+		A106FDB6A2D3FE7ABFD8E6B2 /* Pods_LedgerGUI_LedgerGUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28F00BF18C6AF72E72BF84FE /* Pods_LedgerGUI_LedgerGUITests.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		17A47E1C1D1AC04E0010998A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17A47E041D1AC04D0010998A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17A47E0B1D1AC04D0010998A;
+			remoteInfo = LedgerGUI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0E7B88251E977F15D517116B /* Pods_LedgerGUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LedgerGUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		17A47E0C1D1AC04D0010998A /* LedgerGUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LedgerGUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		17A47E0F1D1AC04D0010998A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		17A47E111D1AC04D0010998A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		17A47E141D1AC04E0010998A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		17A47E161D1AC04E0010998A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		17A47E1B1D1AC04E0010998A /* LedgerGUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LedgerGUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		17A47E1F1D1AC04E0010998A /* LedgerGUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerGUITests.swift; sourceTree = "<group>"; };
+		17A47E211D1AC04E0010998A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		28F00BF18C6AF72E72BF84FE /* Pods_LedgerGUI_LedgerGUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LedgerGUI_LedgerGUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		42FFB525ED0BF6022C2753AA /* Pods-LedgerGUI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI/Pods-LedgerGUI.debug.xcconfig"; sourceTree = "<group>"; };
+		73C543A5AEF43CC5C4E91952 /* Pods-LedgerGUI-LedgerGUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI-LedgerGUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI-LedgerGUITests/Pods-LedgerGUI-LedgerGUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		7F31ADD78CA81CD0A6DD756E /* Pods-LedgerGUI-LedgerGUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI-LedgerGUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI-LedgerGUITests/Pods-LedgerGUI-LedgerGUITests.release.xcconfig"; sourceTree = "<group>"; };
+		BC8CEE71CABA4203AD3842B6 /* Pods-LedgerGUI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI.release.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI/Pods-LedgerGUI.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		17A47E091D1AC04D0010998A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03CDEDBA3DA8D4EDDFBBAF1F /* Pods_LedgerGUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17A47E181D1AC04E0010998A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A106FDB6A2D3FE7ABFD8E6B2 /* Pods_LedgerGUI_LedgerGUITests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		17A47E031D1AC04D0010998A = {
+			isa = PBXGroup;
+			children = (
+				17A47E0E1D1AC04D0010998A /* LedgerGUI */,
+				17A47E1E1D1AC04E0010998A /* LedgerGUITests */,
+				17A47E0D1D1AC04D0010998A /* Products */,
+				F72B6FC2E912FF869F81CE06 /* Pods */,
+				F2CD8FDBAB4C870060076A71 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		17A47E0D1D1AC04D0010998A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				17A47E0C1D1AC04D0010998A /* LedgerGUI.app */,
+				17A47E1B1D1AC04E0010998A /* LedgerGUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		17A47E0E1D1AC04D0010998A /* LedgerGUI */ = {
+			isa = PBXGroup;
+			children = (
+				17A47E0F1D1AC04D0010998A /* AppDelegate.swift */,
+				17A47E111D1AC04D0010998A /* Assets.xcassets */,
+				17A47E131D1AC04E0010998A /* MainMenu.xib */,
+				17A47E161D1AC04E0010998A /* Info.plist */,
+			);
+			path = LedgerGUI;
+			sourceTree = "<group>";
+		};
+		17A47E1E1D1AC04E0010998A /* LedgerGUITests */ = {
+			isa = PBXGroup;
+			children = (
+				17A47E1F1D1AC04E0010998A /* LedgerGUITests.swift */,
+				17A47E211D1AC04E0010998A /* Info.plist */,
+			);
+			path = LedgerGUITests;
+			sourceTree = "<group>";
+		};
+		F2CD8FDBAB4C870060076A71 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0E7B88251E977F15D517116B /* Pods_LedgerGUI.framework */,
+				28F00BF18C6AF72E72BF84FE /* Pods_LedgerGUI_LedgerGUITests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F72B6FC2E912FF869F81CE06 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				42FFB525ED0BF6022C2753AA /* Pods-LedgerGUI.debug.xcconfig */,
+				BC8CEE71CABA4203AD3842B6 /* Pods-LedgerGUI.release.xcconfig */,
+				73C543A5AEF43CC5C4E91952 /* Pods-LedgerGUI-LedgerGUITests.debug.xcconfig */,
+				7F31ADD78CA81CD0A6DD756E /* Pods-LedgerGUI-LedgerGUITests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		17A47E0B1D1AC04D0010998A /* LedgerGUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17A47E241D1AC04E0010998A /* Build configuration list for PBXNativeTarget "LedgerGUI" */;
+			buildPhases = (
+				97CD1968BDE1D21DCD554826 /* [CP] Check Pods Manifest.lock */,
+				17A47E081D1AC04D0010998A /* Sources */,
+				17A47E091D1AC04D0010998A /* Frameworks */,
+				17A47E0A1D1AC04D0010998A /* Resources */,
+				78052B9070FD394D310A1C74 /* [CP] Embed Pods Frameworks */,
+				DD605F6C76D96CB22E4DAD6E /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LedgerGUI;
+			productName = LedgerGUI;
+			productReference = 17A47E0C1D1AC04D0010998A /* LedgerGUI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		17A47E1A1D1AC04E0010998A /* LedgerGUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17A47E271D1AC04E0010998A /* Build configuration list for PBXNativeTarget "LedgerGUITests" */;
+			buildPhases = (
+				D8EFEB9ACD13B9A9D725BEE0 /* [CP] Check Pods Manifest.lock */,
+				17A47E171D1AC04E0010998A /* Sources */,
+				17A47E181D1AC04E0010998A /* Frameworks */,
+				17A47E191D1AC04E0010998A /* Resources */,
+				56791B03D6FA55C279DAB74F /* [CP] Embed Pods Frameworks */,
+				587B4FD1FEA3A3ED91FEAE5E /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				17A47E1D1D1AC04E0010998A /* PBXTargetDependency */,
+			);
+			name = LedgerGUITests;
+			productName = LedgerGUITests;
+			productReference = 17A47E1B1D1AC04E0010998A /* LedgerGUITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		17A47E041D1AC04D0010998A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = objc.io;
+				TargetAttributes = {
+					17A47E0B1D1AC04D0010998A = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+					17A47E1A1D1AC04E0010998A = {
+						CreatedOnToolsVersion = 7.3.1;
+						TestTargetID = 17A47E0B1D1AC04D0010998A;
+					};
+				};
+			};
+			buildConfigurationList = 17A47E071D1AC04D0010998A /* Build configuration list for PBXProject "LedgerGUI" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 17A47E031D1AC04D0010998A;
+			productRefGroup = 17A47E0D1D1AC04D0010998A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				17A47E0B1D1AC04D0010998A /* LedgerGUI */,
+				17A47E1A1D1AC04E0010998A /* LedgerGUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		17A47E0A1D1AC04D0010998A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */,
+				17A47E151D1AC04E0010998A /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17A47E191D1AC04E0010998A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		56791B03D6FA55C279DAB74F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LedgerGUI-LedgerGUITests/Pods-LedgerGUI-LedgerGUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		587B4FD1FEA3A3ED91FEAE5E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LedgerGUI-LedgerGUITests/Pods-LedgerGUI-LedgerGUITests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		78052B9070FD394D310A1C74 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LedgerGUI/Pods-LedgerGUI-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		97CD1968BDE1D21DCD554826 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		D8EFEB9ACD13B9A9D725BEE0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		DD605F6C76D96CB22E4DAD6E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LedgerGUI/Pods-LedgerGUI-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		17A47E081D1AC04D0010998A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17A47E101D1AC04D0010998A /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		17A47E171D1AC04E0010998A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				17A47E201D1AC04E0010998A /* LedgerGUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		17A47E1D1D1AC04E0010998A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17A47E0B1D1AC04D0010998A /* LedgerGUI */;
+			targetProxy = 17A47E1C1D1AC04E0010998A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		17A47E131D1AC04E0010998A /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				17A47E141D1AC04E0010998A /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		17A47E221D1AC04E0010998A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		17A47E231D1AC04E0010998A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		17A47E251D1AC04E0010998A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 42FFB525ED0BF6022C2753AA /* Pods-LedgerGUI.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LedgerGUI/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		17A47E261D1AC04E0010998A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BC8CEE71CABA4203AD3842B6 /* Pods-LedgerGUI.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LedgerGUI/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		17A47E281D1AC04E0010998A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 73C543A5AEF43CC5C4E91952 /* Pods-LedgerGUI-LedgerGUITests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LedgerGUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LedgerGUI.app/Contents/MacOS/LedgerGUI";
+			};
+			name = Debug;
+		};
+		17A47E291D1AC04E0010998A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7F31ADD78CA81CD0A6DD756E /* Pods-LedgerGUI-LedgerGUITests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = LedgerGUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LedgerGUI.app/Contents/MacOS/LedgerGUI";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		17A47E071D1AC04D0010998A /* Build configuration list for PBXProject "LedgerGUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17A47E221D1AC04E0010998A /* Debug */,
+				17A47E231D1AC04E0010998A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17A47E241D1AC04E0010998A /* Build configuration list for PBXNativeTarget "LedgerGUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17A47E251D1AC04E0010998A /* Debug */,
+				17A47E261D1AC04E0010998A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17A47E271D1AC04E0010998A /* Build configuration list for PBXNativeTarget "LedgerGUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17A47E281D1AC04E0010998A /* Debug */,
+				17A47E291D1AC04E0010998A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 17A47E041D1AC04D0010998A /* Project object */;
+}
