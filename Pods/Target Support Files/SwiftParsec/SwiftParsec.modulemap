@@ -1,0 +1,6 @@
+framework module SwiftParsec {
+  umbrella header "SwiftParsec-umbrella.h"
+
+  export *
+  module * { export * }
+}

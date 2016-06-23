@@ -1,0 +1,6 @@
+framework module Pods_LedgerGUI_LedgerGUITests {
+  umbrella header "Pods-LedgerGUI-LedgerGUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
