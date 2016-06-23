@@ -234,6 +234,22 @@ public final class GenericParser<Stream: StreamType, UserState, Result>: ParsecT
         
     }
     
+    public var notAhead: GenericParser<Stream, UserState, ()> {
+        return GenericParser<Stream, UserState, ()>(parse: { state in
+            let consumed = self.parse(state: state)
+            
+            if case .Some(let reply) = consumed, .Ok(let result, _, _) = reply {
+                return .None(.Error(ParseError.unknownParseError(state.position)))
+            }
+            
+            let result = ()
+            
+            return .None(.Ok(result, state, ParseError.unknownParseError(state.position)))
+        })
+    }
+    
+ 
+    
     /// The `many` combinator applies the parser `self` _zero_ or more times. It returns an array of the returned values of `self`.
     ///
     ///     let identifier = identifierStart >>- { char in
@@ -341,6 +357,7 @@ public final class GenericParser<Stream: StreamType, UserState, Result>: ParsecT
         })
         
     }
+    
     
     /// The parser returned by `p.labels(message)` behaves as parser `p`, but whenever the parser `p` fails _without consuming any input_, it replaces expected error messages with the expected error message `message`.
     ///
