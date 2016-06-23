@@ -43,15 +43,7 @@ class ParserTests: XCTestCase {
         let failingDates = ["2016/06-21"]
         testParser(Date.parser, success: dates , failure: failingDates)
     }
-    
-    func testNot() {
-        let example: [(String, String)] = [("An income ; hi\ntest", "An income ; hi"),
-                                           ("Hello  ; a note", "Hello")]
-        let p = String.init <^> (trailingCommentStart.notAhead *> noNewline).many
-        
-        testParser(p, success: example, failure: ["0hello"])
-    }
-    
+
     func testTransactionTitle() {
         let example = ("1985-01-16   An income transaction\n", (Date(year: 1985, month: 1, day: 16), "An income transaction"))
         testParser(transactionTitle, compare: ==, success: [example], failure: [])
@@ -67,10 +59,11 @@ class ParserTests: XCTestCase {
     }
     
     func testPosting() {
-        let example = [("Assets:PayPal  $ 123", Posting(account: "Assets:PayPal", amount: Amount(number: 123, commodity: "$"))),
-                       ("Girokonto  10.01 USD", Posting(account: "Girokonto", amount: Amount(number: 10.01, commodity: "USD"))),
-                       ("Assets:Giro Konto  10.01 USD", Posting(account: "Assets:Giro Konto", amount: Amount(number: 10.01, commodity: "USD"))),
-                       ("Something Else", Posting(account: "Something Else", amount: nil))
+        let example = [("Assets:PayPal  $ 123", Posting(account: "Assets:PayPal", amount: Amount(number: 123, commodity: "$"), note: nil)),
+                       ("Girokonto  10.01 USD", Posting(account: "Girokonto", amount: Amount(number: 10.01, commodity: "USD"), note: nil)),
+                       ("Assets:Giro Konto  10.01 USD", Posting(account: "Assets:Giro Konto", amount: Amount(number: 10.01, commodity: "USD"), note: nil)),
+                       ("Something Else", Posting(account: "Something Else", amount: nil, note: nil)),
+                       ("Something Else  ; with a note", Posting(account: "Something Else", amount: nil, note: Note("with a note")))
             ]
         testParser(posting, success: example, failure: [])
     }
@@ -85,42 +78,68 @@ class ParserTests: XCTestCase {
     }
     
     func testComment() {
-        let examples = [("; This is a comment\n2016-01-03", Comment("This is a comment"))]
+        let examples = [("; This is a comment\n2016-01-03", Note("This is a comment"))]
         testParser(comment, success: examples, failure: [])
     }
     
     func testTransaction() {
         let examples = [("2016/01/31 My Transaction\n Assets:PayPal  200 $",
-            Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", note: nil,
+            Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [],
                                    postings: [
-                                     Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$"))
+                                    Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$"), note: nil)
                                     ])),
             ("2016/01/31 My Transaction\n Assets:PayPal  200 $\n Giro",
-                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction",  note: nil,
+                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction",  notes: [],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
             ("2016/01/31 My Transaction \n Assets:PayPal  200 $\n Giro",
-                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction",  note: nil,
+                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction ",  notes: [],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
             ("2016/01/31 My Transaction ; not a comment\n Assets:PayPal  200 $\n Giro",
-                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction ; not a comment", note: nil,
+                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction ; not a comment", notes: [],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
+                      ]
+
+        testParser(transaction, success: examples, failure: [])
+    }
+
+    func testTransactionNotes() {
+        let examples = [
             ("2016/01/31 My Transaction  ; a note\n Assets:PayPal  200 $\n Giro",
-                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", note: "a note",
+                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note")],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
+                        Posting(account: "Giro", amount: nil)
+                    ])),
+            ("2016/01/31 My Transaction\t; a note\n Assets:PayPal  200 $\n Giro",
+                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note")],
+                    postings: [
+                        Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
+                        Posting(account: "Giro", amount: nil)
+                    ])),
+            ("2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $\n Giro",
+                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note"), Note("another note")],
+                    postings: [
+                        Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
+                        Posting(account: "Giro", amount: nil)
+                    ])),
+            ("2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro",
+                Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note"), Note("another note")],
+                    postings: [
+                        Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$"), notes: [Note("paypal note"), Note("second paypal note")]),
                         Posting(account: "Giro", amount: nil)
                     ])),
             ]
         testParser(transaction, success: examples, failure: [])
+
     }
     
  

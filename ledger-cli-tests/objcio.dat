@@ -1,5 +1,7 @@
 account MyAccount
 
 16/05/31 Hello world  ; this is a comment
-  Assets:Giro  100 USD  ; hello
+  ; this is a second comment
+  Assets:Giro  100 USD; hello
+  ; test
   Assets:CreditCard  -100 USD

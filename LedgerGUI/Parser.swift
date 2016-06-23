@@ -58,22 +58,17 @@ func lexline<A>(parser: GenericParser<String,(), A>) -> GenericParser<String, ()
 }
 
 let noNewline: GenericParser<String,(),Character> = StringParser.noneOf("\n\r") // TODO use real newline stuff
-let spaceWithoutNewline: GenericParser<String,(),Character> = StringParser.satisfy { $0.isSpace }
+let spaceWithoutNewline: GenericParser<String,(),Character> = StringParser.character(" ")
 
-let spacer = spaceWithoutNewline *> spaceWithoutNewline
+let spacer = (spaceWithoutNewline *> spaceWithoutNewline) <|> StringParser.tab
 
-let trailingCommentStart = spacer.attempt *> commentStart
-let trailingComment = lexeme(trailingCommentStart) *> ({Comment(String($0))} <^> noNewline.many)
+let noteStart: StringParser = StringParser.character(";")
+let trailingNoteStart = spacer *> noteStart
+let noteBody = ({Note(String($0))} <^> noNewline.many)
+let trailingNote = lexeme(trailingNoteStart) *> noteBody
+let note = lexeme(noteStart) *> noteBody
 
-//func not<A>(p: GenericParser<String,(),A>) -> GenericParser<String,(),()> {
-//    return (p.lookAhead.attempt *> GenericParser.fail("Unexpected p")) <|> GenericParser(result: ())
-//}
-
-//let notP = String.init <^> (not( StringParser.satisfy { $0.isNewlineOrSpace }) *> StringParser.anyCharacter).many
-
-
-let transactionCharacter = noSpace <|> (spaceWithoutNewline <* (noSpace <|> (spaceWithoutNewline <* StringParser.noneOf(";"))).lookAhead).attempt
-//let transactionCharacter = not(trailingCommentStart) *> noNewline
+let transactionCharacter = trailingNoteStart.notAhead *> noNewline
 
 let transactionTitle: GenericParser<String, (), (Date, String)> =
   pair <^> lexeme(Date.parser) <*> (String.init <^> transactionCharacter.many)
@@ -115,17 +110,47 @@ let amount: GenericParser<String, (), Amount> =
 
 let account = GenericParser.lift2({ String( [$0] + $1 ) }, parser1: noSpace, parser2: (noSpace <|> singleSpace).many)
 
-let posting: GenericParser<String, (), Posting> = GenericParser.lift2(Posting.init, parser1: lexeme(account), parser2: amount.optional)
+let posting: GenericParser<String, (), Posting> = GenericParser.lift3(Posting.init, parser1: lexeme(account), parser2: amount.optional, parser3: trailingNote.optional)
 
 let commentStart: GenericParser<String, (), Character> = StringParser.oneOf(";#%|*")
 
-let comment: GenericParser<String, (), Comment> = commentStart *> spaceWithoutNewline.many *> ( { Comment(String($0)) } <^> noNewline.many)
+let comment: GenericParser<String, (), Note> = commentStart *> spaceWithoutNewline.many *> ( { Note(String($0)) } <^> noNewline.many)
 
-let buildTransaction = { (dateAndTitle: (Date,String), comment: Comment?, postings: [Posting]) -> Transaction in
-    Transaction(date: dateAndTitle.0, title: dateAndTitle.1, note: comment?.comment, postings: postings)
+
+enum PostingOrNote {
+    case posting(Posting)
+    case note(Note)
 }
+
+let buildTransaction = { (dateAndTitle: (Date,String), comment: Note?, items: [PostingOrNote]) -> Transaction in
+    var transactionNotes: [Note] = []
+    if let note = comment {
+        transactionNotes.append(note)
+    }
+    var postings: [Posting] = []
+
+    for postingOrNote in items {
+        switch postingOrNote {
+        case .posting(let posting):
+            postings.append(posting)
+        case .note(let note):
+            if postings.isEmpty {
+                transactionNotes.append(note)
+            } else {
+                postings[postings.count-1].notes.append(note)
+
+            }
+
+        }
+    }
+
+    return Transaction(date: dateAndTitle.0, title: dateAndTitle.1, notes: transactionNotes, postings: postings)
+}
+
+let postingOrNote = PostingOrNote.note <^> lexeme(note) <|> PostingOrNote.posting <^> lexeme(posting)
+
 let transaction: GenericParser<String, (), Transaction> =
-    GenericParser.lift3(buildTransaction, parser1: transactionTitle, parser2: lexline(trailingComment.optional), parser3: (spaceWithoutNewline.many1 *> lexeme(posting)).separatedBy1(StringParser.newLine))
+    GenericParser.lift3(buildTransaction, parser1: transactionTitle, parser2: lexline(trailingNote.optional), parser3: (spaceWithoutNewline.many1 *> postingOrNote).separatedBy1(StringParser.newLine))
 
 typealias LedgerDouble = Double // TODO use infinite precision arithmetic
 
@@ -144,22 +169,29 @@ func ==(lhs: Amount, rhs: Amount) -> Bool {
     return lhs.commodity == rhs.commodity && lhs.number == rhs.number
 }
 
-struct Comment {
+struct Note {
     let comment: String
     init(_ comment: String) {
         self.comment = comment
     }
 }
 
-extension Comment: Equatable {}
+extension Note: Equatable {}
 
-func ==(lhs: Comment, rhs: Comment) -> Bool {
+func ==(lhs: Note, rhs: Note) -> Bool {
     return lhs.comment == rhs.comment
 }
 
 struct Posting {
     var account: String
     var amount: Amount?
+    var notes: [Note]
+}
+
+extension Posting {
+    init(account: String, amount: Amount? = nil, note: Note? = nil) {
+        self = Posting(account: account, amount: amount, notes: note.map { [$0] } ?? [])
+    }
 }
 
 extension Posting: Equatable { }
@@ -171,11 +203,11 @@ func ==(lhs: Posting, rhs: Posting) -> Bool {
 struct Transaction {
     var date: Date
     var title: String
-    var note: String?
+    var notes: [Note]
     var postings: [Posting]
 }
 
 extension Transaction: Equatable { }
 func ==(lhs: Transaction, rhs: Transaction) -> Bool {
-    return lhs.date == rhs.date && lhs.title == rhs.title && lhs.note == rhs.note && lhs.postings == rhs.postings
+    return lhs.date == rhs.date && lhs.title == rhs.title && lhs.notes == rhs.notes && lhs.postings == rhs.postings
 }
