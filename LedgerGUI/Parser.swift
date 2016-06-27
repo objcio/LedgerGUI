@@ -196,7 +196,7 @@ let amount: GenericParser<String, (), Amount> =
     GenericParser.lift2({ Amount(number: $1, commodity: $0) }, parser1: lexeme(commodity), parser2: double) <|>
     GenericParser.lift2(Amount.init, parser1: lexeme(double), parser2: commodity)
 
-let account = GenericParser.lift2({ String( [$0] + $1 ) }, parser1: noSpace, parser2: (noSpace <|> singleSpace).many)
+let account = GenericParser.lift2({ String( $1.prepending($0) ) }, parser1: noSpace, parser2: (noSpace <|> singleSpace).many)
 
 let posting: GenericParser<String, (), Posting> = GenericParser.lift3(Posting.init, parser1: lexeme(account), parser2: amount.optional, parser3: trailingNote.optional)
 
@@ -245,6 +245,9 @@ indirect enum Expression: Equatable {
     case infix(`operator`: String, lhs: Expression, rhs: Expression)
     case number(LedgerDouble)
     case amount(Amount)
+    case ident(String)
+    case regex(String)
+    case string(String)
 }
 
 func ==(lhs: Expression, rhs: Expression) -> Bool {
@@ -253,12 +256,15 @@ func ==(lhs: Expression, rhs: Expression) -> Bool {
         return true
     case let (.number(x), .number(y)) where x == y: return true
     case let(.amount(x), .amount(y)) where x == y: return true
+    case let(.ident(x), .ident(y)) where x == y: return true
+    case let(.regex(x), .regex(y)) where x == y: return true
+    case let(.string(x), .string(y)) where x == y: return true
     default: return false
     }
 }
 
 func binary(_ name: String, assoc: Associativity = .left) -> Operator<String, (), Expression> {
-    let opParser = lexeme(StringParser.string(name)) >>- { name in
+    let opParser = lexeme(StringParser.string(name).attempt) >>- { name in // todo: is the attempt really necessary?
         return GenericParser(result: {
             Expression.infix(operator: name, lhs: $0, rhs: $1)
         })
@@ -266,31 +272,46 @@ func binary(_ name: String, assoc: Associativity = .left) -> Operator<String, ()
     return .infix(opParser, assoc)
 
 }
-//
-//func prefix(name: String, function: Int -> Int) -> Operator<String, (), Int> {
-//
-//    let opParser = StringParser.string(name) *> GenericParser(result: function)
-//    return .Prefix(opParser)
-//
-//}
-//
-//func postfix(name: String, function: Int -> Int) -> Operator<String, (), Int> {
-//
-//    let opParser = StringParser.string(name) *> GenericParser(result: function)
-//    return .Postfix(opParser.attempt)
-//
-//}
-//
+
+func delimited(by character: Character) -> GenericParser<String,(),String> {
+    let delimiter = StringParser.character(character)
+    return delimiter *> ({ String($0) } <^> StringParser.anyCharacter.manyTill(delimiter))
+}
+
+let regex: GenericParser<String,(),String> = delimited(by: "/")
+
+let string = delimited(by: "\"") <|> delimited(by: "'")
+
+let ident = { String($0) } <^> (StringParser.alphaNumeric <|> StringParser.character("_")).many1
+
 let opTable: OperatorTable<String, (), Expression> = [
     [ binary("*"), binary("/")],
-    [ binary("+"), binary("-")]
+    [ binary("+"), binary("-")],
+    [ binary("=="), binary("!="), binary("<"), binary("<="), binary(">"), binary(">="), binary("=~"), binary("!~")],
+    [ binary("&&")],
+    [ binary("||")],
 
 ]
 
 let openingParen: StringParser = lexeme(StringParser.character("("))
 let closingParen: StringParser = lexeme(StringParser.character(")"))
 
-let primitive: GenericParser<String,(),Expression> = Expression.amount <^> amount.attempt <|> Expression.number <^> double
+let primitive: GenericParser<String,(),Expression> =
+    Expression.amount <^> amount.attempt <|>
+    Expression.number <^> double <|>
+    Expression.regex <^> regex <|>
+    Expression.string <^> string <|>
+    Expression.ident <^> ident
+
+struct AutomatedTransaction {
+    enum TransactionType {
+        case regex(String)
+        case expr(Expression)
+    }
+
+    var type: TransactionType
+    var postings: [Posting]
+}
 
 let expression = opTable.makeExpressionParser { expression in
     expression.between(openingParen, closingParen) <|>

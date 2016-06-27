@@ -169,6 +169,10 @@ class ParserTests: XCTestCase {
         let sample = [
             ("(1 * 5 + 2)", Expression.infix(operator: "+", lhs: .infix(operator: "*", lhs: .number(1), rhs: .number(5)), rhs: .number(2))),
             ("(3 / 7 USD)", Expression.infix(operator: "/", lhs: .number(3), rhs: .amount(Amount(number: 7, commodity: "USD")))),
+            ("true", Expression.ident("true")),
+            ("account =~ /^Test$/", Expression.infix(operator: "=~", lhs: .ident("account"), rhs: .regex("^Test$"))),
+            ("account == test && hello =~ true", Expression.infix(operator: "&&", lhs: .infix(operator: "==", lhs: .ident("account"), rhs: .ident("test")), rhs: .infix(operator: "=~", lhs: .ident("hello"), rhs: .ident("true")))),
+            ("account =~ /Income:Core Data/ && commodity == \"EUR\"", Expression.infix(operator: "&&", lhs: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Income:Core Data")), rhs: .infix(operator: "==", lhs: .ident("commodity"), rhs: .string("EUR"))))
             ]
         testParser(expression, success: sample, failure: [])
     }
