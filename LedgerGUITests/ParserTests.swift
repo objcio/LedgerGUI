@@ -18,7 +18,7 @@ class ParserTests: XCTestCase {
             XCTAssertTrue(compare(result,expected), "Expected \(result) to be \(expected)")
         }
         for d in failure {
-            XCTAssertNil(try? Date.parser.run(sourceName: "", input: d))
+            XCTAssertNil(try? (parser <* StringParser.eof).run(sourceName: "", input: d))
         }
     }
     
@@ -35,13 +35,16 @@ class ParserTests: XCTestCase {
 
         }
         for d in failure {
-            XCTAssertNil(try? Date.parser.run(sourceName: "", input: d))
+            XCTAssertNil(try? (parser <* StringParser.eof).run(sourceName: "", input: d))
         }
     }
     
     func testDates() {
         let dates = [("2016/06/21", Date(year: 2016, month: 6, day: 21)),
-                     ("14-1-31", Date(year: 14, month: 1, day: 31))]
+                     ("14-1-31", Date(year: 14, month: 1, day: 31)),
+                     ("16-01", Date(year: nil, month: 16, day: 1)),
+                     ("16/01", Date(year: nil, month: 16, day: 1))
+                     ]
         let failingDates = ["2016/06-21"]
         testParser(Date.parser, success: dates , failure: failingDates)
     }

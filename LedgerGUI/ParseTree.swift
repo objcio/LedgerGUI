@@ -9,7 +9,7 @@
 import Foundation
 
 struct Date {
-    let year: Int
+    let year: Int?
     let month: Int
     let day: Int
 }

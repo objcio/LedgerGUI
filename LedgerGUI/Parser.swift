@@ -186,14 +186,21 @@ let naturalWithCommaString = (StringParser.digit <|> StringParser.character(",")
 
 let natural: GenericParser<String, (), Int> = naturalString.map { Int($0)! }
 
-func monthDay(_ separator: Character) -> GenericParser<String, (), (Int, Int)> {
+func monthDay(_ separator: Character) -> GenericParser<String, (), (Int, Int?)> {
     let separatorInt = StringParser.character(separator) *> natural
-    return lift2( { ($0, $1)} , separatorInt, separatorInt)
+    return lift2( { ($0, $1)} , separatorInt, separatorInt.optional)
+}
+
+func makeDate(one: Int, two: (Int,Int?)) -> Date {
+    guard let day = two.1 else {
+        return Date(year: nil, month: one, day: two.0)
+    }
+    return Date(year: one, month: two.0, day: day)
 }
 
 extension Date {
     static let parser:  GenericParser<String, (), Date> =
-       { y in { m, d in Date(year: y, month: m, day: d) } } <^> natural <*> (monthDay("/") <|> monthDay("-"))
+        lift2(makeDate, natural, monthDay("/") <|> monthDay("-"))
 }
 
 func lexeme<A>(_ parser: GenericParser<String,(), A>) -> GenericParser<String, (), A> {
@@ -390,7 +397,7 @@ func ==(lhs: Statement, rhs: Statement) -> Bool {
 let commodityDirective = lexeme(StringParser.string("commodity")) *> (Statement.commodity <^> commodity)
 let yearDirective = lexeme(StringParser.string("year")) *> (Statement.year <^> natural)
 
-let statement: GenericParser<String,(),Statement> = (Statement.transaction <^> transaction) <|> commodityDirective <|> (Statement.comment <^> comment) <|> accountDirective <|> definition <|> tag <|> (Statement.automated <^> automatedTransaction)
+let statement: GenericParser<String,(),Statement> = (Statement.transaction <^> transaction) <|> yearDirective <|> commodityDirective <|> (Statement.comment <^> comment) <|> accountDirective <|> definition <|> tag <|> (Statement.automated <^> automatedTransaction)
 
 
 
