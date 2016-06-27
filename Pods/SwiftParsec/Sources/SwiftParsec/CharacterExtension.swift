@@ -8,12 +8,12 @@
 
 import Foundation
 
-private let uppercaseSet = NSCharacterSet.uppercaseLetterCharacterSet()
-private let lowercaseSet = NSCharacterSet.lowercaseLetterCharacterSet()
-private let alphaSet = NSCharacterSet.letterCharacterSet()
-private let alphaNumericSet = NSCharacterSet.alphanumericCharacterSet()
-private let symbolSet = NSCharacterSet.symbolCharacterSet()
-private let digitSet = NSCharacterSet.decimalDigitCharacterSet()
+private let uppercaseSet = NSCharacterSet.uppercaseLetters()
+private let lowercaseSet = NSCharacterSet.lowercaseLetters()
+private let alphaSet = NSCharacterSet.letters()
+private let alphaNumericSet = NSCharacterSet.alphanumerics()
+private let symbolSet = NSCharacterSet.symbols()
+private let digitSet = NSCharacterSet.decimalDigits()
 
 extension Character {
     
@@ -65,42 +65,42 @@ extension Character {
     /// `true` if `self` normalized contains a single code unit that is in the categories of Uppercase and Titlecase Letters.
     var isUppercase: Bool {
         
-        return isMemberOfCharacterSet(uppercaseSet)
+        return isMember(of: uppercaseSet)
         
     }
     
     /// `true` if `self` normalized contains a single code unit that is in the category of Lowercase Letters.
     var isLowercase: Bool {
         
-        return isMemberOfCharacterSet(lowercaseSet)
+        return isMember(of: lowercaseSet)
         
     }
     
     /// `true` if `self` normalized contains a single code unit that is in the categories of Letters and Marks.
     var isAlpha: Bool {
         
-        return isMemberOfCharacterSet(alphaSet)
+        return isMember(of: alphaSet)
         
     }
     
     /// `true` if `self` normalized contains a single code unit that is in th categories of Letters, Marks, and Numbers.
     var isAlphaNumeric: Bool {
         
-        return isMemberOfCharacterSet(alphaNumericSet)
+        return isMember(of: alphaNumericSet)
         
     }
     
     /// `true` if `self` normalized contains a single code unit that is in the category of Symbols. These characters include, for example, the dollar sign ($) and the plus (+) sign.
     var isSymbol: Bool {
         
-        return isMemberOfCharacterSet(symbolSet)
+        return isMember(of: symbolSet)
         
     }
     
     /// `true` if `self` normalized contains a single code unit that is in the category of Decimal Numbers.
     var isDigit: Bool {
         
-        return isMemberOfCharacterSet(digitSet)
+        return isMember(of: digitSet)
         
     }
     
@@ -128,7 +128,7 @@ extension Character {
     /// Lowercase `self`.
     var lowercase: Character {
         
-        let str = String(self).lowercaseString
+        let str = String(self).lowercased()
         return str[str.startIndex]
         
     }
@@ -136,7 +136,7 @@ extension Character {
     /// Uppercase `self`.
     var uppercase: Character {
         
-        let str = String(self).uppercaseString
+        let str = String(self).uppercased()
         return str[str.startIndex]
         
     }
@@ -145,7 +145,7 @@ extension Character {
     ///
     /// - parameter set: The `NSCharacterSet` used to test for membership.
     /// - returns: `true` if `self` normalized contains a single code unit that is a member of the supplied character set.
-    func isMemberOfCharacterSet(set: NSCharacterSet) -> Bool {
+    func isMember(of set: NSCharacterSet) -> Bool {
         
         let normalized = String(self).precomposedStringWithCanonicalMapping
         let unicodes = normalized.unicodeScalars
