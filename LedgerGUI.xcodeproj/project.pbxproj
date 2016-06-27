@@ -12,7 +12,6 @@
 		17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E111D1AC04D0010998A /* Assets.xcassets */; };
 		17A47E151D1AC04E0010998A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E131D1AC04E0010998A /* MainMenu.xib */; };
 		17A47E201D1AC04E0010998A /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E1F1D1AC04E0010998A /* ParserTests.swift */; };
-		8317E4521D1C459100626651 /* Performance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317E4511D1C459100626651 /* Performance.swift */; };
 		839E90891D1BCE8400AD9CBF /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839E90881D1BCE8400AD9CBF /* Parser.swift */; };
 		A106FDB6A2D3FE7ABFD8E6B2 /* Pods_LedgerGUI_LedgerGUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28F00BF18C6AF72E72BF84FE /* Pods_LedgerGUI_LedgerGUITests.framework */; };
 /* End PBXBuildFile section */
@@ -41,7 +40,6 @@
 		42FFB525ED0BF6022C2753AA /* Pods-LedgerGUI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI/Pods-LedgerGUI.debug.xcconfig"; sourceTree = "<group>"; };
 		73C543A5AEF43CC5C4E91952 /* Pods-LedgerGUI-LedgerGUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI-LedgerGUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI-LedgerGUITests/Pods-LedgerGUI-LedgerGUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		7F31ADD78CA81CD0A6DD756E /* Pods-LedgerGUI-LedgerGUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI-LedgerGUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI-LedgerGUITests/Pods-LedgerGUI-LedgerGUITests.release.xcconfig"; sourceTree = "<group>"; };
-		8317E4511D1C459100626651 /* Performance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Performance.swift; sourceTree = "<group>"; };
 		839E90881D1BCE8400AD9CBF /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		BC8CEE71CABA4203AD3842B6 /* Pods-LedgerGUI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LedgerGUI.release.xcconfig"; path = "Pods/Target Support Files/Pods-LedgerGUI/Pods-LedgerGUI.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -94,7 +92,6 @@
 				17A47E131D1AC04E0010998A /* MainMenu.xib */,
 				17A47E161D1AC04E0010998A /* Info.plist */,
 				839E90881D1BCE8400AD9CBF /* Parser.swift */,
-				8317E4511D1C459100626651 /* Performance.swift */,
 			);
 			path = LedgerGUI;
 			sourceTree = "<group>";
@@ -370,7 +367,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8317E4521D1C459100626651 /* Performance.swift in Sources */,
 				17A47E201D1AC04E0010998A /* ParserTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
