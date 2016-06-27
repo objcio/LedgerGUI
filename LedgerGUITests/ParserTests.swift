@@ -22,11 +22,13 @@ class ParserTests: XCTestCase {
         }
     }
     
-    func testParser<A: Equatable>(_ parser: GenericParser<String,(), A>, success: [(String, A)], failure: [String]) {
+    func testParser<A: Equatable>(_ parser: GenericParser<String,(), A>, success: [(String, A)], failure: [String], file: String = #file, line: UInt = #line) {
         for (d, expected) in success {
             do {
                 let result = try parser.run(sourceName: "", input: d)
-                XCTAssertEqual(result, expected)
+                if result != expected {
+                    self.recordFailure(withDescription: "Expected \(result) to equal \(expected)", inFile: file, atLine: line, expected: true)
+                }
             } catch {
                 XCTFail("\(error)")
             }
