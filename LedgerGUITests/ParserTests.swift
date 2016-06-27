@@ -64,7 +64,8 @@ class ParserTests: XCTestCase {
             ("Something Else  ; with a note", Posting(account: "Something Else", amount: nil, note: Note("with a note"))),
             ("Balance  -100 EUR = 0", Posting(account: "Balance", amount: Amount(number: -100, commodity: "EUR"), balance: Amount(number: 0, commodity: nil), note: nil)),
             ("Assets:Brokerage  10 USD @ 0.83 EUR", Posting(account: "Assets:Brokerage", amount: Amount(number: 10, commodity: "USD"), cost: Cost(type: .perUnit, amount: Amount(number: 0.83, commodity: "EUR")), balance: nil, note: nil)),
-            ("Assets:Brokerage  10 USD @@ 8.33 EUR", Posting(account: "Assets:Brokerage", amount: Amount(number: 10, commodity: "USD"), cost: Cost(type: .total, amount: Amount(number: 8.33, commodity: "EUR")), balance: nil, note: nil))
+            ("Assets:Brokerage  10 USD @@ 8.33 EUR", Posting(account: "Assets:Brokerage", amount: Amount(number: 10, commodity: "USD"), cost: Cost(type: .total, amount: Amount(number: 8.33, commodity: "EUR")), balance: nil, note: nil)),
+            ("Liabilities:VAT  (10.0 USD * 2)", Posting(account: "Liabilities:VAT", expression: Expression.infix(operator: "*", lhs: .amount(Amount(number: 10, commodity: "USD")), rhs: .amount(Amount(number: 2, commodity: nil))), cost: nil, balance: nil, notes: []))
 
             ]
         testParser(posting, success: example, failure: [])

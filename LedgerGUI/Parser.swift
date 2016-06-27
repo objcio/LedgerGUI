@@ -94,15 +94,41 @@ func ==(lhs: Cost, rhs: Cost) -> Bool {
     return lhs.type == rhs.type && lhs.amount == rhs.amount
 }
 
+enum AmountOrExpression: Equatable {
+    case amount(Amount)
+    case expression(Expression)
+}
+
+func ==(lhs: AmountOrExpression, rhs: AmountOrExpression) -> Bool {
+    switch (lhs, rhs) {
+    case let (.amount(l), .amount(r)):
+        return l == r
+    case let (.expression(l), .expression(r)):
+        return l == r
+    default: return false
+    }
+}
+
 struct Posting {
     var account: String
-    var amount: Amount?
+    var amountOrExpression: AmountOrExpression?
     var cost: Cost?
     var balance: Amount?
     var notes: [Note]
 }
 
 extension Posting {
+    init(account: String, amountOrExpression: AmountOrExpression? = nil, cost: Cost? = nil, balance: Amount? = nil, note: Note?) {
+        self = Posting(account: account, amountOrExpression: amountOrExpression, cost: cost, balance: balance, notes: note.map { [$0] } ?? [])
+    }
+
+    init(account: String, expression: Expression? = nil, cost: Cost? = nil, balance: Amount? = nil, notes: [Note]) {
+        self = Posting(account: account, amountOrExpression: expression.map(AmountOrExpression.expression), cost: cost, balance: balance, notes: notes)
+    }
+
+    init(account: String, amount: Amount? = nil, cost: Cost? = nil, balance: Amount? = nil, notes: [Note]) {
+        self = Posting(account: account, amountOrExpression: amount.map(AmountOrExpression.amount), cost: cost, balance: balance, notes: notes)
+    }
     init(account: String, amount: Amount? = nil, cost: Cost? = nil, balance: Amount? = nil, note: Note? = nil) {
         self = Posting(account: account, amount: amount, cost: cost, balance: balance, notes: note.map { [$0] } ?? [])
     }
@@ -111,7 +137,7 @@ extension Posting {
 extension Posting: Equatable { }
 
 func ==(lhs: Posting, rhs: Posting) -> Bool {
-    return lhs.account == rhs.account && lhs.amount == rhs.amount && lhs.cost == rhs.cost && lhs.balance == rhs.balance && lhs.notes == rhs.notes
+    return lhs.account == rhs.account && lhs.amountOrExpression == rhs.amountOrExpression && lhs.cost == rhs.cost && lhs.balance == rhs.balance && lhs.notes == rhs.notes
 }
 
 struct Transaction {
@@ -238,7 +264,9 @@ let balanceAssertion = lexeme(StringParser.character("=")) *> amount
 let costStart = lift2({ Cost.CostType(rawValue: $0 + ($1 ?? ""))! }, StringParser.string("@"), StringParser.string("@").optional)
 let cost: GenericParser<String,(),Cost> = lift2(Cost.init, lexeme(costStart), amount)
 
-let posting: GenericParser<String, (), Posting> = lift5(Posting.init, account, (spaceWithoutNewline.many *> amount).attempt.optional, (spaceWithoutNewline.many *> cost).attempt.optional, (spaceWithoutNewline.many *> balanceAssertion).attempt.optional, trailingNote.optional)
+let amountOrExpression = (spaceWithoutNewline.many *> (AmountOrExpression.amount <^> amount <|> AmountOrExpression.expression <^> expression))
+
+let posting: GenericParser<String, (), Posting> = lift5(Posting.init, account, amountOrExpression.attempt.optional, (spaceWithoutNewline.many *> cost).attempt.optional, (spaceWithoutNewline.many *> balanceAssertion).attempt.optional, trailingNote.optional)
 
 let commentStart: GenericParser<String, (), Character> = StringParser.oneOf(";#%|*")
 
