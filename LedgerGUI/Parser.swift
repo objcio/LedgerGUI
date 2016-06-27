@@ -196,6 +196,23 @@ let comment: GenericParser<String, (), Note> = commentStart *> spaceWithoutNewli
 
 let postingOrNote = PostingOrNote.note <^> lexeme(note) <|> PostingOrNote.posting <^> lexeme(posting)
 
+extension GenericParser {
+    public func lazySeparatedBy1<Separator>(_ separator: GenericParser<StreamType, UserState, Separator>) -> GenericParser<StreamType, UserState, [Result]> {
+
+        return self >>- { result in
+
+            (separator *> self).attempt.many >>- { results in
+
+                let rs = results.prepending(result)
+                return GenericParser<StreamType, UserState, [Result]>(result: rs)
+
+            }
+
+        }
+
+    }
+}
+
 let transaction: GenericParser<String, (), Transaction> =
-    GenericParser.lift3(Transaction.init, parser1: transactionTitle, parser2: lexline(trailingNote.optional), parser3: lexline(spaceWithoutNewline.many1 *> postingOrNote).many1)
+    GenericParser.lift3(Transaction.init, parser1: transactionTitle, parser2: lexline(trailingNote.optional), parser3: (spaceWithoutNewline.many1 *> postingOrNote).lazySeparatedBy1(StringParser.newLine))
 

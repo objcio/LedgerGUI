@@ -113,25 +113,25 @@ class ParserTests: XCTestCase {
     
     func testTransactionNotes() {
         let examples = [
-            ("2016/01/31 My Transaction  ; a note\n Assets:PayPal  200 $\n Giro\n",
+            ("2016/01/31 My Transaction  ; a note\n Assets:PayPal  200 $\n Giro",
                 Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note")],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
-            ("2016/01/31 My Transaction\t; a note\n Assets:PayPal  200 $\n Giro\n",
+            ("2016/01/31 My Transaction\t; a note\n Assets:PayPal  200 $\n Giro",
                 Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note")],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
-            ("2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $\n Giro\n",
+            ("2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $\n Giro",
                 Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note"), Note("another note")],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
-            ("2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro\n",
+            ("2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro",
                 Transaction(date: Date(year: 2016, month: 1, day: 31), title: "My Transaction", notes: [Note("a note"), Note("another note")],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$"), notes: [Note("paypal note"), Note("second paypal note")]),
@@ -143,7 +143,7 @@ class ParserTests: XCTestCase {
     }
     
     func testPerformance() {
-        let sample = "2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro 10 USD\n"
+        let sample = "2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro 10 USD"
         let transactions = Array(repeating: sample, count: 100).joined(separator: "\n")
         let parser = transaction.separatedBy(StringParser.newLine.many1)
         
