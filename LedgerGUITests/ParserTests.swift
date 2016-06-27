@@ -196,8 +196,13 @@ class ParserTests: XCTestCase {
             AutomatedTransaction(type: .expr(.ident("true")), postings: [
                 Posting(account: "[Funds:Core Data]", amount: Amount(number: -0.7, commodity: nil)),
                 Posting(account: "[Assets:Giro]", amount: Amount(number: 0.7, commodity: nil))
-            ])
-            )
+            ])),
+            ("= /Expenses:Functional Swift/\n  [Assets:Giro]  1\n  [Funds:Functional Swift]  -1",
+             AutomatedTransaction(type: .regex("Expenses:Functional Swift"), postings: [
+                Posting(account: "[Assets:Giro]", amount: Amount(number: 1, commodity: nil)),
+                Posting(account: "[Funds:Functional Swift]", amount: Amount(number: -1, commodity: nil))
+                ])
+            ),
         ]
         testParser(automatedTransaction, success: sample, failure: [])
     }

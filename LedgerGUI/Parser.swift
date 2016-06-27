@@ -363,5 +363,6 @@ let expression = opTable.makeExpressionParser { expression in
     } <?> "expression"
 
 let postings = (spaceWithoutNewline.many1 *> posting).lazySeparatedBy1(StringParser.newLine)
-let automatedExpression = AutomatedTransaction.TransactionType.expr <^> (lexeme(StringParser.string("expr")) *> (lexeme(StringParser.character("'")) *> lexeme(expression) <* StringParser.character("'")))
+let automatedExpression = AutomatedTransaction.TransactionType.expr <^> (lexeme(StringParser.string("expr")) *> (lexeme(StringParser.character("'")) *> lexeme(expression) <* StringParser.character("'"))) <|>
+  AutomatedTransaction.TransactionType.regex <^> regex
 let automatedTransaction: GenericParser<String,(),AutomatedTransaction> = lift2(AutomatedTransaction.init, lexeme(StringParser.character("=")) *> lexeme(automatedExpression) <* StringParser.newLine.many1, postings)
