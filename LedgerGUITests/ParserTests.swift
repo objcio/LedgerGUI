@@ -81,7 +81,10 @@ class ParserTests: XCTestCase {
     }
     
     func testComment() {
-        let examples = [("; This is a comment\n2016-01-03", Note("This is a comment"))]
+        let examples = [
+            ("; This is a comment\n2016-01-03", "This is a comment"),
+            ("# This is a comment\n2016-01-03", "This is a comment")
+        ]
         testParser(comment, success: examples, failure: [])
     }
     
@@ -164,7 +167,7 @@ class ParserTests: XCTestCase {
     }
     
     func testAccountDirective() {
-        let sample = [("account Expenses:Food", AccountDirective(name: "Expenses:Food"))]
+        let sample = [("account Expenses:Food", Statement.account("Expenses:Food"))]
         testParser(accountDirective, success: sample, failure: [])
     }
 
@@ -208,6 +211,29 @@ class ParserTests: XCTestCase {
         testParser(automatedTransaction, success: sample, failure: [])
     }
 
+    func testDefine() {
+        let sample: [(String,Statement)] = [
+            ("define exchange_rate=100.00/99.00 EUR", .definition(name: "exchange_rate", expression: .infix(operator: "/", lhs: .amount(Amount(number: 100)), rhs: .amount(Amount(number: 99, commodity: "EUR")))))
+        ]
+        testParser(definition, success: sample, failure: [])
+
+    }
+
+    func testTag() {
+        let sample: [(String, Statement)] = [
+            ("tag file", .tag("file"))
+        ]
+        testParser(tag, success: sample, failure: [])
+    }
+
+    func testFile() {
+        let newlineAndSpacedNewlines = StringParser.newLine *> StringParser.space.many
+        let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
+        let contents = try! String(contentsOfFile: path)
+        let parser = statement.lazySeparatedBy1(newlineAndSpacedNewlines) <* StringParser.space.many1 <* StringParser.eof
+        let result = try! parser.run(sourceName: "sample.txt", input: contents)
+        print(result)
+    }
  
 }
 

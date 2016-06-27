@@ -9,25 +9,7 @@
 import Foundation
 import SwiftParsec
 
-struct Date {
-    let year: Int
-    let month: Int
-    let day: Int
-}
 
-enum TransactionState: Character {
-    case cleared = "*"
-    case pending = "!"
-}
-
-extension TransactionState: Equatable { }
-
-typealias LedgerDouble = Double // TODO use infinite precision arithmetic
-
-enum PostingOrNote {
-    case posting(Posting)
-    case note(Note)
-}
 
 extension Transaction {
     init(dateStateAndTitle: (Date, TransactionState?, String), comment: Note?, items: [PostingOrNote]) {
@@ -222,7 +204,7 @@ func lexline<A>(_ parser: GenericParser<String,(), A>) -> GenericParser<String, 
     return parser <* StringParser.oneOf(" \t").many <* StringParser.newLine
 }
 
-let noNewline: GenericParser<String,(),Character> = StringParser.noneOf("\n\r") // TODO use real newline stuff
+let noNewline: GenericParser<String,(),Character> = StringParser.newLine.noOccurence *> StringParser.anyCharacter
 let spaceWithoutNewline: GenericParser<String,(),Character> = StringParser.character(" ")
 
 let spacer = (spaceWithoutNewline *> spaceWithoutNewline) <|> StringParser.tab
@@ -270,7 +252,7 @@ let posting: GenericParser<String, (), Posting> = lift5(Posting.init, account, a
 
 let commentStart: GenericParser<String, (), Character> = StringParser.oneOf(";#%|*")
 
-let comment: GenericParser<String, (), Note> = commentStart *> spaceWithoutNewline.many *> ( { Note(String($0)) } <^> noNewline.many)
+let comment: GenericParser<String, (), String> = commentStart *> spaceWithoutNewline.many *> ( { String($0) } <^> noNewline.many)
 
 let postingOrNote = PostingOrNote.note <^> lexeme(note) <|> PostingOrNote.posting <^> lexeme(posting)
 
@@ -290,17 +272,8 @@ extension GenericParser {
 let transaction: GenericParser<String, (), Transaction> =
     lift3(Transaction.init, transactionTitle, lexline(trailingNote.optional), (spaceWithoutNewline.many1 *> postingOrNote).lazySeparatedBy1(StringParser.newLine))
 
-struct AccountDirective {
-    let name: String
-}
-
-func ==(lhs: AccountDirective, rhs: AccountDirective) -> Bool {
-    return lhs.name == rhs.name
-}
-extension AccountDirective: Equatable {}
-
-let accountDirective: GenericParser<String, (), AccountDirective> =
-    lexeme(StringParser.string("account")) *> (AccountDirective.init <^> account)
+let accountDirective: GenericParser<String, (), Statement> =
+    lexeme(StringParser.string("account")) *> (Statement.account <^> account)
 
 
 indirect enum Expression: Equatable {
@@ -383,6 +356,43 @@ func ==(lhs: AutomatedTransaction.TransactionType, rhs: AutomatedTransaction.Tra
 func ==(lhs: AutomatedTransaction, rhs: AutomatedTransaction) -> Bool {
     return lhs.type == rhs.type && lhs.postings == rhs.postings
 }
+
+let definition = lift2(Statement.definition, lexeme(StringParser.string("define")) *> lexeme(ident), lexeme(StringParser.character("=")) *> expression)
+
+let tag = Statement.tag <^> (lexeme(StringParser.string("tag")) *> lexeme(ident))
+
+enum Statement: Equatable {
+    case definition(name: String, expression: Expression)
+    case tag(String)
+    case account(String)
+    case automated(AutomatedTransaction)
+    case transaction(Transaction)
+    case comment(String)
+    case commodity(String)
+    case year(Int)
+}
+
+func ==(lhs: Statement, rhs: Statement) -> Bool {
+    switch (lhs, rhs) {
+    case let (.definition(ln, le), .definition(rn, re)): return ln == rn && le == re
+    case let (.tag(l), .tag(r)): return l == r
+    case let (.account(l), .account(r)): return l == r
+    case let (.automated(l), .automated(r)): return l == r
+    case let (.transaction(l), .transaction(r)): return l == r
+    case let (.comment(l), .comment(r)): return l == r
+    case let (.commodity(l), .commodity(r)): return l == r
+    case let (.year(l), .year(r)): return l == r
+
+    default: return false
+    }
+}
+
+let commodityDirective = lexeme(StringParser.string("commodity")) *> (Statement.commodity <^> commodity)
+let yearDirective = lexeme(StringParser.string("year")) *> (Statement.year <^> natural)
+
+let statement: GenericParser<String,(),Statement> = (Statement.transaction <^> transaction) <|> commodityDirective <|> (Statement.comment <^> comment) <|> accountDirective <|> definition <|> tag <|> (Statement.automated <^> automatedTransaction)
+
+
 
 let expression = opTable.makeExpressionParser { expression in
     expression.between(openingParen, closingParen) <|>
