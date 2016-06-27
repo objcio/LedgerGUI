@@ -139,7 +139,7 @@ class ParserTests: XCTestCase {
                             Posting(account: "Giro", amount: nil)
                 ])),
             ("2016/01/31 ! My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro",
-             Transaction(date: Date(year: 2016, month: 1, day: 31), state: .cleared, title: "My Transaction", notes: [Note("a note"), Note("another note")],
+             Transaction(date: Date(year: 2016, month: 1, day: 31), state: .pending, title: "My Transaction", notes: [Note("a note"), Note("another note")],
                          postings: [
                             Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$"), notes: [Note("paypal note"), Note("second paypal note")]),
                             Posting(account: "Giro", amount: nil)
@@ -149,6 +149,11 @@ class ParserTests: XCTestCase {
 
     }
     
+    func testAccountDirective() {
+        let sample = [("account Expenses:Food", AccountDirective(name: "Expenses:Food"))]
+        testParser(accountDirective, success: sample, failure: [])
+    }
+
     func testPerformance() {
         let sample = "2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro 10 USD"
         let transactions = Array(repeating: sample, count: 5).joined(separator: "\n")
@@ -160,6 +165,14 @@ class ParserTests: XCTestCase {
    
     }
     
+    func testExpression() {
+        let sample = [
+            ("(1 * 5 + 2)", Expression.infix(operator: "+", lhs: .infix(operator: "*", lhs: .number(1), rhs: .number(5)), rhs: .number(2))),
+            ("(3 / 7 USD)", Expression.infix(operator: "/", lhs: .number(3), rhs: .amount(Amount(number: 7, commodity: "USD")))),
+            ]
+        testParser(expression, success: sample, failure: [])
+    }
+
  
 }
 

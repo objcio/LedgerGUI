@@ -223,6 +223,77 @@ extension GenericParser {
     }
 }
 
+
+
 let transaction: GenericParser<String, (), Transaction> =
     GenericParser.lift3(Transaction.init, parser1: transactionTitle, parser2: lexline(trailingNote.optional), parser3: (spaceWithoutNewline.many1 *> postingOrNote).lazySeparatedBy1(StringParser.newLine))
 
+struct AccountDirective {
+    let name: String
+}
+
+func ==(lhs: AccountDirective, rhs: AccountDirective) -> Bool {
+    return lhs.name == rhs.name
+}
+extension AccountDirective: Equatable {}
+
+let accountDirective: GenericParser<String, (), AccountDirective> =
+    lexeme(StringParser.string("account")) *> (AccountDirective.init <^> account)
+
+
+indirect enum Expression: Equatable {
+    case infix(`operator`: String, lhs: Expression, rhs: Expression)
+    case number(LedgerDouble)
+    case amount(Amount)
+}
+
+func ==(lhs: Expression, rhs: Expression) -> Bool {
+    switch (lhs, rhs) {
+    case let (.infix(op1, lhs1, rhs1), .infix(op2, lhs2, rhs2)) where op1 == op2 && lhs1 == lhs2 && rhs1 == rhs2:
+        return true
+    case let (.number(x), .number(y)) where x == y: return true
+    case let(.amount(x), .amount(y)) where x == y: return true
+    default: return false
+    }
+}
+
+func binary(_ name: String, assoc: Associativity = .left) -> Operator<String, (), Expression> {
+    let opParser = lexeme(StringParser.string(name)) >>- { name in
+        return GenericParser(result: {
+            Expression.infix(operator: name, lhs: $0, rhs: $1)
+        })
+    }
+    return .infix(opParser, assoc)
+
+}
+//
+//func prefix(name: String, function: Int -> Int) -> Operator<String, (), Int> {
+//
+//    let opParser = StringParser.string(name) *> GenericParser(result: function)
+//    return .Prefix(opParser)
+//
+//}
+//
+//func postfix(name: String, function: Int -> Int) -> Operator<String, (), Int> {
+//
+//    let opParser = StringParser.string(name) *> GenericParser(result: function)
+//    return .Postfix(opParser.attempt)
+//
+//}
+//
+let opTable: OperatorTable<String, (), Expression> = [
+    [ binary("*"), binary("/")],
+    [ binary("+"), binary("-")]
+
+]
+
+let openingParen: StringParser = lexeme(StringParser.character("("))
+let closingParen: StringParser = lexeme(StringParser.character(")"))
+
+let primitive: GenericParser<String,(),Expression> = Expression.amount <^> amount.attempt <|> Expression.number <^> double
+
+let expression = opTable.makeExpressionParser { expression in
+    expression.between(openingParen, closingParen) <|>
+        lexeme(primitive) <?> "simple expression"
+
+    } <?> "expression"
