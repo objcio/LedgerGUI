@@ -15,6 +15,13 @@ struct Date {
     let day: Int
 }
 
+enum TransactionState: Character {
+    case cleared = "*"
+    case pending = "!"
+}
+
+extension TransactionState: Equatable { }
+
 typealias LedgerDouble = Double // TODO use infinite precision arithmetic
 
 enum PostingOrNote {
@@ -23,7 +30,7 @@ enum PostingOrNote {
 }
 
 extension Transaction {
-    init(dateAndTitle: (Date,String), comment: Note?, items: [PostingOrNote]) {
+    init(dateStateAndTitle: (Date, TransactionState?, String), comment: Note?, items: [PostingOrNote]) {
         var transactionNotes: [Note] = []
         var postings: [Posting] = []
         
@@ -42,7 +49,7 @@ extension Transaction {
             }
         }
         
-        self = Transaction(date: dateAndTitle.0, title: dateAndTitle.1, notes: transactionNotes, postings: postings)
+        self = Transaction(date: dateStateAndTitle.0, state: dateStateAndTitle.1, title: dateStateAndTitle.2, notes: transactionNotes, postings: postings)
     }
 }
 
@@ -94,6 +101,7 @@ func ==(lhs: Posting, rhs: Posting) -> Bool {
 
 struct Transaction {
     var date: Date
+    var state: TransactionState?
     var title: String
     var notes: [Note]
     var postings: [Posting]
@@ -101,7 +109,7 @@ struct Transaction {
 
 extension Transaction: Equatable { }
 func ==(lhs: Transaction, rhs: Transaction) -> Bool {
-    return lhs.date == rhs.date && lhs.title == rhs.title && lhs.notes == rhs.notes && lhs.postings == rhs.postings
+    return lhs.date == rhs.date && lhs.state == rhs.state && lhs.title == rhs.title && lhs.notes == rhs.notes && lhs.postings == rhs.postings
 }
 
 func pair<A,B>(_ x: A) -> (B) -> (A,B) {
@@ -168,9 +176,11 @@ let note = lexeme(noteStart) *> noteBody
 
 let transactionCharacter = trailingNoteStart.noOccurence *> noNewline
 
+let transactionState = StringParser.character("*").map { _ in TransactionState.cleared } <|> StringParser.character("!").map { _ in TransactionState.pending }
+
 let transactionHelper: GenericParser<String, (), String> = transactionCharacter.many.map { String($0) }
-let transactionTitle: GenericParser<String, (), (Date, String)> =
-  pair <^> lexeme(Date.parser) <*> transactionHelper
+let transactionTitle: GenericParser<String, (), (Date, TransactionState?, String)> =
+    GenericParser.lift3( { ($0, $1, $2) }, parser1: lexeme(Date.parser), parser2: lexeme(transactionState.optional), parser3: transactionHelper)
 
 let commodity: GenericParser<String, (), String> = StringParser.string("USD") <|> StringParser.string("EUR") <|> StringParser.string("$")
 let double: GenericParser<String, (), LedgerDouble> = GenericParser.lift2( { x, fraction in // todo name x
