@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import SwiftParsec
 @testable import LedgerGUI
 
 class ParserTests: XCTestCase {
@@ -27,7 +26,7 @@ class ParserTests: XCTestCase {
             do {
                 let result = try parser.run(sourceName: "", input: d)
                 if result != expected {
-                    self.recordFailure(withDescription: "Expected \(result) to equal \(expected)", inFile: file, atLine: line, expected: true)
+                    self.recordFailure(withDescription: "Expected \(expected), but got \(result)", inFile: file, atLine: line, expected: true)
                 }
             } catch {
                 XCTFail("\(error)")
@@ -54,6 +53,8 @@ class ParserTests: XCTestCase {
                        ("100.00$", Amount(number: 100.0, commodity: "$")),
                        ("100 USD", Amount(number: 100, commodity: "USD")),
                        ("1,000.00 EUR", Amount(number: 1000, commodity: "EUR")),
+//                       ("-$100", Amount(number: -100, commodity: "$")),
+//                       ("- 100 EUR", Amount(number: -100, commodity: "EUR"))
                        ]
         testParser(amount, success: example, failure: [])
     }
@@ -93,30 +94,30 @@ class ParserTests: XCTestCase {
     }
     
     func testTransaction() {
-        let examples = [("2016/01/31 My Transaction\n Assets:PayPal  200 $\n",
+        let examples = [("2016/01/31 My Transaction\n Assets:PayPal  200 $",
                          Transaction(date: Date(year: 2016, month: 1, day: 31), state: nil, title: "My Transaction", notes: [],
                                    postings: [
                                     Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$"), note: nil)
                                     ])),
-            ("2016/01/31 My Transaction\n Assets:PayPal  200 $\n Giro\n",
+            ("2016/01/31 My Transaction\n Assets:PayPal  200 $\n Giro",
              Transaction(date: Date(year: 2016, month: 1, day: 31), state: nil, title: "My Transaction",  notes: [],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
-            ("2016/01/31 My Transaction \n Assets:PayPal  200 $\n Giro\n",
+            ("2016/01/31 My Transaction \n Assets:PayPal  200 $\n Giro",
              Transaction(date: Date(year: 2016, month: 1, day: 31), state: nil, title: "My Transaction ",  notes: [],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
-            ("2016/01/31 My Transaction ; not a comment\n Assets:PayPal  200 $\n Giro\n",
+            ("2016/01/31 My Transaction ; not a comment\n Assets:PayPal  200 $\n Giro",
              Transaction(date: Date(year: 2016, month: 1, day: 31), state: nil, title: "My Transaction ; not a comment", notes: [],
                     postings: [
                         Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: "$")),
                         Posting(account: "Giro", amount: nil)
                     ])),
-            ("2016/01/31 My Transaction ; not a comment\n Assets:PayPal  200\n Giro\n",
+            ("2016/01/31 My Transaction ; not a comment\n Assets:PayPal  200\n Giro",
              Transaction(date: Date(year: 2016, month: 1, day: 31), state: nil, title: "My Transaction ; not a comment", notes: [],
                          postings: [
                             Posting(account: "Assets:PayPal", amount: Amount(number: 200, commodity: nil)),
@@ -233,9 +234,13 @@ class ParserTests: XCTestCase {
     func testFile() {
         let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
         let contents = try! String(contentsOfFile: path)
-        let parser = statements <* StringParser.space.many <* StringParser.eof
-            let result = try! parser.run(sourceName: "sample.txt", input: contents)
-            print(result)
+        let parts = contents.components(separatedBy: "\n\n")
+        let parser = StringParser.newLine.many *> statements <* StringParser.space.many <* StringParser.eof
+        let result: [Statement] = parts.flatMap { (s: String) -> [Statement] in
+            try! parser.run(sourceName: "sample.txt", input: s + "\n")
+        }
+//            let result = try! parser.run(sourceName: "sample.txt", input: contents)
+        print(result)
     }
  
 }

@@ -7,9 +7,6 @@
 //
 
 import Foundation
-import SwiftParsec
-
-
 
 extension Transaction {
     init(dateStateAndTitle: (Date, TransactionState?, String), comment: Note?, items: [PostingOrNote]) {
@@ -172,10 +169,6 @@ extension Character {
         return set.contains(UnicodeScalar(unicodes.first!.value))
     }
     
-    var isSpace: Bool {
-        return isMemberOfCharacterSet(.whitespaces)
-    }
-    
     var isNewlineOrSpace: Bool {
         return isMemberOfCharacterSet(.whitespacesAndNewlines)
     }
@@ -253,9 +246,9 @@ let balanceAssertion = lexeme(StringParser.character("=")) *> amount
 let costStart = lift2({ Cost.CostType(rawValue: $0 + ($1 ?? ""))! }, StringParser.string("@"), StringParser.string("@").optional)
 let cost: GenericParser<String,(),Cost> = lift2(Cost.init, lexeme(costStart), amount)
 
-let amountOrExpression = (spaceWithoutNewline.many *> (AmountOrExpression.amount <^> amount <|> AmountOrExpression.expression <^> expression))
+let amountOrExpression = (AmountOrExpression.amount <^> amount <|> AmountOrExpression.expression <^> expression)
 
-let posting: GenericParser<String, (), Posting> = lift5(Posting.init, account, amountOrExpression.attempt.optional, (spaceWithoutNewline.many *> cost).attempt.optional, (spaceWithoutNewline.many *> balanceAssertion).attempt.optional, trailingNote.optional)
+let posting: GenericParser<String, (), Posting> = lift5(Posting.init, lexeme(account), lexeme(amountOrExpression.optional), lexeme(cost.optional), lexeme(balanceAssertion.optional), (lexeme(noteStart) *> noteBody).optional)
 
 let commentStart: GenericParser<String, (), Character> = StringParser.oneOf(";#%|*")
 
