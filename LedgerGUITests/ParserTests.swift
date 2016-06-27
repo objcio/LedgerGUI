@@ -107,10 +107,10 @@ class ParserTests: XCTestCase {
                         Posting(account: "Giro", amount: nil)
                     ])),
                       ]
-
+        
         testParser(transaction, success: examples, failure: [])
     }
-
+    
     func testTransactionNotes() {
         let examples = [
             ("2016/01/31 My Transaction  ; a note\n Assets:PayPal  200 $\n Giro",
@@ -140,6 +140,17 @@ class ParserTests: XCTestCase {
             ]
         testParser(transaction, success: examples, failure: [])
 
+    }
+    
+    func testPerformance() {
+        let sample = "2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro 10 USD"
+        let transactions = Array(count: 2, repeatedValue: sample).joinWithSeparator("\n\n")
+        let parser = transaction.separatedBy(StringParser.newLine.many1)
+        
+        self.measureBlock {
+            try! parser.run(sourceName: "", input: transactions)
+        }
+   
     }
     
  
