@@ -212,9 +212,9 @@ func lexline<A>(_ parser: GenericParser<String,(), A>) -> GenericParser<String, 
 }
 
 let noNewline: GenericParser<String,(),Character> = StringParser.newLine.noOccurence *> StringParser.anyCharacter
-let spaceWithoutNewline: GenericParser<String,(),Character> = StringParser.character(" ")
+let spaceWithoutNewline: GenericParser<String,(),Character> = StringParser.character(" ") <|> StringParser.tab
 
-let spacer = (spaceWithoutNewline *> spaceWithoutNewline) <|> StringParser.tab
+let spacer = StringParser.tab <|> (spaceWithoutNewline *> spaceWithoutNewline)
 
 let noteStart: StringParser = StringParser.character(";")
 let trailingNoteStart = spacer *> noteStart
@@ -238,8 +238,8 @@ let double: GenericParser<String, (), LedgerDouble> = lift3( { sign, x, fraction
 }, StringParser.character("-").optional, naturalWithCommaString, (StringParser.character(".") *> naturalString).optional)
 
 
-let noSpace: GenericParser<String, (), Character> = StringParser.satisfy { !$0.isNewlineOrSpace }
-let singleSpace: GenericParser<String, (), Character> = (spaceWithoutNewline <* noSpace.lookAhead).attempt
+let noSpace: GenericParser<String, (), Character> = StringParser.space.noOccurence *> StringParser.anyCharacter
+let singleSpace: GenericParser<String, (), Character> = (StringParser.character(" ") <* StringParser.space.noOccurence).attempt
 
 let amount: GenericParser<String, (), Amount> =
     lift2({ Amount(number: $1, commodity: $0) }, lexeme(commodity), double) <|>
@@ -263,21 +263,8 @@ let comment: GenericParser<String, (), String> = commentStart *> spaceWithoutNew
 
 let postingOrNote = PostingOrNote.note <^> lexeme(note) <|> PostingOrNote.posting <^> lexeme(posting)
 
-extension GenericParser {
-    public func lazySeparatedBy1<Separator>(_ separator: GenericParser<StreamType, UserState, Separator>) -> GenericParser<StreamType, UserState, [Result]> {
-        return self >>- { result in
-            (separator *> self).attempt.many >>- { results in
-                let rs = results.prepending(result)
-                return GenericParser<StreamType, UserState, [Result]>(result: rs)
-            }
-        }
-    }
-}
-
-
-
 let transaction: GenericParser<String, (), Transaction> =
-    lift3(Transaction.init, transactionTitle, lexline(trailingNote.optional), (spaceWithoutNewline.many1 *> postingOrNote).lazySeparatedBy1(StringParser.newLine))
+    lift3(Transaction.init, transactionTitle, lexeme(trailingNote.optional), ((StringParser.newLine *> spaceWithoutNewline.many1).attempt *> postingOrNote).many1)
 
 let accountDirective: GenericParser<String, (), Statement> =
     lexeme(StringParser.string("account")) *> (Statement.account <^> account)
@@ -399,6 +386,8 @@ let yearDirective = lexeme(StringParser.string("year")) *> (Statement.year <^> n
 
 let statement: GenericParser<String,(),Statement> = (Statement.transaction <^> transaction) <|> yearDirective <|> commodityDirective <|> (Statement.comment <^> comment) <|> accountDirective <|> definition <|> tag <|> (Statement.automated <^> automatedTransaction)
 
+let newlineAndSpacedNewlines = StringParser.newLine *> StringParser.space.many
+let statements = (statement <* newlineAndSpacedNewlines).many
 
 
 let expression = opTable.makeExpressionParser { expression in
@@ -407,7 +396,7 @@ let expression = opTable.makeExpressionParser { expression in
 
     } <?> "expression"
 
-let postings = (spaceWithoutNewline.many1 *> posting).lazySeparatedBy1(StringParser.newLine)
+let postings = ((StringParser.newLine *> spaceWithoutNewline.many1).attempt *> posting).many1
 let automatedExpression = AutomatedTransaction.TransactionType.expr <^> (lexeme(StringParser.string("expr")) *> (lexeme(StringParser.character("'")) *> lexeme(expression) <* StringParser.character("'"))) <|>
   AutomatedTransaction.TransactionType.regex <^> regex
-let automatedTransaction: GenericParser<String,(),AutomatedTransaction> = lift2(AutomatedTransaction.init, lexeme(StringParser.character("=")) *> lexeme(automatedExpression) <* StringParser.newLine.many1, postings)
+let automatedTransaction: GenericParser<String,(),AutomatedTransaction> = lift2(AutomatedTransaction.init, lexeme(StringParser.character("=")) *> lexeme(automatedExpression), postings)
