@@ -104,7 +104,7 @@ func ==(lhs: Transaction, rhs: Transaction) -> Bool {
     return lhs.date == rhs.date && lhs.title == rhs.title && lhs.notes == rhs.notes && lhs.postings == rhs.postings
 }
 
-func pair<A,B>(x: A) -> (B) -> (A,B) {
+func pair<A,B>(_ x: A) -> (B) -> (A,B) {
     return { y in (x,y) }
 }
 
@@ -115,29 +115,29 @@ func ==(lhs: Date, rhs: Date) -> Bool {
 
 extension Character {
     
-    func isMemberOfCharacterSet(set: NSCharacterSet) -> Bool {
+    func isMemberOfCharacterSet(_ set: CharacterSet) -> Bool {
         let normalized = String(self).precomposedStringWithCanonicalMapping
         let unicodes = normalized.unicodeScalars
         
         guard unicodes.count == 1 else { return false }
-        return set.longCharacterIsMember(unicodes.first!.value)
+        return set.contains(UnicodeScalar(unicodes.first!.value))
     }
     
     var isSpace: Bool {
-        return isMemberOfCharacterSet(.whitespaceCharacterSet())
+        return isMemberOfCharacterSet(.whitespaces)
     }
     
     var isNewlineOrSpace: Bool {
-        return isMemberOfCharacterSet(.whitespaceAndNewlineCharacterSet())
+        return isMemberOfCharacterSet(.whitespacesAndNewlines)
     }
 }
 
-let naturalString = StringParser.digit.many1.map(String.init)
+let naturalString: GenericParser<String, (), String> = StringParser.digit.many1.map { digits in String(digits) }
 let naturalWithCommaString = (StringParser.digit <|> StringParser.character(",")).many1.map( { digitsAndCommas in String(digitsAndCommas.filter { $0 != "," }) })
 
 let natural: GenericParser<String, (), Int> = naturalString.map { Int($0)! }
 
-func monthDay(separator: Character) -> GenericParser<String, (), (Int, Int)> {
+func monthDay(_ separator: Character) -> GenericParser<String, (), (Int, Int)> {
     let separatorInt = StringParser.character(separator) *> natural
     return GenericParser.lift2( { ($0, $1)} , parser1: separatorInt, parser2: separatorInt)
 }
@@ -147,11 +147,11 @@ extension Date {
        { y in { m, d in Date(year: y, month: m, day: d) } } <^> natural <*> (monthDay("/") <|> monthDay("-"))
 }
 
-func lexeme<A>(parser: GenericParser<String,(), A>) -> GenericParser<String, (), A> {
+func lexeme<A>(_ parser: GenericParser<String,(), A>) -> GenericParser<String, (), A> {
     return parser <* spaceWithoutNewline.many
 }
 
-func lexline<A>(parser: GenericParser<String,(), A>) -> GenericParser<String, (), A> {
+func lexline<A>(_ parser: GenericParser<String,(), A>) -> GenericParser<String, (), A> {
     return parser <* StringParser.oneOf(" \t").many <* StringParser.newLine
 }
 
@@ -166,10 +166,11 @@ let noteBody = ({Note(String($0))} <^> noNewline.many)
 let trailingNote = lexeme(trailingNoteStart) *> noteBody
 let note = lexeme(noteStart) *> noteBody
 
-let transactionCharacter = trailingNoteStart.notAhead *> noNewline
+let transactionCharacter = trailingNoteStart.noOccurence *> noNewline
 
+let transactionHelper: GenericParser<String, (), String> = transactionCharacter.many.map { String($0) }
 let transactionTitle: GenericParser<String, (), (Date, String)> =
-  pair <^> lexeme(Date.parser) <*> (String.init <^> transactionCharacter.many)
+  pair <^> lexeme(Date.parser) <*> transactionHelper
 
 let commodity: GenericParser<String, (), String> = StringParser.string("USD") <|> StringParser.string("EUR") <|> StringParser.string("$")
 let double: GenericParser<String, (), LedgerDouble> = GenericParser.lift2( { x, fraction in // todo name x
@@ -196,5 +197,5 @@ let comment: GenericParser<String, (), Note> = commentStart *> spaceWithoutNewli
 let postingOrNote = PostingOrNote.note <^> lexeme(note) <|> PostingOrNote.posting <^> lexeme(posting)
 
 let transaction: GenericParser<String, (), Transaction> =
-    GenericParser.lift3(Transaction.init, parser1: transactionTitle, parser2: lexline(trailingNote.optional), parser3: (spaceWithoutNewline.many1 *> postingOrNote).separatedBy1(StringParser.newLine))
+    GenericParser.lift3(Transaction.init, parser1: transactionTitle, parser2: lexline(trailingNote.optional), parser3: lexline(spaceWithoutNewline.many1 *> postingOrNote).many1)
 
