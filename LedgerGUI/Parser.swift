@@ -8,6 +8,8 @@
 
 import Foundation
 
+
+
 extension Transaction {
     init(dateStateAndTitle: (Date, TransactionState?, String), comment: Note?, items: [PostingOrNote]) {
         var transactionNotes: [Note] = []
@@ -174,13 +176,42 @@ extension Character {
     }
 }
 
-let naturalString: GenericParser<String, (), String> = StringParser.digit.many1.map { digits in String(digits) }
-let naturalWithCommaString = (StringParser.digit <|> StringParser.character(",")).many1.map( { digitsAndCommas in String(digitsAndCommas.filter { $0 != "," }) })
+struct ImmutableCharacters: Stream {
+    var characters: [Character]
+    var start: Int
+    
+    init(string: String) {
+        characters = Array(string.characters)
+        start = 0
+    }
+    
+    init(arrayLiteral elements: Character...) {
+        characters = elements
+        start = 0
+    }
+    
+    mutating func popFirst() -> Character? {
+        guard start < characters.count else { return nil }
+        let oldStart = start
+        start += 1
+        return characters[oldStart]
+    }
+}
+typealias FastParser = GenericParser<ImmutableCharacters, (), Character>
 
-let natural: GenericParser<String, (), Int> = naturalString.map { Int($0)! }
+func parse(string: String) -> [Statement] {
+    let parser = FastParser.newLine.many *> statements <* FastParser.space.many <* FastParser.eof
+    let result = try! parser.run(sourceName: "", input: ImmutableCharacters(string: string))
+    return result
+}
 
-func monthDay(_ separator: Character) -> GenericParser<String, (), (Int, Int?)> {
-    let separatorInt = StringParser.character(separator) *> natural
+let naturalString: GenericParser<ImmutableCharacters, (), String> = FastParser.digit.many1.map { digits in String(digits) }
+let naturalWithCommaString = (FastParser.digit <|> FastParser.character(",")).many1.map( { digitsAndCommas in String(digitsAndCommas.filter { $0 != "," }) })
+
+let natural: GenericParser<ImmutableCharacters, (), Int> = naturalString.map { Int($0)! }
+
+func monthDay(_ separator: Character) -> GenericParser<ImmutableCharacters, (), (Int, Int?)> {
+    let separatorInt = FastParser.character(separator) *> natural
     return lift2( { ($0, $1)} , separatorInt, separatorInt.optional)
 }
 
@@ -192,24 +223,24 @@ func makeDate(one: Int, two: (Int,Int?)) -> Date {
 }
 
 extension Date {
-    static let parser:  GenericParser<String, (), Date> =
+    static let parser:  GenericParser<ImmutableCharacters, (), Date> =
         lift2(makeDate, natural, monthDay("/") <|> monthDay("-"))
 }
 
-func lexeme<A>(_ parser: GenericParser<String,(), A>) -> GenericParser<String, (), A> {
+func lexeme<A>(_ parser: GenericParser<ImmutableCharacters,(), A>) -> GenericParser<ImmutableCharacters, (), A> {
     return parser <* spaceWithoutNewline.many
 }
 
-func lexline<A>(_ parser: GenericParser<String,(), A>) -> GenericParser<String, (), A> {
-    return parser <* StringParser.oneOf(" \t").many <* StringParser.newLine
+func lexline<A>(_ parser: GenericParser<ImmutableCharacters,(), A>) -> GenericParser<ImmutableCharacters, (), A> {
+    return parser <* FastParser.oneOf(" \t").many <* FastParser.newLine
 }
 
-let noNewline: GenericParser<String,(),Character> = StringParser.newLine.noOccurence *> StringParser.anyCharacter
-let spaceWithoutNewline: GenericParser<String,(),Character> = StringParser.character(" ") <|> StringParser.tab
+let noNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.newLine.noOccurence *> FastParser.anyCharacter
+let spaceWithoutNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.character(" ") <|> FastParser.tab
 
-let spacer = StringParser.tab <|> (spaceWithoutNewline *> spaceWithoutNewline)
+let spacer = FastParser.tab <|> (spaceWithoutNewline *> spaceWithoutNewline)
 
-let noteStart: StringParser = StringParser.character(";")
+let noteStart: FastParser = FastParser.character(";")
 let trailingNoteStart = spacer *> noteStart
 let noteBody = ({Note(String($0))} <^> noNewline.many)
 let trailingNote = lexeme(trailingNoteStart) *> noteBody
@@ -217,50 +248,54 @@ let note = lexeme(noteStart) *> noteBody
 
 let transactionCharacter = trailingNoteStart.noOccurence *> noNewline
 
-let transactionState = StringParser.character("*").map { _ in TransactionState.cleared } <|> StringParser.character("!").map { _ in TransactionState.pending }
+let transactionState = FastParser.character("*").map { _ in TransactionState.cleared } <|> FastParser.character("!").map { _ in TransactionState.pending }
 
-let transactionHelper: GenericParser<String, (), String> = transactionCharacter.many.map { String($0) }
-let transactionTitle: GenericParser<String, (), (Date, TransactionState?, String)> =
+let transactionHelper: GenericParser<ImmutableCharacters, (), String> = transactionCharacter.many.map { String($0) }
+let transactionTitle: GenericParser<ImmutableCharacters, (), (Date, TransactionState?, String)> =
     lift3( { ($0, $1, $2) }, lexeme(Date.parser), lexeme(transactionState.optional), transactionHelper)
 
-let commodity: GenericParser<String, (), String> = StringParser.string("USD") <|> StringParser.string("EUR") <|> StringParser.string("$")
-let double: GenericParser<String, (), LedgerDouble> = lift3( { sign, x, fraction in // todo name x
+let commodity: GenericParser<ImmutableCharacters, (), String> = string("USD") <|> string("EUR") <|> string("$")
+let double: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift3( { sign, x, fraction in // todo name x
     let sign = sign.map { String($0) } ?? ""
     guard let fraction = fraction else { return Double(sign + x)! }
     return Double("\(sign)\(x).\(fraction)")!
-}, StringParser.character("-").optional, naturalWithCommaString, (StringParser.character(".") *> naturalString).optional)
+}, FastParser.character("-").optional, naturalWithCommaString, (FastParser.character(".") *> naturalString).optional)
 
 
-let noSpace: GenericParser<String, (), Character> = StringParser.space.noOccurence *> StringParser.anyCharacter
-let singleSpace: GenericParser<String, (), Character> = (StringParser.character(" ") <* StringParser.space.noOccurence).attempt
+let noSpace: GenericParser<ImmutableCharacters, (), Character> = FastParser.space.noOccurence *> FastParser.anyCharacter
+let singleSpace: GenericParser<ImmutableCharacters, (), Character> = (FastParser.character(" ") <* FastParser.space.noOccurence).attempt
 
-let amount: GenericParser<String, (), Amount> =
+let amount: GenericParser<ImmutableCharacters, (), Amount> =
     lift2({ Amount(number: $1, commodity: $0) }, lexeme(commodity), double) <|>
     lift2(Amount.init, lexeme(double), commodity.optional)
 
 let account = lift2({ String( $1.prepending($0) ) }, noSpace, (noSpace <|> singleSpace).many)
 
-let balanceAssertion = lexeme(StringParser.character("=")) *> amount
+let balanceAssertion = lexeme(FastParser.character("=")) *> amount
 
 // This is not very beautiful. Tries to parse either @@ or @ into a string
-let costStart = lift2({ Cost.CostType(rawValue: $0 + ($1 ?? ""))! }, StringParser.string("@"), StringParser.string("@").optional)
-let cost: GenericParser<String,(),Cost> = lift2(Cost.init, lexeme(costStart), amount)
+let costStart = lift2({ Cost.CostType(rawValue: $0 + ($1 ?? ""))! }, string("@"), string("@").optional)
+let cost: GenericParser<ImmutableCharacters,(),Cost> = lift2(Cost.init, lexeme(costStart), amount)
 
 let amountOrExpression = (AmountOrExpression.amount <^> amount <|> AmountOrExpression.expression <^> expression)
 
-let posting: GenericParser<String, (), Posting> = lift5(Posting.init, lexeme(account), lexeme(amountOrExpression.optional), lexeme(cost.optional), lexeme(balanceAssertion.optional), (lexeme(noteStart) *> noteBody).optional)
+let posting: GenericParser<ImmutableCharacters, (), Posting> = lift5(Posting.init, lexeme(account), lexeme(amountOrExpression.optional), lexeme(cost.optional), lexeme(balanceAssertion.optional), (lexeme(noteStart) *> noteBody).optional)
 
-let commentStart: GenericParser<String, (), Character> = StringParser.oneOf(";#%|*")
+let commentStart: GenericParser<ImmutableCharacters, (), Character> = FastParser.oneOf(";#%|*")
 
-let comment: GenericParser<String, (), String> = commentStart *> spaceWithoutNewline.many *> ( { String($0) } <^> noNewline.many)
+let comment: GenericParser<ImmutableCharacters, (), String> = commentStart *> spaceWithoutNewline.many *> ( { String($0) } <^> noNewline.many)
 
 let postingOrNote = PostingOrNote.note <^> lexeme(note) <|> PostingOrNote.posting <^> lexeme(posting)
 
-let transaction: GenericParser<String, (), Transaction> =
-    lift3(Transaction.init, transactionTitle, lexeme(trailingNote.optional), ((StringParser.newLine *> spaceWithoutNewline.many1).attempt *> postingOrNote).many1)
+let transaction: GenericParser<ImmutableCharacters, (), Transaction> =
+    lift3(Transaction.init, transactionTitle, lexeme(trailingNote.optional), ((FastParser.newLine *> spaceWithoutNewline.many1).attempt *> postingOrNote).many1)
 
-let accountDirective: GenericParser<String, (), Statement> =
-    lexeme(StringParser.string("account")) *> (Statement.account <^> account)
+func string(_ string: String) -> GenericParser<ImmutableCharacters, (), String> {
+    return FastParser.string(ImmutableCharacters(string: string)) *> GenericParser(result: string)
+}
+
+let accountDirective: GenericParser<ImmutableCharacters, (), Statement> =
+    lexeme(string("account")) *> (Statement.account <^> account)
 
 
 indirect enum Expression: Equatable {
@@ -283,8 +318,8 @@ func ==(lhs: Expression, rhs: Expression) -> Bool {
     }
 }
 
-func binary(_ name: String, assoc: Associativity = .left) -> Operator<String, (), Expression> {
-    let opParser = lexeme(StringParser.string(name).attempt) >>- { name in // todo: is the attempt really necessary?
+func binary(_ name: String, assoc: Associativity = .left) -> Operator<ImmutableCharacters, (), Expression> {
+    let opParser = lexeme(string(name).attempt) >>- { name in // todo: is the attempt really necessary?
         return GenericParser(result: {
             Expression.infix(operator: name, lhs: $0, rhs: $1)
         })
@@ -293,18 +328,18 @@ func binary(_ name: String, assoc: Associativity = .left) -> Operator<String, ()
 
 }
 
-func delimited(by character: Character) -> GenericParser<String,(),String> {
-    let delimiter = StringParser.character(character)
-    return delimiter *> ({ String($0) } <^> StringParser.anyCharacter.manyTill(delimiter))
+func delimited(by character: Character) -> GenericParser<ImmutableCharacters,(),String> {
+    let delimiter = FastParser.character(character)
+    return delimiter *> ({ String($0) } <^> FastParser.anyCharacter.manyTill(delimiter))
 }
 
-let regex: GenericParser<String,(),String> = delimited(by: "/")
+let regex: GenericParser<ImmutableCharacters,(),String> = delimited(by: "/")
 
 let string = delimited(by: "\"") <|> delimited(by: "'")
 
-let ident = { String($0) } <^> (StringParser.alphaNumeric <|> StringParser.character("_")).many1
+let ident = { String($0) } <^> (FastParser.alphaNumeric <|> FastParser.character("_")).many1
 
-let opTable: OperatorTable<String, (), Expression> = [
+let opTable: OperatorTable<ImmutableCharacters, (), Expression> = [
     [ binary("*"), binary("/")],
     [ binary("+"), binary("-")],
     [ binary("=="), binary("!="), binary("<"), binary("<="), binary(">"), binary(">="), binary("=~"), binary("!~")],
@@ -313,10 +348,10 @@ let opTable: OperatorTable<String, (), Expression> = [
 
 ]
 
-let openingParen: StringParser = lexeme(StringParser.character("("))
-let closingParen: StringParser = lexeme(StringParser.character(")"))
+let openingParen: FastParser = lexeme(FastParser.character("("))
+let closingParen: FastParser = lexeme(FastParser.character(")"))
 
-let primitive: GenericParser<String,(),Expression> =
+let primitive: GenericParser<ImmutableCharacters,(),Expression> =
     Expression.amount <^> amount <|>
     Expression.regex <^> regex <|>
     Expression.string <^> string <|>
@@ -344,9 +379,9 @@ func ==(lhs: AutomatedTransaction, rhs: AutomatedTransaction) -> Bool {
     return lhs.type == rhs.type && lhs.postings == rhs.postings
 }
 
-let definition = lift2(Statement.definition, lexeme(StringParser.string("define")) *> lexeme(ident), lexeme(StringParser.character("=")) *> expression)
+let definition = lift2(Statement.definition, lexeme(string("define")) *> lexeme(ident), lexeme(FastParser.character("=")) *> expression)
 
-let tag = Statement.tag <^> (lexeme(StringParser.string("tag")) *> lexeme(ident))
+let tag = Statement.tag <^> (lexeme(string("tag")) *> lexeme(ident))
 
 enum Statement: Equatable {
     case definition(name: String, expression: Expression)
@@ -374,12 +409,12 @@ func ==(lhs: Statement, rhs: Statement) -> Bool {
     }
 }
 
-let commodityDirective = lexeme(StringParser.string("commodity")) *> (Statement.commodity <^> commodity)
-let yearDirective = lexeme(StringParser.string("year")) *> (Statement.year <^> natural)
+let commodityDirective = lexeme(string("commodity")) *> (Statement.commodity <^> commodity)
+let yearDirective = lexeme(string("year")) *> (Statement.year <^> natural)
 
-let statement: GenericParser<String,(),Statement> = (Statement.transaction <^> transaction) <|> yearDirective <|> commodityDirective <|> (Statement.comment <^> comment) <|> accountDirective <|> definition <|> tag <|> (Statement.automated <^> automatedTransaction)
+let statement: GenericParser<ImmutableCharacters,(),Statement> = (Statement.transaction <^> transaction) <|> yearDirective <|> commodityDirective <|> (Statement.comment <^> comment) <|> accountDirective <|> definition <|> tag <|> (Statement.automated <^> automatedTransaction)
 
-let newlineAndSpacedNewlines = StringParser.newLine *> StringParser.space.many
+let newlineAndSpacedNewlines = FastParser.newLine *> FastParser.space.many
 let statements = (statement <* newlineAndSpacedNewlines).many
 
 
@@ -389,7 +424,7 @@ let expression = opTable.makeExpressionParser { expression in
 
     } <?> "expression"
 
-let postings = ((StringParser.newLine *> spaceWithoutNewline.many1).attempt *> posting).many1
-let automatedExpression = AutomatedTransaction.TransactionType.expr <^> (lexeme(StringParser.string("expr")) *> (lexeme(StringParser.character("'")) *> lexeme(expression) <* StringParser.character("'"))) <|>
+let postings = ((FastParser.newLine *> spaceWithoutNewline.many1).attempt *> posting).many1
+let automatedExpression = AutomatedTransaction.TransactionType.expr <^> (lexeme(string("expr")) *> (lexeme(FastParser.character("'")) *> lexeme(expression) <* FastParser.character("'"))) <|>
   AutomatedTransaction.TransactionType.regex <^> regex
-let automatedTransaction: GenericParser<String,(),AutomatedTransaction> = lift2(AutomatedTransaction.init, lexeme(StringParser.character("=")) *> lexeme(automatedExpression), postings)
+let automatedTransaction: GenericParser<ImmutableCharacters,(),AutomatedTransaction> = lift2(AutomatedTransaction.init, lexeme(FastParser.character("=")) *> lexeme(automatedExpression), postings)

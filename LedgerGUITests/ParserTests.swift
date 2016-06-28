@@ -11,20 +11,20 @@ import XCTest
 
 class ParserTests: XCTestCase {
     
-    func testParser<A>(_ parser: GenericParser<String,(), A>, compare: (A, A) -> Bool, success: [(String, A)], failure: [String]) {
+    func testParser<A>(_ parser: GenericParser<ImmutableCharacters,(), A>, compare: (A, A) -> Bool, success: [(String, A)], failure: [String]) {
         for (d, expected) in success {
-            let result = try! parser.run(sourceName: "", input: d)
+            let result = try! parser.run(sourceName: "", input: ImmutableCharacters(string: d))
             XCTAssertTrue(compare(result,expected), "Expected \(result) to be \(expected)")
         }
         for d in failure {
-            XCTAssertNil(try? (parser <* StringParser.eof).run(sourceName: "", input: d))
+            XCTAssertNil(try? (parser <* FastParser.eof).run(sourceName: "", input: ImmutableCharacters(string: d)))
         }
     }
     
-    func testParser<A: Equatable>(_ parser: GenericParser<String,(), A>, success: [(String, A)], failure: [String], file: String = #file, line: UInt = #line) {
+    func testParser<A: Equatable>(_ parser: GenericParser<ImmutableCharacters,(), A>, success: [(String, A)], failure: [String], file: String = #file, line: UInt = #line) {
         for (d, expected) in success {
             do {
-                let result = try parser.run(sourceName: "", input: d)
+                let result = try parser.run(sourceName: "", input: ImmutableCharacters(string: d))
                 if result != expected {
                     self.recordFailure(withDescription: "Expected \(expected), but got \(result)", inFile: file, atLine: line, expected: true)
                 }
@@ -34,7 +34,7 @@ class ParserTests: XCTestCase {
 
         }
         for d in failure {
-            XCTAssertNil(try? (parser <* StringParser.eof).run(sourceName: "", input: d))
+            XCTAssertNil(try? (parser <* FastParser.eof).run(sourceName: "", input: ImmutableCharacters(string: d)))
         }
     }
     
@@ -176,17 +176,6 @@ class ParserTests: XCTestCase {
         testParser(accountDirective, success: sample, failure: [])
     }
 
-    func testPerformance() {
-        let sample = "2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro  10 USD"
-        let transactions = Array(repeating: sample, count: 5).joined(separator: "\n")
-        let parser = transaction.separatedBy(StringParser.newLine.many1)
-        
-        self.measure {
-            try! parser.run(sourceName: "", input: transactions)
-        }
-   
-    }
-    
     func testExpression() {
         let sample = [
             ("(1 * 5 + 2)", Expression.infix(operator: "+", lhs: .infix(operator: "*", lhs: .amount(Amount(number: 1)), rhs: .amount(Amount(number: 5))), rhs: .amount(Amount(number: 2)))),
@@ -232,15 +221,11 @@ class ParserTests: XCTestCase {
     }
 
     func testFile() {
+        typealias MyParser = FastParser
         let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
         let contents = try! String(contentsOfFile: path)
-        let parts = contents.components(separatedBy: "\n\n")
-        let parser = StringParser.newLine.many *> statements <* StringParser.space.many <* StringParser.eof
-        let result: [Statement] = parts.flatMap { (s: String) -> [Statement] in
-            try! parser.run(sourceName: "sample.txt", input: s + "\n")
-        }
-//            let result = try! parser.run(sourceName: "sample.txt", input: contents)
-        print(result)
+        let result = parse(string: contents)
+        print("Done")
     }
  
 }
