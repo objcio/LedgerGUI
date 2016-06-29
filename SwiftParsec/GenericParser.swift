@@ -81,6 +81,12 @@ public final class GenericParser<StreamType: Stream, UserState, Result>: Parsec 
         
     }
     
+    public static var position: GenericParser<StreamType, UserState, SourcePosition> {
+        return GenericParser<StreamType, UserState, SourcePosition>(parse: { state in
+            .none(.ok(state.position, state, ParseError.unknownParseError(state.position)))
+        })
+    }
+
     /// This combinator implements choice. The parser `p.alternative(q)` first applies `p`. If it succeeds, the value of `p` is returned. If `p` fails _without consuming any input_, parser `q` is tried. The parser is called _predictive_ since `q` is only tried when parser `p` didn't consume any input (i.e.. the look ahead is 1). This non-backtracking behaviour allows for both an efficient implementation of the parser combinators and the generation of good error messages.
     ///
     /// This method has the synonym infix operator `<|>`.
