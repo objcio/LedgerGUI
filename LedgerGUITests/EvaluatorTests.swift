@@ -39,7 +39,7 @@ struct State {
 
 extension String: ErrorProtocol {}
 
-func merge(commodity1: String?, commodity2: String?) throws -> String? {
+func unify(commodity1: String?, commodity2: String?) throws -> String? {
     switch (commodity1, commodity2) {
     case (nil, nil):
         return nil
@@ -56,7 +56,7 @@ func merge(commodity1: String?, commodity2: String?) throws -> String? {
 
 extension Amount {
     func op(_ f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Amount) throws -> Amount {
-        let commodity = try merge(commodity1: self.commodity, commodity2: other.commodity)
+        let commodity = try unify(commodity1: self.commodity, commodity2: other.commodity)
         return Amount(number: f(self.number, other.number), commodity: commodity)
     }
 }
@@ -443,6 +443,9 @@ class EvaluatorTests: XCTestCase {
     }
 
     // TODO: test that evaluating a posting falls back on the transaction variables, which falls back on the state variables
-    // TODO: test that a posting without a year, but which has a year specified using the year directive has a valid date (maybe cerate an EvaluatedPosting)
+    // TODO: test that a posting without a year, but which has a year specified using the year directive has a valid `date` (maybe cerate an EvaluatedPosting)
     // TODO: test that a posting without an amount (auto-balanced amount) matches on something like commodity='EUR'
+
+    // TODO: test and add > >= < <= operators
+    // TODO: test and add
 }
