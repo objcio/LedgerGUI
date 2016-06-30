@@ -88,14 +88,29 @@ extension Array {
     }
 }
 
-extension Posting {
-    func match(expression: Expression) throws -> Bool {
-        let value = try expression.evaluate { name in
-            if name == "account" {
-                return .string(self.account)
-            }
+extension Transaction {
+    func expressionContext(name: String) -> Value? {
+
+        switch name {
+        case "year": return self.date.year.map { .amount(Amount(number: LedgerDouble($0))) }
+        case "month": return .amount(Amount(number: LedgerDouble(date.month)))
+        case "day": return .amount(Amount(number: LedgerDouble(date.day)))
+        default:
             return nil
         }
+    }
+}
+
+extension Posting {
+    func expressionContext(name: String) -> Value? {
+        switch name {
+        case "account": return .string(self.account)
+        default:
+            return nil
+        }
+    }
+    func match(expression: Expression) throws -> Bool {
+        let value = try expression.evaluate(lookup: expressionContext)
         guard case .bool(let result) = value else {
             throw "Expected boolean expression"
         }
@@ -121,13 +136,20 @@ func ==(lhs: Value, rhs: Value) -> Bool {
 }
 
 extension Value {
-    func op(_ f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Value) throws -> Amount {
+    func op(double f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Value) throws -> Amount {
         guard case .amount(let selfAmount) = self, case .amount(let otherAmount) = other else {
             throw "Arithmetic operator on non-amount" // todo better failure message
         }
         return try selfAmount.op(f, otherAmount)
     }
     
+    func op(bool f: (Bool, Bool) -> Bool, _ other: Value) throws -> Bool {
+        guard case .bool(let selfValue) = self, case .bool(let otherValue) = other else {
+            throw "Boolean operator on non-bool" // todo better failure message
+        }
+        return f(selfValue, otherValue)
+    }
+
     func matches(_ rhs: Value) throws -> Bool {
         guard case let .string(string) = self, case let .regex(regex) = rhs else {
             throw "Regular expression match on non string/regex"
@@ -147,17 +169,21 @@ extension Expression {
             let right = try rhs.evaluate(lookup: lookup)
             switch op {
             case "*":
-                return try .amount(left.op(*, right))
+                return try .amount(left.op(double: *, right))
             case "/":
-                return try .amount(left.op(/, right))
+                return try .amount(left.op(double: /, right))
             case "+":
-                return try .amount(left.op(+, right))
+                return try .amount(left.op(double: +, right))
             case "-":
-                return try .amount(left.op(-, right))
+                return try .amount(left.op(double: -, right))
             case "=~":
                 return try .bool(left.matches(right))
+            case "&&":
+                return try .bool(left.op(bool: { $0 && $1 }, right))
+            case "||":
+                return try .bool(left.op(bool: { $0 || $1 }, right))
             default:
-                fatalError()
+                fatalError("Unknown operator: \(op)")
             }
             
         case .ident(let name):
@@ -167,8 +193,8 @@ extension Expression {
             return .string(string)
         case .regex(let regex):
             return .regex(regex)
-        default:
-            fatalError()
+        case .bool(let bool):
+            return .bool(bool)
         }
 
     }
@@ -226,7 +252,6 @@ extension State {
         return newBalance
     }
     
-    
     func get(definition name: String) -> Value? {
         return definitions[name]
     }
@@ -246,6 +271,16 @@ extension State {
     func balance(account: String) -> [Commodity:LedgerDouble] {
         return self.balance[account] ?? [:]
     }
+
+    func expressionContext(name: String) -> Value? {
+
+        switch name {
+        case "year": return self.year.map { .amount(Amount(number: LedgerDouble($0))) }
+        default:
+            return get(definition: name)
+        }
+    }
+
 }
 
 class EvaluatorTests: XCTestCase {
@@ -378,5 +413,32 @@ class EvaluatorTests: XCTestCase {
         let expression = Expression.infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Gir"))
         let posting = Posting(account: "Assets:Giro")
         XCTAssertTrue(try! posting.match(expression: expression))
+    }
+
+    func testPostingVariables() {
+        let posting = Posting(account: "Assets:Giro", amount: Amount(number: 100, commodity: "EUR"))
+        XCTAssertTrue(posting.expressionContext(name: "account") == .string("Assets:Giro"))
+
+    }
+
+    func testBool() {
+        let e: (Expression) -> Value = { try! $0.evaluate(lookup: { _ in nil }) }
+        XCTAssert(e(.infix(operator: "&&", lhs: .bool(true), rhs: .bool(true))) == .bool(true))
+        XCTAssert(e(.infix(operator: "&&", lhs: .bool(true), rhs: .bool(false))) == .bool(false))
+        XCTAssert(e(.infix(operator: "||", lhs: .bool(false), rhs: .bool(true))) == .bool(true))
+    }
+
+    func testTransactionVariables() {
+        let transaction = Transaction(date: Date(year: 2015, month: 1, day: 16), state: .cleared, title: "My Transaction", notes: [], postings: [])
+        XCTAssertTrue(transaction.expressionContext(name: "year") == .amount(Amount(number: 2015)))
+        XCTAssertTrue(transaction.expressionContext(name: "month") == .amount(Amount(number: 1)))
+        XCTAssertTrue(transaction.expressionContext(name: "day") == .amount(Amount(number: 16)))
+
+    }
+
+    func testStateVariables() {
+        let state = State(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:])
+        XCTAssertTrue(state.expressionContext(name: "year") == .amount(Amount(number: 2016)))
+        XCTAssertTrue(state.expressionContext(name: "one") == .string("Hello"))
     }
 }

@@ -279,6 +279,7 @@ let accountDirective: GenericParser<ImmutableCharacters, (), Statement> =
 indirect enum Expression: Equatable {
     case infix(`operator`: String, lhs: Expression, rhs: Expression)
     case amount(Amount)
+    case bool(Bool)
     case ident(String)
     case regex(String)
     case string(String)
@@ -292,6 +293,7 @@ func ==(lhs: Expression, rhs: Expression) -> Bool {
     case let(.ident(x), .ident(y)) where x == y: return true
     case let(.regex(x), .regex(y)) where x == y: return true
     case let(.string(x), .string(y)) where x == y: return true
+    case let(.bool(x), .bool(y)) where x == y: return true
     default: return false
     }
 }
@@ -315,7 +317,9 @@ let regex: GenericParser<ImmutableCharacters,(),String> = delimited(by: "/")
 
 let string = delimited(by: "\"") <|> delimited(by: "'")
 
-let ident = { String($0) } <^> (FastParser.alphaNumeric <|> FastParser.character("_")).many1
+let identCharacter = FastParser.alphaNumeric <|> FastParser.character("_")
+let ident = { String($0) } <^> identCharacter.many1
+let bool = (({ _ in true } <^> string("true") <|> { _ in false } <^> string("false")) <* identCharacter.noOccurence).attempt
 
 let opTable: OperatorTable<ImmutableCharacters, (), Expression> = [
     [ binary("*"), binary("/")],
@@ -333,6 +337,7 @@ let primitive: GenericParser<ImmutableCharacters,(),Expression> =
     Expression.amount <^> amount <|>
     Expression.regex <^> regex <|>
     Expression.string <^> string <|>
+    Expression.bool <^> bool <|>
     Expression.ident <^> ident
 
 struct AutomatedTransaction: Equatable {

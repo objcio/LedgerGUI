@@ -180,9 +180,11 @@ class ParserTests: XCTestCase {
         let sample = [
             ("(1 * 5 + 2)", Expression.infix(operator: "+", lhs: .infix(operator: "*", lhs: .amount(Amount(number: 1)), rhs: .amount(Amount(number: 5))), rhs: .amount(Amount(number: 2)))),
             ("(3 / 7 USD)", Expression.infix(operator: "/", lhs: .amount(Amount(number: 3)), rhs: .amount(Amount(number: 7, commodity: "USD")))),
-            ("true", Expression.ident("true")),
+            ("true", Expression.bool(true)),
+            ("false", Expression.bool(false)),
+            ("truet", Expression.ident("truet")),
             ("account =~ /^Test$/", Expression.infix(operator: "=~", lhs: .ident("account"), rhs: .regex("^Test$"))),
-            ("account == test && hello =~ true", Expression.infix(operator: "&&", lhs: .infix(operator: "==", lhs: .ident("account"), rhs: .ident("test")), rhs: .infix(operator: "=~", lhs: .ident("hello"), rhs: .ident("true")))),
+            ("account == test && hello =~ true", Expression.infix(operator: "&&", lhs: .infix(operator: "==", lhs: .ident("account"), rhs: .ident("test")), rhs: .infix(operator: "=~", lhs: .ident("hello"), rhs: .bool(true)))),
             ("account =~ /Income:Core Data/ && commodity == \"EUR\"", Expression.infix(operator: "&&", lhs: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Income:Core Data")), rhs: .infix(operator: "==", lhs: .ident("commodity"), rhs: .string("EUR"))))
             ]
         testParser(expression, success: sample, failure: [])
@@ -191,7 +193,7 @@ class ParserTests: XCTestCase {
     func testAutomatedTransaction() {
         let sample: [(String,AutomatedTransaction)] = [
             ("= expr 'true'\n  [Funds:Core Data]  -0.7\n  [Assets:Giro]  0.7",
-            AutomatedTransaction(type: .expr(.ident("true")), postings: [
+            AutomatedTransaction(type: .expr(.bool(true)), postings: [
                 Posting(account: "[Funds:Core Data]", amount: Amount(number: -0.7, commodity: nil)),
                 Posting(account: "[Assets:Giro]", amount: Amount(number: 0.7, commodity: nil))
             ])),
