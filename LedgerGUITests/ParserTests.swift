@@ -232,7 +232,7 @@ class ParserTests: XCTestCase {
         typealias MyParser = FastParser
         let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
         let contents = try! String(contentsOfFile: path)
-        let result = parse(string: contents)
+        _ = parse(string: contents)
         print("Done")
     }
  
