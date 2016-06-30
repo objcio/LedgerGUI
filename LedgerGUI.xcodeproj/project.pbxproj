@@ -11,6 +11,8 @@
 		17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E111D1AC04D0010998A /* Assets.xcassets */; };
 		17A47E151D1AC04E0010998A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E131D1AC04E0010998A /* MainMenu.xib */; };
 		17A47E201D1AC04E0010998A /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E1F1D1AC04E0010998A /* ParserTests.swift */; };
+		17D8A3041D256E1A00661EA6 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3031D256E1A00661EA6 /* Helpers.swift */; };
+		17D8A3061D256E5D00661EA6 /* ParseHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */; };
 		8324DB611D217C8100436BE9 /* sample.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8324DB601D217C8100436BE9 /* sample.txt */; };
 		8324DB631D21878500436BE9 /* ParseTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324DB621D21878500436BE9 /* ParseTree.swift */; };
 		833A8FF21D23C0DF00FFB2DB /* EvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833A8FF11D23C0DF00FFB2DB /* EvaluatorTests.swift */; };
@@ -57,6 +59,8 @@
 		17A47E1B1D1AC04E0010998A /* LedgerGUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LedgerGUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		17A47E1F1D1AC04E0010998A /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		17A47E211D1AC04E0010998A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		17D8A3031D256E1A00661EA6 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseHelpers.swift; sourceTree = "<group>"; };
 		8324DB601D217C8100436BE9 /* sample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = sample.txt; path = ../sample.txt; sourceTree = "<group>"; };
 		8324DB621D21878500436BE9 /* ParseTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseTree.swift; sourceTree = "<group>"; };
 		833A8FF11D23C0DF00FFB2DB /* EvaluatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatorTests.swift; sourceTree = "<group>"; };
@@ -130,7 +134,9 @@
 				17A47E131D1AC04E0010998A /* MainMenu.xib */,
 				17A47E161D1AC04E0010998A /* Info.plist */,
 				839E90881D1BCE8400AD9CBF /* Parser.swift */,
+				17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */,
 				8324DB621D21878500436BE9 /* ParseTree.swift */,
+				17D8A3031D256E1A00661EA6 /* Helpers.swift */,
 			);
 			path = LedgerGUI;
 			sourceTree = "<group>";
@@ -289,7 +295,9 @@
 				83667D211D21B27E009DCEE7 /* RangeReplaceableCollectionTypeExtension.swift in Sources */,
 				83667D1F1D21B27E009DCEE7 /* Permutation.swift in Sources */,
 				83667D161D21B27E009DCEE7 /* Combinator.swift in Sources */,
+				17D8A3061D256E5D00661EA6 /* ParseHelpers.swift in Sources */,
 				83667D271D21B27E009DCEE7 /* UnicodeScalarExtension.swift in Sources */,
+				17D8A3041D256E1A00661EA6 /* Helpers.swift in Sources */,
 				83667D141D21B27E009DCEE7 /* CharacterExtension.swift in Sources */,
 				83667D231D21B27E009DCEE7 /* SetExtension.swift in Sources */,
 				83667D151D21B27E009DCEE7 /* CollectionTypeExtension.swift in Sources */,
@@ -436,13 +444,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
 				INFOPLIST_FILE = LedgerGUI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -451,12 +460,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = LedgerGUI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

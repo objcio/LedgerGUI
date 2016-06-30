@@ -11,22 +11,6 @@ import Foundation
 import XCTest
 @testable import LedgerGUI
 
-struct Commodity: Equatable, Hashable {
-    var value: String?
-    
-    var hashValue: Int {
-        return value?.hashValue ?? 0
-    }
-    
-    init(_ value: String?) {
-        self.value = value
-    }
-}
-
-func ==(x: Commodity, y: Commodity) -> Bool {
-    return x.value == y.value
-}
-
 struct State {
     typealias Balance = [String: [Commodity:LedgerDouble]]
     var year: Int? = nil
@@ -35,28 +19,32 @@ struct State {
     var commodities: Set<String> = []
     var tags: Set<String> = []
     var balance: Balance = [:]
+    var automatedTransactions: [AutomatedTransaction] = []
 }
 
 extension String: ErrorProtocol {}
 
-func unify(commodity1: String?, commodity2: String?) throws -> String? {
-    switch (commodity1, commodity2) {
-    case (nil, nil):
-        return nil
-    case (nil, let c):
-        return c
-    case (let c, nil):
-        return c
-    case (let c1, let c2) where c1 == c2:
-        return c1
-    default:
-        throw "Commodities (\(commodity1), \(commodity2)) can't be merged"
+extension Commodity {
+    func unify(_ other: Commodity) throws -> Commodity {
+        switch (value, other.value) {
+        case (nil, nil):
+            return Commodity()
+        case (nil, _):
+            return other
+        case (_, nil):
+            return self
+        case (let c1, let c2) where c1 == c2:
+            return self
+        default:
+            throw "Commodities (\(self), \(other)) cannot be unified"
+        }
     }
 }
 
+
 extension Amount {
     func op(_ f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Amount) throws -> Amount {
-        let commodity = try unify(commodity1: self.commodity, commodity2: other.commodity)
+        let commodity = try self.commodity.unify(other.commodity)
         return Amount(number: f(self.number, other.number), commodity: commodity)
     }
 }
@@ -101,7 +89,7 @@ extension Transaction {
     }
 }
 
-extension Posting {
+extension EvaluatedPosting {
     func expressionContext(name: String) -> Value? {
         switch name {
         case "account": return .string(self.account)
@@ -217,6 +205,8 @@ extension State {
             break
         case .transaction(let transaction):
             balance = try computeNewBalance(postings: transaction.postings)
+        case .automated(let autoTransaction):
+            automatedTransactions.append(autoTransaction)
         default:
             fatalError()
         }
@@ -230,25 +220,48 @@ extension State {
         let postingsWithoutValue = postingsWithValue.remove { $0.value == nil }
         guard postingsWithoutValue.count <= 1 else { throw "More than one posting without value" }
         
+        var evaluatedPostings: [EvaluatedPosting] = []
+        
         for posting in postingsWithValue {
             var accountBalance = newBalance[posting.account] ?? [:]
             let value = try posting.value!.evaluate(lookup: get)
             guard case .amount(let amount) = value else {
                 throw "Posting value evaluates to a non-amount"
             }
-            let commodity = Commodity(amount.commodity)
-            total[commodity, or: 0] += amount.number
-            accountBalance[commodity, or: 0] += amount.number
+            total[amount.commodity, or: 0] += amount.number
+            accountBalance[amount.commodity, or: 0] += amount.number
             newBalance[posting.account] = accountBalance
+            evaluatedPostings.append(EvaluatedPosting(account: posting.account, amount: amount))
+        }
+        
+        if let postingWithoutValue = postingsWithoutValue.first {
+            for (commodity, value) in total {
+                let amount = Amount(number: -value, commodity: commodity)
+                newBalance[postingWithoutValue.account, or: [:]][commodity, or: 0] += amount.number
+                evaluatedPostings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount))
+                total[commodity, or: 0] += amount.number
+            }
+        }
+        
+        for evaluatedPosting in evaluatedPostings {
+            for automatedTransaction in automatedTransactions {
+                if try evaluatedPosting.match(expression: automatedTransaction.expression) {
+                    for automatedPosting in automatedTransaction.postings {
+                        let value = try automatedPosting.value.evaluate(lookup: self.get)
+                        guard case .amount(let amount) = value else {
+                            throw "Posting value evaluates to a non-amount"
+                        }
+                        total[amount.commodity, or: 0] += amount.number
+                        newBalance[automatedPosting.account, or: [:]][amount.commodity, or: 0] += amount.number
+                    }
+                }
+            }
         }
         
         for (commodity, value) in total {
-            if let postingWithoutValue = postingsWithoutValue.first {
-                newBalance[postingWithoutValue.account, or: [:]][commodity, or: 0] -= value
-            } else {
-                guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)" }
-            }
+            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)" }
         }
+        
         return newBalance
     }
     
@@ -281,6 +294,11 @@ extension State {
         }
     }
 
+}
+
+struct EvaluatedPosting {
+    var account: String
+    var amount: Amount
 }
 
 class EvaluatorTests: XCTestCase {
@@ -410,13 +428,12 @@ class EvaluatorTests: XCTestCase {
     }
     
     func testRegex() {
-        let expression = Expression.infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Gir"))
-        let posting = Posting(account: "Assets:Giro")
-        XCTAssertTrue(try! posting.match(expression: expression))
+        let expression = Expression.infix(operator: "=~", lhs: .string("Assets:Giro"), rhs: .regex("Gir"))
+        XCTAssertTrue(try! expression.evaluate() == .bool(true))
     }
 
     func testPostingVariables() {
-        let posting = Posting(account: "Assets:Giro", amount: Amount(number: 100, commodity: "EUR"))
+        let posting = EvaluatedPosting(account: "Assets:Giro", amount: Amount(number: 100, commodity: "EUR"))
         XCTAssertTrue(posting.expressionContext(name: "account") == .string("Assets:Giro"))
 
     }
@@ -437,11 +454,32 @@ class EvaluatorTests: XCTestCase {
     }
 
     func testStateVariables() {
-        let state = State(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:])
+        let state = State(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:], automatedTransactions: [])
         XCTAssertTrue(state.expressionContext(name: "year") == .amount(Amount(number: 2016)))
         XCTAssertTrue(state.expressionContext(name: "one") == .string("Hello"))
     }
+    
+    func testAutomatedTransaction() {
+        let auto = Statement.automated(AutomatedTransaction(expression: .bool(true), postings: [
+            AutomatedPosting(account: "Foo", value: .amount(Amount(number: 50, commodity: Commodity("$")))),
+            AutomatedPosting(account: "Bar", value: .amount(Amount(number: -50, commodity: Commodity("$")))),
+        ]))
+        let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
+            Posting(account: "Expenses:Food", amount: Amount(number: 20, commodity: Commodity("$"))),
+            Posting(account: "Cash"),
+        ])
+        var state = State()
+        try! state.apply(auto)
+        try! state.apply(.transaction(transaction))
+        XCTAssert(state.balance(account: "Foo") == [Commodity("$"): 100])
+        XCTAssert(state.balance(account: "Bar") == [Commodity("$"): -100])
+        XCTAssert(state.balance(account: "Expenses:Food") == [Commodity("$"): 20])
+        XCTAssert(state.balance(account: "Cash") == [Commodity("$"): -20])
+    }
 
+    
+    // TODO: Auto transactions with postings that don't have commodities
+    // TODO: Unbalanced auto transactions should throw
     // TODO: test that evaluating a posting falls back on the transaction variables, which falls back on the state variables
     // TODO: test that a posting without a year, but which has a year specified using the year directive has a valid `date` (maybe cerate an EvaluatedPosting)
     // TODO: test that a posting without an amount (auto-balanced amount) matches on something like commodity='EUR'

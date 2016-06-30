@@ -9,6 +9,13 @@
 import XCTest
 @testable import LedgerGUI
 
+extension Amount {
+    init(number: LedgerDouble, commodity: String?) {
+        self.number = number
+        self.commodity = Commodity(commodity)
+    }
+}
+
 class ParserTests: XCTestCase {
     
     func testParser<A>(_ parser: GenericParser<ImmutableCharacters,(), A>, compare: (A, A) -> Bool, success: [(String, A)], failure: [String]) {
@@ -45,7 +52,7 @@ class ParserTests: XCTestCase {
                      ("16/01", Date(year: nil, month: 16, day: 1))
                      ]
         let failingDates = ["2016/06-21"]
-        testParser(Date.parser, success: dates , failure: failingDates)
+        testParser(date, success: dates , failure: failingDates)
     }
 
     func testAmount() {
@@ -193,14 +200,14 @@ class ParserTests: XCTestCase {
     func testAutomatedTransaction() {
         let sample: [(String,AutomatedTransaction)] = [
             ("= expr 'true'\n  [Funds:Core Data]  -0.7\n  [Assets:Giro]  0.7",
-            AutomatedTransaction(type: .expr(.bool(true)), postings: [
-                Posting(account: "[Funds:Core Data]", amount: Amount(number: -0.7, commodity: nil)),
-                Posting(account: "[Assets:Giro]", amount: Amount(number: 0.7, commodity: nil))
+            AutomatedTransaction(expression: .bool(true), postings: [
+                AutomatedPosting(account: "[Funds:Core Data]", value: .amount(Amount(number: -0.7, commodity: nil))),
+                AutomatedPosting(account: "[Assets:Giro]", value: .amount(Amount(number: 0.7, commodity: nil)))
             ])),
             ("= /Expenses:Functional Swift/\n  [Assets:Giro]  1\n  [Funds:Functional Swift]  -1",
-             AutomatedTransaction(type: .regex("Expenses:Functional Swift"), postings: [
-                Posting(account: "[Assets:Giro]", amount: Amount(number: 1, commodity: nil)),
-                Posting(account: "[Funds:Functional Swift]", amount: Amount(number: -1, commodity: nil))
+             AutomatedTransaction(expression: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Expenses:Functional Swift")), postings: [
+                AutomatedPosting(account: "[Assets:Giro]", value: .amount(Amount(number: 1, commodity: nil))),
+                AutomatedPosting(account: "[Funds:Functional Swift]", value: .amount(Amount(number: -1, commodity: nil)))
                 ])
             ),
         ]
@@ -211,15 +218,14 @@ class ParserTests: XCTestCase {
         let sample: [(String,Statement)] = [
             ("define exchange_rate=100.00/99.00 EUR", .definition(name: "exchange_rate", expression: .infix(operator: "/", lhs: .amount(Amount(number: 100)), rhs: .amount(Amount(number: 99, commodity: "EUR")))))
         ]
-        testParser(definition, success: sample, failure: [])
-
+        testParser(definitionDirective, success: sample, failure: [])
     }
 
     func testTag() {
         let sample: [(String, Statement)] = [
             ("tag file", .tag("file"))
         ]
-        testParser(tag, success: sample, failure: [])
+        testParser(tagDirective, success: sample, failure: [])
     }
 
     func testFile() {

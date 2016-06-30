@@ -15,11 +15,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        typealias MyParser = FastParser
-        let path = "/Users/chris/objc.io/LedgerGUI/sample.txt"
-        let contents = try! String(contentsOfFile: path)
-        let result = parse(string: contents)
-        print("Done")
+//        typealias MyParser = FastParser
+//        let path = "/Users/chris/objc.io/LedgerGUI/sample.txt"
+//        let contents = try! String(contentsOfFile: path)
+//        let result = parse(string: contents)
+//        print("Done")
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
