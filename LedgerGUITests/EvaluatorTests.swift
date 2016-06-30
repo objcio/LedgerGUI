@@ -441,4 +441,8 @@ class EvaluatorTests: XCTestCase {
         XCTAssertTrue(state.expressionContext(name: "year") == .amount(Amount(number: 2016)))
         XCTAssertTrue(state.expressionContext(name: "one") == .string("Hello"))
     }
+
+    // TODO: test that evaluating a posting falls back on the transaction variables, which falls back on the state variables
+    // TODO: test that a posting without a year, but which has a year specified using the year directive has a valid date (maybe cerate an EvaluatedPosting)
+    // TODO: test that a posting without an amount (auto-balanced amount) matches on something like commodity='EUR'
 }
