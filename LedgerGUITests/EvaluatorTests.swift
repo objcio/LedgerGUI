@@ -143,7 +143,7 @@ class EvaluatorTests: XCTestCase {
     }
 
     func testPostingVariables() {
-        let posting = EvaluatedPosting(account: "Assets:Giro", amount: Amount(number: 100, commodity: "EUR"))
+        let posting = EvaluatedPosting(account: "Assets:Giro", amount: Amount(number: 100, commodity: "EUR"), cost: nil)
         XCTAssertTrue(posting.expressionContext(name: "account") == .string("Assets:Giro"))
 
     }
@@ -163,7 +163,6 @@ class EvaluatorTests: XCTestCase {
 
     func testStateVariables() {
         let state = State(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:], automatedTransactions: [])
-        XCTAssertTrue(state.lookup(variable: "year") == .amount(Amount(number: 2016)))
         XCTAssertTrue(state.lookup(variable: "one") == .string("Hello"))
     }
     
@@ -232,16 +231,33 @@ class EvaluatorTests: XCTestCase {
         var state = State()
         try! state.apply(auto)
         try! state.apply(.transaction(transaction))
-        print(state)
         XCTAssert(state.balance(account: "Foo") == [Commodity("$"): 0.4*20])
         XCTAssert(state.balance(account: "Bar") == [Commodity("$"): -0.4*20])
         XCTAssert(state.balance(account: "Expenses:Food") == [Commodity("$"): 20])
         XCTAssert(state.balance(account: "Cash") == [Commodity("$"): -20])
-
     }
     
-    // TODO: test that a posting without an amount (auto-balanced amount) matches on something like commodity='EUR'
+    func testPostingCosts() {
+        let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
+            Posting(account: "Assets:Giro", amount: Amount(number: 10, commodity: Commodity("EUR")), cost: Cost(type: .total, amount: Amount(number: 12, commodity: Commodity("$")))),
+            Posting(account: "Assets:Paypal", amount: Amount(number: -12, commodity: Commodity("$"))),
+        ])
+        var state = State()
+        try! state.apply(.transaction(transaction))
+        XCTAssert(state.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
+        XCTAssert(state.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
 
+        let transaction2 = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
+            Posting(account: "Assets:Giro", amount: Amount(number: 10, commodity: Commodity("EUR")), cost: Cost(type: .total, amount: Amount(number: 12, commodity: Commodity("$")))),
+            Posting(account: "Assets:Paypal"),
+        ])
+        var state2 = State()
+        try! state2.apply(.transaction(transaction2))
+        XCTAssert(state2.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
+        XCTAssert(state2.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
+    }
+    
+    // TODO: test cost expressions
+    // TODO: test that a posting without an amount (auto-balanced amount) matches on something like commodity='EUR'
     // TODO: test and add > >= < <= operators
-    // TODO: test and add
 }

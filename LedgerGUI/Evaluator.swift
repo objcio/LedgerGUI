@@ -94,6 +94,7 @@ func ??(lhs: ExpressionContext, rhs: ExpressionContext) -> ExpressionContext {
 struct EvaluatedPosting {
     var account: String
     var amount: Amount
+    var cost: Amount?
 }
 
 extension EvaluatedPosting {
@@ -209,7 +210,8 @@ extension EvaluatedTransaction {
     var balance: [Commodity: LedgerDouble] {
         var result: [Commodity: LedgerDouble] = [:]
         for posting in postings {
-            result[posting.amount.commodity, or: 0] += posting.amount.number
+            let amount = posting.cost ?? posting.amount
+            result[amount.commodity, or: 0] += amount.number
         }
         return result
     }
@@ -235,7 +237,7 @@ extension EvaluatedTransaction {
                     amount.commodity = evaluatedPosting.amount.commodity
                     amount.number *= evaluatedPosting.amount.number
                 }
-                postings.append(EvaluatedPosting(account: automatedPosting.account, amount: amount))
+                postings.append(EvaluatedPosting(account: automatedPosting.account, amount: amount, cost: nil))
             }
         }
     }
@@ -250,7 +252,16 @@ extension Posting {
     func evaluate(context: ExpressionContext) throws -> EvaluatedPosting {
         let value = try self.value!.evaluate(context: context)
         guard case .amount(let amount) = value else { throw "Posting value evaluates to a non-amount" }
-        return EvaluatedPosting(account: account, amount: amount)
+        var costAmount: Amount? = nil
+        if let cost = cost {
+            switch cost.type {
+            case .total:
+                costAmount = cost.amount
+            case .perUnit:
+                fatalError() // TODO
+            }
+        }
+        return EvaluatedPosting(account: account, amount: amount, cost: costAmount)
     }
 }
 
@@ -269,7 +280,7 @@ extension Transaction {
         if let postingWithoutValue = postingsWithoutValue.first {
             for (commodity, value) in evaluatedTransaction.balance {
                 let amount = Amount(number: -value, commodity: commodity)
-                evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount))
+                evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount, cost: nil))
             }
         }
         
