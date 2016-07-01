@@ -311,7 +311,7 @@ extension Transaction {
         guard postingsWithoutValue.count <= 1 else { throw "More than one posting without value" }
         if let postingWithoutValue = postingsWithoutValue.first {
             for (commodity, value) in evaluatedTransaction.balance {
-                let amount = Amount(number: -value, commodity: commodity)
+                let amount = Amount(-value, commodity: commodity)
                 evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount, cost: nil))
             }
         }
@@ -345,7 +345,7 @@ extension Commodity {
 extension Amount {
     func op(_ f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Amount) throws -> Amount {
         let commodity = try self.commodity.unify(other.commodity)
-        return Amount(number: f(self.number, other.number), commodity: commodity)
+        return Amount(f(self.number, other.number), commodity: commodity)
     }
 }
 

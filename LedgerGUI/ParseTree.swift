@@ -83,7 +83,7 @@ extension Transaction {
 struct Amount: Equatable {
     var number: LedgerDouble
     var commodity: Commodity
-    init(number: LedgerDouble, commodity: Commodity = Commodity()) {
+    init(_ number: LedgerDouble, commodity: Commodity = Commodity()) {
         self.number = number
         self.commodity = commodity
     }
@@ -110,7 +110,7 @@ extension Amount {
     
     func matchingSign(ofAmount otherAmount: Amount) -> Amount {
         guard isNegative != otherAmount.isNegative else { return self }
-        return Amount(number: number * -1, commodity: commodity)
+        return Amount(number * -1, commodity: commodity)
     }
 }
 

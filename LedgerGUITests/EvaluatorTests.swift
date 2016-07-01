@@ -11,6 +11,16 @@ import XCTest
 @testable import LedgerGUI
 
 
+extension LedgerDouble {
+    var euro: Amount {
+        return Amount(self, commodity: Commodity("EUR"))
+    }
+
+    var usd: Amount {
+        return Amount(self, commodity: Commodity("$"))
+    }
+}
+
 class EvaluatorTests: XCTestCase {
     func forceUnwrap(_ f: @autoclosure () throws -> (), file: String = #file, line: UInt = #line) {
         do {
@@ -22,9 +32,8 @@ class EvaluatorTests: XCTestCase {
     }
         
     func testYear() {
-        let directive = Statement.year(2005)
         var state = State()
-        try! state.apply(directive)
+        try! state.apply(.year(2005))
         XCTAssert(state.year == 2005)
     }
     
@@ -32,70 +41,63 @@ class EvaluatorTests: XCTestCase {
         let name = "exchange_rate"
         var state = State()
 
-        let amount = Amount(number: 2, commodity: "EUR")
-        let directive = Statement.definition(name: name, expression: .amount(amount))
-        try! state.apply(directive)
-        XCTAssert(state.lookup(variable: name) == .amount(amount))
+        try! state.apply(.definition(name: name, expression: .amount(2.euro)))
+        XCTAssert(state.lookup(variable: name) == .amount(2.euro))
 
-        let amount2 = Amount(number: 3, commodity: "EUR")
-        let directive2 = Statement.definition(name: name, expression: .amount(amount2))
-        try! state.apply(directive2)
-        XCTAssert(state.lookup(variable: name) == .amount(amount2))
+        try! state.apply(.definition(name: name, expression: .amount(3.euro)))
+        XCTAssert(state.lookup(variable: name) == .amount(3.euro))
     }
     
     func testAccount() {
         let name = "Some:Account"
-        let account = Statement.account(name)
         var state = State()
         XCTAssertFalse(state.valid(account: name))
-        try! state.apply(account)
+        try! state.apply(.account(name))
         XCTAssertTrue(state.valid(account: name))
     }
     
     func testCommodity() {
         let name = "EUR"
-        let commodity = Statement.commodity(name)
         var state = State()
         XCTAssertFalse(state.valid(commodity: name))
-        try! state.apply(commodity)
+        try! state.apply(.commodity(name))
         XCTAssertTrue(state.valid(commodity: name))
     }
     
     func testTag() {
         let name = "tag"
-        let tag = Statement.tag(name)
         var state = State()
         XCTAssertFalse(state.valid(tag: name))
-        try! state.apply(tag)
+        try! state.apply(.tag(name))
         XCTAssertTrue(state.valid(tag: name))
     }
     
     func testEvaluateExpression() {
-        let expression = Expression.infix(operator: "*", lhs: .amount(Amount(number: 2, commodity: "EUR")), rhs: .amount(Amount(number: 3)))
+        let expression = Expression.infix(operator: "*", lhs: .amount(2.euro), rhs: .amount(Amount(3)))
         let result = try! expression.evaluate()
-        XCTAssert(result == .amount(Amount(number: 6, commodity: "EUR")))
+        XCTAssert(result == .amount(6.euro))
         
-        let amount = Value.amount(Amount(number: 3))
+        let amount = Value.amount(Amount(3))
         let lookup: (String) -> Value? = { if $0 == "foo" { return amount } else { return nil } }
         XCTAssert(try! Expression.ident("foo").evaluate(context: lookup) == amount)
     }
     
     func testAmountMultiplication() {
-        let a1 = Amount(number: 3)
-        let a2 = Amount(number: 5)
-        let a3 = Amount(number: 7, commodity: "EUR")
-        let a4 = Amount(number: 11, commodity: "$")
-        XCTAssertTrue(try! a1.op(*, a2) == Amount(number: 15))
-        XCTAssertTrue(try! a1.op(*, a3) == Amount(number: 21, commodity: "EUR"))
-        XCTAssertTrue(try! a4.op(*, a2) == Amount(number: 55, commodity: "$"))
+        let a1 = Amount(3)
+        let a2 = Amount(5)
+        let a3 = 7.euro
+        let a4 = 11.usd
+        XCTAssertTrue(try! a1.op(*, a2) == Amount(15))
+        XCTAssertTrue(try! a1.op(*, a3) == 21.euro)
+        XCTAssertTrue(try! a4.op(*, a2) == 55.usd)
         XCTAssertNil(try? a3.op(*, a4))
     }
     
     func testTransaction() {
         var state = State()
         let date = LedgerGUI.Date(year: 2015, month: 1, day: 16)
-        let posting1 = Posting(account: "Giro", amount: Amount(number: 100, commodity: "USD"), cost: nil, balance: nil, note: nil)
-        let posting2 = Posting(account: "Cash", amount: Amount(number: -100, commodity: "USD"), cost: nil, balance: nil, note: nil)
+        let posting1 = Posting(account: "Giro", amount: Amount(100, commodity: "USD"), cost: nil, balance: nil, note: nil)
+        let posting2 = Posting(account: "Cash", amount: Amount(-100, commodity: "USD"), cost: nil, balance: nil, note: nil)
         let transaction = Statement.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting1, posting2]))
         try! state.apply(transaction)
         XCTAssert(state.balance(account: "Giro") == [Commodity("USD"): 100])
@@ -108,9 +110,9 @@ class EvaluatorTests: XCTestCase {
     func testAutoBalancing() {
         var state = State()
         let date = LedgerGUI.Date(year: 2015, month: 1, day: 16)
-        let posting1 = Posting(account: "Giro", amount: Amount(number: 100, commodity: "USD"))
+        let posting1 = Posting(account: "Giro", amount: Amount(100, commodity: "USD"))
         let posting2 = Posting(account: "Cash", value: nil)
-        let posting3 = Posting(account: "Giro", amount: Amount(number: 200, commodity: "EUR"))
+        let posting3 = Posting(account: "Giro", amount: 200.euro)
         
         try! state.apply(.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting1, posting2])))
         XCTAssert(state.balance(account: "Giro") == [Commodity("USD"): 100])
@@ -132,13 +134,13 @@ class EvaluatorTests: XCTestCase {
     func testBalanceVerification() {
         var state = State()
         let date = LedgerGUI.Date(year: 2015, month: 1, day: 16)
-        let posting1 = Posting(account: "Giro", amount: Amount(number: 100, commodity: "USD"), cost: nil, balance: nil, note: nil)
-        let posting2 = Posting(account: "Cash", amount: Amount(number: -200, commodity: "USD"), cost: nil, balance: nil, note: nil)
+        let posting1 = Posting(account: "Giro", amount: Amount(100, commodity: "USD"), cost: nil, balance: nil, note: nil)
+        let posting2 = Posting(account: "Cash", amount: Amount(-200, commodity: "USD"), cost: nil, balance: nil, note: nil)
         let transaction = Statement.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting1, posting2]))
         XCTAssertNil(try? state.apply(transaction))
 
-        let posting3 = Posting(account: "Giro", amount: Amount(number: 100, commodity: "USD"), cost: nil, balance: nil, note: nil)
-        let posting4 = Posting(account: "Cash", amount: Amount(number: -100, commodity: "EUR"), cost: nil, balance: nil, note: nil)
+        let posting3 = Posting(account: "Giro", amount: Amount(100, commodity: "USD"), cost: nil, balance: nil, note: nil)
+        let posting4 = Posting(account: "Cash", amount: (-100).euro, cost: nil, balance: nil, note: nil)
         let transaction2 = Statement.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting3, posting4]))
         XCTAssertNotNil(try? state.apply(transaction2))
         
@@ -152,7 +154,7 @@ class EvaluatorTests: XCTestCase {
     }
 
     func testPostingVariables() {
-        let posting = EvaluatedPosting(account: "Assets:Giro", amount: Amount(number: 100, commodity: "EUR"), cost: nil)
+        let posting = EvaluatedPosting(account: "Assets:Giro", amount: 100.euro, cost: nil)
         XCTAssertTrue(posting.expressionContext(name: "account") == .string("Assets:Giro"))
 
     }
@@ -177,11 +179,11 @@ class EvaluatorTests: XCTestCase {
     
     func testAutomatedTransaction() {
         let auto = Statement.automated(AutomatedTransaction(expression: .bool(true), postings: [
-            AutomatedPosting(account: "Foo", value: .amount(Amount(number: 50, commodity: Commodity("$")))),
-            AutomatedPosting(account: "Bar", value: .amount(Amount(number: -50, commodity: Commodity("$")))),
+            AutomatedPosting(account: "Foo", value: .amount(50.usd)),
+            AutomatedPosting(account: "Bar", value: .amount((-50).usd)),
         ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
-            Posting(account: "Expenses:Food", amount: Amount(number: 20, commodity: Commodity("$"))),
+            Posting(account: "Expenses:Food", amount: 20.usd),
             Posting(account: "Cash"),
         ])
         var state = State()
@@ -195,11 +197,11 @@ class EvaluatorTests: XCTestCase {
     
     func testAutomatedTransactionAmountMultipliers() {
         let auto = Statement.automated(AutomatedTransaction(expression: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Food")), postings: [
-            AutomatedPosting(account: "Foo", value: .amount(Amount(number: 0.4))),
-            AutomatedPosting(account: "Bar", value: .amount(Amount(number: -0.4))),
+            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4))),
+            AutomatedPosting(account: "Bar", value: .amount(Amount(-0.4))),
             ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
-            Posting(account: "Expenses:Food", amount: Amount(number: 20, commodity: Commodity("$"))),
+            Posting(account: "Expenses:Food", amount: 20.usd),
             Posting(account: "Cash"),
             ])
         var state = State()
@@ -213,11 +215,11 @@ class EvaluatorTests: XCTestCase {
     
     func testAutomatedTransactionBalanceErrors() {
         let auto = Statement.automated(AutomatedTransaction(expression: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Food")), postings: [
-            AutomatedPosting(account: "Foo", value: .amount(Amount(number: 0.4))),
+            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4))),
             ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
-            Posting(account: "Expenses:Food", amount: Amount(number: 20, commodity: Commodity("$"))),
-            Posting(account: "Cash", amount: Amount(number: 20, commodity: Commodity("$"))),
+            Posting(account: "Expenses:Food", amount: 20.usd),
+            Posting(account: "Cash", amount: 20.usd),
             ])
         var state = State()
         try! state.apply(auto)
@@ -230,12 +232,12 @@ class EvaluatorTests: XCTestCase {
         let expression = Expression.infix(operator: "&&", lhs: is2016, rhs: isFood)
         
         let auto = Statement.automated(AutomatedTransaction(expression: expression, postings: [
-            AutomatedPosting(account: "Foo", value: .amount(Amount(number: 0.4))),
-            AutomatedPosting(account: "Bar", value: .amount(Amount(number: -0.4)))
+            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4))),
+            AutomatedPosting(account: "Bar", value: .amount(Amount(-0.4)))
             ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
-            Posting(account: "Expenses:Food", amount: Amount(number: 20, commodity: Commodity("$"))),
-            Posting(account: "Cash", amount: Amount(number: -20, commodity: Commodity("$"))),
+            Posting(account: "Expenses:Food", amount: 20.usd),
+            Posting(account: "Cash", amount: (-20).usd),
             ])
         var state = State()
         try! state.apply(auto)
@@ -248,8 +250,8 @@ class EvaluatorTests: XCTestCase {
     
     func testPostingCosts() {
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
-            Posting(account: "Assets:Giro", amount: Amount(number: 10, commodity: Commodity("EUR")), cost: Cost(type: .total, amount: Amount(number: 12, commodity: Commodity("$")))),
-            Posting(account: "Assets:Paypal", amount: Amount(number: -12, commodity: Commodity("$"))),
+            Posting(account: "Assets:Giro", amount: 10.euro, cost: Cost(type: .total, amount: 12.usd)),
+            Posting(account: "Assets:Paypal", amount: (-12).usd),
         ])
         var state = State()
         try! state.apply(.transaction(transaction))
@@ -257,7 +259,7 @@ class EvaluatorTests: XCTestCase {
         XCTAssert(state.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
         
         let transaction2 = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
-            Posting(account: "Assets:Giro", amount: Amount(number: 10, commodity: Commodity("EUR")), cost: Cost(type: .total, amount: Amount(number: 12, commodity: Commodity("$")))),
+            Posting(account: "Assets:Giro", amount: 10.euro, cost: Cost(type: .total, amount: 12.usd)),
             Posting(account: "Assets:Paypal"),
         ])
         var state2 = State()
@@ -266,8 +268,8 @@ class EvaluatorTests: XCTestCase {
         XCTAssert(state2.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
         
         let transaction3 = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
-            Posting(account: "Assets:Giro", amount: Amount(number: -10, commodity: Commodity("EUR")), cost: Cost(type: .total, amount: Amount(number: 12, commodity: Commodity("$")))),
-            Posting(account: "Assets:Paypal", amount: Amount(number: 12, commodity: Commodity("$"))),
+            Posting(account: "Assets:Giro", amount: (-10).euro, cost: Cost(type: .total, amount: 12.usd)),
+            Posting(account: "Assets:Paypal", amount: 12.usd),
             ])
         var state3 = State()
         try! state3.apply(.transaction(transaction3))
@@ -277,8 +279,8 @@ class EvaluatorTests: XCTestCase {
     
     func testImplicitConversion() {
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
-            Posting(account: "Assets:Giro", amount: Amount(number: 10, commodity: Commodity("EUR"))),
-            Posting(account: "Assets:Paypal", amount: Amount(number: -12, commodity: Commodity("$"))),
+            Posting(account: "Assets:Giro", amount: 10.euro),
+            Posting(account: "Assets:Paypal", amount: (-12).usd),
             ])
         var state = State()
         try! state.apply(.transaction(transaction))

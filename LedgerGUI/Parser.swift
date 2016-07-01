@@ -94,10 +94,10 @@ let transactionTitle: GenericParser<ImmutableCharacters, (), (Date, TransactionS
 let account = lift2({ String( $1.prepending($0) ) }, noSpace, (noSpace <|> singleSpace).many)
 
 let amount: GenericParser<ImmutableCharacters, (), Amount> =
-    lift2({ Amount(number: $1, commodity: Commodity($0)) }, lexeme(commodity), double) <|>
+    lift2({ Amount($1, commodity: Commodity($0)) }, lexeme(commodity), double) <|>
     lift2(Amount.init, lexeme(double), Commodity.init <^> commodity.optional)
 let unsignedAmount: GenericParser<ImmutableCharacters, (), Amount> =
-    lift2({ Amount(number: $1, commodity: Commodity($0)) }, lexeme(commodity), unsignedDouble) <|>
+    lift2({ Amount($1, commodity: Commodity($0)) }, lexeme(commodity), unsignedDouble) <|>
         lift2(Amount.init, lexeme(unsignedDouble), Commodity.init <^> commodity.optional)
 
 let commodity: GenericParser<ImmutableCharacters, (), String> = string("USD") <|> string("EUR") <|> string("$")
