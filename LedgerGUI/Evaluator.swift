@@ -185,6 +185,73 @@ extension Expression {
     }
 }
 
+
+struct EvaluatedTransaction {
+    var postings: [EvaluatedPosting]
+}
+
+extension EvaluatedTransaction {
+    var balance: [Commodity: LedgerDouble] {
+        var result: [Commodity: LedgerDouble] = [:]
+        for posting in postings {
+            result[posting.amount.commodity, or: 0] += posting.amount.number
+        }
+        return result
+    }
+
+    func verify() throws {
+        for (commodity, value) in balance {
+            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)" }
+        }
+    }
+    
+    mutating func apply(automatedTransaction: AutomatedTransaction, lookup: (String) -> Value?) throws {
+        for evaluatedPosting in postings {
+            guard try evaluatedPosting.match(expression: automatedTransaction.expression) else { continue }
+            for automatedPosting in automatedTransaction.postings {
+                let value = try automatedPosting.value.evaluate(lookup: lookup)
+                guard case .amount(let amount) = value else { throw "Posting value evaluates to a non-amount" }
+                postings.append(EvaluatedPosting(account: automatedPosting.account, amount: amount))
+            }
+        }
+    }
+}
+
+extension Posting {
+    func evaluate(lookup: (String) -> Value?) throws -> EvaluatedPosting {
+        let value = try self.value!.evaluate(lookup: lookup)
+        guard case .amount(let amount) = value else { throw "Posting value evaluates to a non-amount" }
+        return EvaluatedPosting(account: account, amount: amount)
+    }
+}
+
+extension Transaction {
+    func evaluate(automatedTransactions: [AutomatedTransaction], lookup: (String) -> Value?) throws -> EvaluatedTransaction {
+        var postingsWithValue = postings
+        let postingsWithoutValue = postingsWithValue.remove { $0.value == nil }
+        var evaluatedTransaction = EvaluatedTransaction(postings: [])
+        
+        for posting in postingsWithValue {
+            try evaluatedTransaction.postings.append(posting.evaluate(lookup: lookup))
+        }
+        
+        guard postingsWithoutValue.count <= 1 else { throw "More than one posting without value" }
+        if let postingWithoutValue = postingsWithoutValue.first {
+            for (commodity, value) in evaluatedTransaction.balance {
+                let amount = Amount(number: -value, commodity: commodity)
+                evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount))
+            }
+        }
+        
+        for automatedTransaction in automatedTransactions {
+            try evaluatedTransaction.apply(automatedTransaction: automatedTransaction, lookup: lookup)
+        }
+        
+        try evaluatedTransaction.verify()
+        return evaluatedTransaction
+    }
+}
+
 extension State {
     mutating func apply(_ statement: Statement) throws {
         switch statement {
@@ -201,63 +268,17 @@ extension State {
         case .comment:
             break
         case .transaction(let transaction):
-            balance = try computeNewBalance(postings: transaction.postings)
+            let evaluatedTransaction = try transaction.evaluate(automatedTransactions: automatedTransactions, lookup: get)
+            apply(transaction: evaluatedTransaction)
         case .automated(let autoTransaction):
             automatedTransactions.append(autoTransaction)
         }
     }
     
-    // This method is not mutating. This prevents us from accidentally mutating `balance` (we might throw during a transaction)
-    func computeNewBalance(postings: [Posting]) throws -> Balance {
-        var newBalance = balance
-        var total: [Commodity: LedgerDouble] = [:]
-        var postingsWithValue = postings
-        let postingsWithoutValue = postingsWithValue.remove { $0.value == nil }
-        guard postingsWithoutValue.count <= 1 else { throw "More than one posting without value" }
-        
-        var evaluatedPostings: [EvaluatedPosting] = []
-        
-        for posting in postingsWithValue {
-            var accountBalance = newBalance[posting.account] ?? [:]
-            let value = try posting.value!.evaluate(lookup: get)
-            guard case .amount(let amount) = value else {
-                throw "Posting value evaluates to a non-amount"
-            }
-            total[amount.commodity, or: 0] += amount.number
-            accountBalance[amount.commodity, or: 0] += amount.number
-            newBalance[posting.account] = accountBalance
-            evaluatedPostings.append(EvaluatedPosting(account: posting.account, amount: amount))
+    mutating func apply(transaction: EvaluatedTransaction) {
+        for posting in transaction.postings {
+            balance[posting.account, or: [:]][posting.amount.commodity, or: 0] += posting.amount.number
         }
-        
-        if let postingWithoutValue = postingsWithoutValue.first {
-            for (commodity, value) in total {
-                let amount = Amount(number: -value, commodity: commodity)
-                newBalance[postingWithoutValue.account, or: [:]][commodity, or: 0] += amount.number
-                evaluatedPostings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount))
-                total[commodity, or: 0] += amount.number
-            }
-        }
-        
-        for evaluatedPosting in evaluatedPostings {
-            for automatedTransaction in automatedTransactions {
-                if try evaluatedPosting.match(expression: automatedTransaction.expression) {
-                    for automatedPosting in automatedTransaction.postings {
-                        let value = try automatedPosting.value.evaluate(lookup: self.get)
-                        guard case .amount(let amount) = value else {
-                            throw "Posting value evaluates to a non-amount"
-                        }
-                        total[amount.commodity, or: 0] += amount.number
-                        newBalance[automatedPosting.account, or: [:]][amount.commodity, or: 0] += amount.number
-                    }
-                }
-            }
-        }
-        
-        for (commodity, value) in total {
-            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)" }
-        }
-        
-        return newBalance
     }
     
     func get(definition name: String) -> Value? {
