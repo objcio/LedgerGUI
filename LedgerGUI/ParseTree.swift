@@ -8,11 +8,16 @@
 
 import Foundation
 
-struct Date {
+struct Date: Equatable {
     let year: Int?
     let month: Int
     let day: Int
 }
+
+func ==(lhs: Date, rhs: Date) -> Bool {
+    return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day
+}
+
 
 enum TransactionState: Character {
     case cleared = "*"
@@ -69,33 +74,35 @@ extension Transaction {
     }
 }
 
-struct Amount {
-    let number: LedgerDouble
-    let commodity: Commodity
-    init(number: LedgerDouble, commodity: Commodity = Commodity(nil)) {
+struct Amount: Equatable {
+    var number: LedgerDouble
+    var commodity: Commodity
+    init(number: LedgerDouble, commodity: Commodity = Commodity()) {
         self.number = number
         self.commodity = commodity
     }
+    
+    var hasCommodity: Bool {
+        return commodity.value != nil
+    }
 }
-
-extension Amount: Equatable {}
 
 func ==(lhs: Amount, rhs: Amount) -> Bool {
     return lhs.commodity == rhs.commodity && lhs.number == rhs.number
 }
 
-struct Note {
+
+struct Note: Equatable {
     let comment: String
     init(_ comment: String) {
         self.comment = comment
     }
 }
 
-extension Note: Equatable {}
-
 func ==(lhs: Note, rhs: Note) -> Bool {
     return lhs.comment == rhs.comment
 }
+
 
 struct Cost: Equatable {
     enum CostType: String, Equatable {
@@ -110,7 +117,8 @@ func ==(lhs: Cost, rhs: Cost) -> Bool {
     return lhs.type == rhs.type && lhs.amount == rhs.amount
 }
 
-struct Posting {
+
+struct Posting: Equatable {
     var account: String
     var value: Expression?
     var cost: Cost?
@@ -118,13 +126,8 @@ struct Posting {
     var notes: [Note]
 }
 
-struct AutomatedPosting: Equatable {
-    var account: String
-    var value: Expression
-}
-
-func ==(lhs: AutomatedPosting, rhs: AutomatedPosting) -> Bool {
-    return lhs.account == rhs.account && lhs.value == rhs.value
+func ==(lhs: Posting, rhs: Posting) -> Bool {
+    return lhs.account == rhs.account && lhs.value == rhs.value && lhs.cost == rhs.cost && lhs.balance == rhs.balance && lhs.notes == rhs.notes
 }
 
 extension Posting {
@@ -137,13 +140,19 @@ extension Posting {
     }
 }
 
-extension Posting: Equatable { }
 
-func ==(lhs: Posting, rhs: Posting) -> Bool {
-    return lhs.account == rhs.account && lhs.value == rhs.value && lhs.cost == rhs.cost && lhs.balance == rhs.balance && lhs.notes == rhs.notes
+struct AutomatedPosting: Equatable {
+    var account: String
+    var value: Expression
 }
 
-struct Transaction {
+func ==(lhs: AutomatedPosting, rhs: AutomatedPosting) -> Bool {
+    return lhs.account == rhs.account && lhs.value == rhs.value
+}
+
+
+
+struct Transaction: Equatable {
     var date: Date
     var state: TransactionState?
     var title: String
@@ -151,15 +160,10 @@ struct Transaction {
     var postings: [Posting]
 }
 
-extension Transaction: Equatable { }
 func ==(lhs: Transaction, rhs: Transaction) -> Bool {
     return lhs.date == rhs.date && lhs.state == rhs.state && lhs.title == rhs.title && lhs.notes == rhs.notes && lhs.postings == rhs.postings
 }
 
-extension Date: Equatable {}
-func ==(lhs: Date, rhs: Date) -> Bool {
-    return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day
-}
 
 indirect enum Expression: Equatable {
     case infix(`operator`: String, lhs: Expression, rhs: Expression)
@@ -182,6 +186,7 @@ func ==(lhs: Expression, rhs: Expression) -> Bool {
     default: return false
     }
 }
+
 
 struct AutomatedTransaction: Equatable {
     var expression: Expression

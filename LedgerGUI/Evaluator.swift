@@ -8,6 +8,9 @@
 
 import Foundation
 
+extension String: ErrorProtocol {}
+
+
 struct State {
     typealias Balance = [String: [Commodity:LedgerDouble]]
     var year: Int? = nil
@@ -19,7 +22,265 @@ struct State {
     var automatedTransactions: [AutomatedTransaction] = []
 }
 
-extension String: ErrorProtocol {}
+extension State {
+    mutating func apply(_ statement: Statement) throws {
+        switch statement {
+        case .year(let year):
+            self.year = year
+        case .definition(let name, let expression):
+            definitions[name] = try expression.evaluate(context: lookup)
+        case .account(let name):
+            accounts.insert(name)
+        case .commodity(let name):
+            commodities.insert(name)
+        case .tag(let name):
+            tags.insert(name)
+        case .comment:
+            break
+        case .transaction(let transaction):
+            let evaluatedTransaction = try transaction.evaluate(automatedTransactions: automatedTransactions, year: year, context: lookup)
+            apply(transaction: evaluatedTransaction)
+        case .automated(let autoTransaction):
+            automatedTransactions.append(autoTransaction)
+        }
+    }
+    
+    mutating func apply(transaction: EvaluatedTransaction) {
+        for posting in transaction.postings {
+            balance[posting.account, or: [:]][posting.amount.commodity, or: 0] += posting.amount.number
+        }
+    }
+    
+    func valid(account: String) -> Bool {
+        return accounts.contains(account)
+    }
+    
+    func valid(commodity: String) -> Bool {
+        return commodities.contains(commodity)
+    }
+    
+    func valid(tag: String) -> Bool {
+        return tags.contains(tag)
+    }
+    
+    func balance(account: String) -> [Commodity:LedgerDouble] {
+        return self.balance[account] ?? [:]
+    }
+    
+    func lookup(variable name: String) -> Value? {
+        return definitions[name]
+    }
+}
+
+
+extension EvaluatedTransaction {
+    func lookup(variable: String) -> Value? {
+        switch variable {
+        case "date":
+            return .date(date)
+        default:
+            return nil
+        }
+    }
+}
+
+func ??(lhs: ExpressionContext, rhs: ExpressionContext) -> ExpressionContext {
+    return { x in
+        return lhs(x) ?? rhs(x)
+    }
+}
+
+
+struct EvaluatedPosting {
+    var account: String
+    var amount: Amount
+}
+
+extension EvaluatedPosting {
+    func expressionContext(name: String) -> Value? {
+        switch name {
+        case "account": return .string(self.account)
+        default:
+            return nil
+        }
+    }
+    
+    func match(expression: Expression, context: ExpressionContext) throws -> Bool {
+        let value = try expression.evaluate(context: expressionContext ?? context)
+        guard case .bool(let result) = value else {
+            throw "Expected boolean expression"
+        }
+        return result
+    }
+}
+
+
+enum Value: Equatable {
+    case amount(Amount)
+    case string(String)
+    case regex(String)
+    case bool(Bool)
+    case date(EvaluatedDate)
+}
+
+func ==(lhs: Value, rhs: Value) -> Bool {
+    switch (lhs,rhs) {
+    case let (.amount(x), .amount(y)): return x == y
+    case let (.string(x), .string(y)): return x == y
+    case let (.regex(x), .regex(y)): return x == y
+    case let (.bool(x), .bool(y)): return x == y
+    case let (.date(x), .date(y)): return x == y
+    default: return false
+    }
+}
+
+typealias ExpressionContext = (String) -> Value?
+
+extension Value {
+    func op(double f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Value) throws -> Amount {
+        guard case .amount(let selfAmount) = self, case .amount(let otherAmount) = other else {
+            throw "Arithmetic operator on non-amount" // todo better failure message
+        }
+        return try selfAmount.op(f, otherAmount)
+    }
+    
+    func op(bool f: (Bool, Bool) -> Bool, _ other: Value) throws -> Bool {
+        guard case .bool(let selfValue) = self, case .bool(let otherValue) = other else {
+            throw "Boolean operator on non-bool" // todo better failure message
+        }
+        return f(selfValue, otherValue)
+    }
+    
+    func matches(_ rhs: Value) throws -> Bool {
+        guard case let .regex(regex) = rhs else {
+            throw "Right-hand side of regular expression match is not a regular expression"
+        }
+        guard let string = stringRepresentation else {
+            throw "Cannot convert \(self) to string for reg-ex matching"
+        }
+        let range = NSRange(location: 0, length: (string as NSString).length)
+        return try RegularExpression(pattern: regex, options: []).firstMatch(in: string, options: [], range: range) != nil
+    }
+    
+    var stringRepresentation: String? {
+        switch self {
+        case .string(let string):
+            return string
+        case .date(let date):
+            return date.string
+        default:
+            return nil
+        }
+    }
+}
+
+struct EvaluatedDate: Equatable {
+    var year: Int
+    var month: Int
+    var day: Int
+}
+
+func ==(lhs: EvaluatedDate, rhs: EvaluatedDate) -> Bool {
+    return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day
+}
+
+extension EvaluatedDate {
+    init(date: Date, year: Int?) throws {
+        guard let year = date.year ?? year else {
+            throw "No year specified for \(date)"
+        }
+        self.year = year
+        self.month = date.month
+        self.day = date.day
+    }
+    
+    var string: String {
+        return "\(year)/\(month)/\(day)"
+    }
+}
+
+
+struct EvaluatedTransaction {
+    var postings: [EvaluatedPosting]
+    var date: EvaluatedDate
+}
+
+extension EvaluatedTransaction {
+    var balance: [Commodity: LedgerDouble] {
+        var result: [Commodity: LedgerDouble] = [:]
+        for posting in postings {
+            result[posting.amount.commodity, or: 0] += posting.amount.number
+        }
+        return result
+    }
+
+    func verify() throws {
+        for (commodity, value) in balance {
+            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)" }
+        }
+    }
+    
+    mutating func append(posting: Posting, context: ExpressionContext) throws {
+        try postings.append(posting.evaluate(context: lookup ?? context))
+    }
+    
+    mutating func apply(automatedTransaction: AutomatedTransaction, context: ExpressionContext) throws {
+        let transactionLookup = lookup ?? context
+        for evaluatedPosting in postings {
+            guard try evaluatedPosting.match(expression: automatedTransaction.expression, context: transactionLookup) else { continue }
+            for automatedPosting in automatedTransaction.postings {
+                let value = try automatedPosting.value.evaluate(context: transactionLookup)
+                guard case .amount(var amount) = value else { throw "Posting value evaluates to a non-amount" }
+                if !amount.hasCommodity {
+                    amount.commodity = evaluatedPosting.amount.commodity
+                    amount.number *= evaluatedPosting.amount.number
+                }
+                postings.append(EvaluatedPosting(account: automatedPosting.account, amount: amount))
+            }
+        }
+    }
+}
+
+
+
+
+
+
+extension Posting {
+    func evaluate(context: ExpressionContext) throws -> EvaluatedPosting {
+        let value = try self.value!.evaluate(context: context)
+        guard case .amount(let amount) = value else { throw "Posting value evaluates to a non-amount" }
+        return EvaluatedPosting(account: account, amount: amount)
+    }
+}
+
+extension Transaction {
+    // TODO: refactor this? we are using two variables from State
+    func evaluate(automatedTransactions: [AutomatedTransaction], year: Int?, context: ExpressionContext) throws -> EvaluatedTransaction {
+        var postingsWithValue = postings
+        let postingsWithoutValue = postingsWithValue.remove { $0.value == nil }
+        var evaluatedTransaction = try EvaluatedTransaction(postings: [], date: EvaluatedDate(date: date, year: year))
+        
+        for posting in postingsWithValue {
+            try evaluatedTransaction.append(posting: posting, context: context)
+        }
+        
+        guard postingsWithoutValue.count <= 1 else { throw "More than one posting without value" }
+        if let postingWithoutValue = postingsWithoutValue.first {
+            for (commodity, value) in evaluatedTransaction.balance {
+                let amount = Amount(number: -value, commodity: commodity)
+                evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount))
+            }
+        }
+        
+        for automatedTransaction in automatedTransactions {
+            try evaluatedTransaction.apply(automatedTransaction: automatedTransaction, context: context)
+        }
+        
+        try evaluatedTransaction.verify()
+        return evaluatedTransaction
+    }
+}
 
 extension Commodity {
     func unify(_ other: Commodity) throws -> Commodity {
@@ -38,7 +299,6 @@ extension Commodity {
     }
 }
 
-
 extension Amount {
     func op(_ f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Amount) throws -> Amount {
         let commodity = try self.commodity.unify(other.commodity)
@@ -46,112 +306,14 @@ extension Amount {
     }
 }
 
-extension Dictionary {
-    subscript(key: Key, or defaultValue: Value) -> Value {
-        get {
-            return self[key] ?? defaultValue
-        }
-        set {
-            self[key] = newValue
-        }
-    }
-}
-
-extension Array {
-    mutating func remove(where test: (Element) -> Bool) -> [Element] {
-        var result: [Element] = []
-        var newSelf: [Element] = []
-        for x in self {
-            if test(x) {
-                result.append(x)
-            } else {
-                newSelf.append(x)
-            }
-        }
-        self = newSelf
-        return result
-    }
-}
-
-extension Transaction {
-    func expressionContext(name: String) -> Value? {
-        
-        switch name {
-        case "year": return self.date.year.map { .amount(Amount(number: LedgerDouble($0))) }
-        case "month": return .amount(Amount(number: LedgerDouble(date.month)))
-        case "day": return .amount(Amount(number: LedgerDouble(date.day)))
-        default:
-            return nil
-        }
-    }
-}
-
-extension EvaluatedPosting {
-    func expressionContext(name: String) -> Value? {
-        switch name {
-        case "account": return .string(self.account)
-        default:
-            return nil
-        }
-    }
-    func match(expression: Expression) throws -> Bool {
-        let value = try expression.evaluate(lookup: expressionContext)
-        guard case .bool(let result) = value else {
-            throw "Expected boolean expression"
-        }
-        return result
-    }
-}
-
-enum Value: Equatable {
-    case amount(Amount)
-    case string(String)
-    case regex(String)
-    case bool(Bool)
-}
-
-func ==(lhs: Value, rhs: Value) -> Bool {
-    switch (lhs,rhs) {
-    case let (.amount(x), .amount(y)): return x == y
-    case let (.string(x), .string(y)): return x == y
-    case let (.regex(x), .regex(y)): return x == y
-    case let (.bool(x), .bool(y)): return x == y
-    default: return false
-    }
-}
-
-extension Value {
-    func op(double f: (LedgerDouble, LedgerDouble) -> LedgerDouble, _ other: Value) throws -> Amount {
-        guard case .amount(let selfAmount) = self, case .amount(let otherAmount) = other else {
-            throw "Arithmetic operator on non-amount" // todo better failure message
-        }
-        return try selfAmount.op(f, otherAmount)
-    }
-    
-    func op(bool f: (Bool, Bool) -> Bool, _ other: Value) throws -> Bool {
-        guard case .bool(let selfValue) = self, case .bool(let otherValue) = other else {
-            throw "Boolean operator on non-bool" // todo better failure message
-        }
-        return f(selfValue, otherValue)
-    }
-    
-    func matches(_ rhs: Value) throws -> Bool {
-        guard case let .string(string) = self, case let .regex(regex) = rhs else {
-            throw "Regular expression match on non string/regex"
-        }
-        let range = NSRange(location: 0, length: (string as NSString).length)
-        return try RegularExpression(pattern: regex, options: []).firstMatch(in: string, options: [], range: range) != nil
-    }
-}
-
 extension Expression {
-    func evaluate(lookup: (String) -> Value? = { _ in return nil }) throws -> Value {
+    func evaluate(context: ExpressionContext = { _ in return nil }) throws -> Value {
         switch self {
         case .amount(let amount):
             return .amount(amount)
         case .infix(let op, let lhs, let rhs):
-            let left = try lhs.evaluate(lookup: lookup)
-            let right = try rhs.evaluate(lookup: lookup)
+            let left = try lhs.evaluate(context: context)
+            let right = try rhs.evaluate(context: context)
             switch op {
             case "*":
                 return try .amount(left.op(double: *, right))
@@ -172,7 +334,7 @@ extension Expression {
             }
             
         case .ident(let name):
-            guard let value = lookup(name) else { throw "Variable \(name) not defined"}
+            guard let value = context(name) else { throw "Variable \(name) not defined"}
             return value
         case .string(let string):
             return .string(string)
@@ -181,137 +343,7 @@ extension Expression {
         case .bool(let bool):
             return .bool(bool)
         }
-        
     }
 }
 
 
-struct EvaluatedTransaction {
-    var postings: [EvaluatedPosting]
-}
-
-extension EvaluatedTransaction {
-    var balance: [Commodity: LedgerDouble] {
-        var result: [Commodity: LedgerDouble] = [:]
-        for posting in postings {
-            result[posting.amount.commodity, or: 0] += posting.amount.number
-        }
-        return result
-    }
-
-    func verify() throws {
-        for (commodity, value) in balance {
-            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)" }
-        }
-    }
-    
-    mutating func apply(automatedTransaction: AutomatedTransaction, lookup: (String) -> Value?) throws {
-        for evaluatedPosting in postings {
-            guard try evaluatedPosting.match(expression: automatedTransaction.expression) else { continue }
-            for automatedPosting in automatedTransaction.postings {
-                let value = try automatedPosting.value.evaluate(lookup: lookup)
-                guard case .amount(let amount) = value else { throw "Posting value evaluates to a non-amount" }
-                postings.append(EvaluatedPosting(account: automatedPosting.account, amount: amount))
-            }
-        }
-    }
-}
-
-extension Posting {
-    func evaluate(lookup: (String) -> Value?) throws -> EvaluatedPosting {
-        let value = try self.value!.evaluate(lookup: lookup)
-        guard case .amount(let amount) = value else { throw "Posting value evaluates to a non-amount" }
-        return EvaluatedPosting(account: account, amount: amount)
-    }
-}
-
-extension Transaction {
-    func evaluate(automatedTransactions: [AutomatedTransaction], lookup: (String) -> Value?) throws -> EvaluatedTransaction {
-        var postingsWithValue = postings
-        let postingsWithoutValue = postingsWithValue.remove { $0.value == nil }
-        var evaluatedTransaction = EvaluatedTransaction(postings: [])
-        
-        for posting in postingsWithValue {
-            try evaluatedTransaction.postings.append(posting.evaluate(lookup: lookup))
-        }
-        
-        guard postingsWithoutValue.count <= 1 else { throw "More than one posting without value" }
-        if let postingWithoutValue = postingsWithoutValue.first {
-            for (commodity, value) in evaluatedTransaction.balance {
-                let amount = Amount(number: -value, commodity: commodity)
-                evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount))
-            }
-        }
-        
-        for automatedTransaction in automatedTransactions {
-            try evaluatedTransaction.apply(automatedTransaction: automatedTransaction, lookup: lookup)
-        }
-        
-        try evaluatedTransaction.verify()
-        return evaluatedTransaction
-    }
-}
-
-extension State {
-    mutating func apply(_ statement: Statement) throws {
-        switch statement {
-        case .year(let year):
-            self.year = year
-        case .definition(let name, let expression):
-            definitions[name] = try expression.evaluate(lookup: get)
-        case .account(let name):
-            accounts.insert(name)
-        case .commodity(let name):
-            commodities.insert(name)
-        case .tag(let name):
-            tags.insert(name)
-        case .comment:
-            break
-        case .transaction(let transaction):
-            let evaluatedTransaction = try transaction.evaluate(automatedTransactions: automatedTransactions, lookup: get)
-            apply(transaction: evaluatedTransaction)
-        case .automated(let autoTransaction):
-            automatedTransactions.append(autoTransaction)
-        }
-    }
-    
-    mutating func apply(transaction: EvaluatedTransaction) {
-        for posting in transaction.postings {
-            balance[posting.account, or: [:]][posting.amount.commodity, or: 0] += posting.amount.number
-        }
-    }
-    
-    func get(definition name: String) -> Value? {
-        return definitions[name]
-    }
-    
-    func valid(account: String) -> Bool {
-        return accounts.contains(account)
-    }
-    
-    func valid(commodity: String) -> Bool {
-        return commodities.contains(commodity)
-    }
-    
-    func valid(tag: String) -> Bool {
-        return tags.contains(tag)
-    }
-    
-    func balance(account: String) -> [Commodity:LedgerDouble] {
-        return self.balance[account] ?? [:]
-    }
-    
-    func expressionContext(name: String) -> Value? {
-        
-        switch name {
-        case "year": return self.year.map { .amount(Amount(number: LedgerDouble($0))) }
-        default:
-            return get(definition: name)
-        }
-    }
-}
-
-struct EvaluatedPosting {
-    var account: String
-    var amount: Amount
-}
