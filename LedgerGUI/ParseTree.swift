@@ -49,6 +49,12 @@ func ==(x: Commodity, y: Commodity) -> Bool {
     return x.value == y.value
 }
 
+extension Commodity: CustomStringConvertible {
+    var description: String {
+        return value ?? ""
+    }
+}
+
 
 extension Transaction {
     init(dateStateAndTitle: (Date, TransactionState?, String), comment: Note?, items: [PostingOrNote]) {
@@ -91,6 +97,29 @@ func ==(lhs: Amount, rhs: Amount) -> Bool {
     return lhs.commodity == rhs.commodity && lhs.number == rhs.number
 }
 
+extension LedgerDouble {
+    var isNegative: Bool {
+        return self < 0
+    }
+}
+
+extension Amount {
+    var isNegative: Bool {
+        return number.isNegative
+    }
+    
+    func matchingSign(ofAmount otherAmount: Amount) -> Amount {
+        guard isNegative != otherAmount.isNegative else { return self }
+        return Amount(number: number * -1, commodity: commodity)
+    }
+}
+
+extension Amount: CustomStringConvertible {
+    var description: String {
+        return "\(number)\(commodity)"
+    }
+}
+
 
 struct Note: Equatable {
     let comment: String
@@ -116,6 +145,13 @@ struct Cost: Equatable {
 func ==(lhs: Cost, rhs: Cost) -> Bool {
     return lhs.type == rhs.type && lhs.amount == rhs.amount
 }
+
+extension Cost: CustomStringConvertible {
+    var description: String {
+        return "\(type.rawValue) \(amount)"
+    }
+}
+
 
 
 struct Posting: Equatable {

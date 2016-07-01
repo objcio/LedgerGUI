@@ -12,6 +12,15 @@ import XCTest
 
 
 class EvaluatorTests: XCTestCase {
+    func forceUnwrap(_ f: @autoclosure () throws -> (), file: String = #file, line: UInt = #line) {
+        do {
+            try f()
+        } catch {
+            print(error)
+            XCTFail()
+        }
+    }
+        
     func testYear() {
         let directive = Statement.year(2005)
         var state = State()
@@ -131,7 +140,7 @@ class EvaluatorTests: XCTestCase {
         let posting3 = Posting(account: "Giro", amount: Amount(number: 100, commodity: "USD"), cost: nil, balance: nil, note: nil)
         let posting4 = Posting(account: "Cash", amount: Amount(number: -100, commodity: "EUR"), cost: nil, balance: nil, note: nil)
         let transaction2 = Statement.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting3, posting4]))
-        XCTAssertNil(try? state.apply(transaction2))
+        XCTAssertNotNil(try? state.apply(transaction2))
         
         let transaction3 = Statement.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting1, posting1, posting2]))
         XCTAssertNotNil(try? state.apply(transaction3))
@@ -246,7 +255,7 @@ class EvaluatorTests: XCTestCase {
         try! state.apply(.transaction(transaction))
         XCTAssert(state.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
         XCTAssert(state.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
-
+        
         let transaction2 = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
             Posting(account: "Assets:Giro", amount: Amount(number: 10, commodity: Commodity("EUR")), cost: Cost(type: .total, amount: Amount(number: 12, commodity: Commodity("$")))),
             Posting(account: "Assets:Paypal"),
@@ -255,6 +264,43 @@ class EvaluatorTests: XCTestCase {
         try! state2.apply(.transaction(transaction2))
         XCTAssert(state2.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
         XCTAssert(state2.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
+        
+        let transaction3 = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
+            Posting(account: "Assets:Giro", amount: Amount(number: -10, commodity: Commodity("EUR")), cost: Cost(type: .total, amount: Amount(number: 12, commodity: Commodity("$")))),
+            Posting(account: "Assets:Paypal", amount: Amount(number: 12, commodity: Commodity("$"))),
+            ])
+        var state3 = State()
+        try! state3.apply(.transaction(transaction3))
+        XCTAssert(state3.balance(account: "Assets:Giro") == [Commodity("EUR"): -10])
+        XCTAssert(state3.balance(account: "Assets:Paypal") == [Commodity("$"): 12])
+    }
+    
+    func testImplicitConversion() {
+        let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "Foo", notes: [], postings: [
+            Posting(account: "Assets:Giro", amount: Amount(number: 10, commodity: Commodity("EUR"))),
+            Posting(account: "Assets:Paypal", amount: Amount(number: -12, commodity: Commodity("$"))),
+            ])
+        var state = State()
+        try! state.apply(.transaction(transaction))
+        XCTAssert(state.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
+        XCTAssert(state.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
+    }
+    
+    func testSample() {
+        typealias MyParser = FastParser
+        let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
+        let contents = try! String(contentsOfFile: path)
+        let statements = parse(string: contents)
+        var state = State()
+        for statement in statements {
+            forceUnwrap(try state.apply(statement))
+        }
+        let result = Array(state.balance).sorted { p1, p2 in
+            return p1.key < p2.key
+        }
+        for x in result {
+            print (x)
+        }
     }
     
     // TODO: test cost expressions

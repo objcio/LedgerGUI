@@ -80,7 +80,10 @@ class ParserTests: XCTestCase {
             ("Test\t\t123", Posting(account: "Test", amount: Amount(number: 123), cost: nil, balance: nil, note: nil))
 
             ]
-        testParser(posting, success: example, failure: [])
+        let failure = [
+            "Assets:Brokerage  10 USD @ -0.83 EUR",
+        ]
+        testParser(posting, success: example, failure: failure)
     }
     
     func testAccount() {

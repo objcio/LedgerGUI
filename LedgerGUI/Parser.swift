@@ -19,11 +19,13 @@ func parse(string: String) -> [Statement] {
 let naturalString: GenericParser<ImmutableCharacters, (), String> = FastParser.digit.many1.map { digits in String(digits) }
 let naturalWithCommaString = (FastParser.digit <|> FastParser.character(",")).many1.map( { digitsAndCommas in String(digitsAndCommas.filter { $0 != "," }) })
 let natural: GenericParser<ImmutableCharacters, (), Int> = naturalString.map { Int($0)! }
-let double: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift3( { sign, integerPart, fractionalPart in
-    let sign = sign.map { String($0) } ?? ""
-    guard let fraction = fractionalPart else { return Double(sign + integerPart)! }
-    return Double("\(sign)\(integerPart).\(fraction)")!
-    }, FastParser.character("-").optional, naturalWithCommaString, (FastParser.character(".") *> naturalString).optional)
+let unsignedDouble: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift2( { integerPart, fractionalPart in
+    guard let fraction = fractionalPart else { return Double(integerPart)! }
+    return Double("\(integerPart).\(fraction)")!
+    }, naturalWithCommaString, (FastParser.character(".") *> naturalString).optional)
+let double: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift2( { sign, double in
+    return sign == "-" ? -double : double
+    }, FastParser.character("-").optional, unsignedDouble)
 
 let noNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.newLine.noOccurence *> FastParser.anyCharacter
 let spaceWithoutNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.character(" ") <|> FastParser.tab
@@ -94,12 +96,15 @@ let account = lift2({ String( $1.prepending($0) ) }, noSpace, (noSpace <|> singl
 let amount: GenericParser<ImmutableCharacters, (), Amount> =
     lift2({ Amount(number: $1, commodity: Commodity($0)) }, lexeme(commodity), double) <|>
     lift2(Amount.init, lexeme(double), Commodity.init <^> commodity.optional)
+let unsignedAmount: GenericParser<ImmutableCharacters, (), Amount> =
+    lift2({ Amount(number: $1, commodity: Commodity($0)) }, lexeme(commodity), unsignedDouble) <|>
+        lift2(Amount.init, lexeme(unsignedDouble), Commodity.init <^> commodity.optional)
 
 let commodity: GenericParser<ImmutableCharacters, (), String> = string("USD") <|> string("EUR") <|> string("$")
 
 let balanceAssertion = lexeme(FastParser.character("=")) *> amount
 let costStart = lift2({ Cost.CostType(rawValue: $0 + ($1 ?? ""))! }, string("@"), string("@").optional)
-let cost: GenericParser<ImmutableCharacters,(),Cost> = lift2(Cost.init, lexeme(costStart), amount)
+let cost: GenericParser<ImmutableCharacters,(),Cost> = lift2(Cost.init, lexeme(costStart), unsignedAmount)
 
 let amountOrExpression = (Expression.amount <^> amount <|> (openingParen *> expression <* closingParen))
 

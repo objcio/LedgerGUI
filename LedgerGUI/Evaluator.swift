@@ -24,25 +24,30 @@ struct State {
 
 extension State {
     mutating func apply(_ statement: Statement) throws {
-        switch statement {
-        case .year(let year):
-            self.year = year
-        case .definition(let name, let expression):
-            definitions[name] = try expression.evaluate(context: lookup)
-        case .account(let name):
-            accounts.insert(name)
-        case .commodity(let name):
-            commodities.insert(name)
-        case .tag(let name):
-            tags.insert(name)
-        case .comment:
-            break
-        case .transaction(let transaction):
-            let evaluatedTransaction = try transaction.evaluate(automatedTransactions: automatedTransactions, year: year, context: lookup)
-            apply(transaction: evaluatedTransaction)
-        case .automated(let autoTransaction):
-            automatedTransactions.append(autoTransaction)
+        do {
+            switch statement {
+            case .year(let year):
+                self.year = year
+            case .definition(let name, let expression):
+                definitions[name] = try expression.evaluate(context: lookup)
+            case .account(let name):
+                accounts.insert(name)
+            case .commodity(let name):
+                commodities.insert(name)
+            case .tag(let name):
+                tags.insert(name)
+            case .comment:
+                break
+            case .transaction(let transaction):
+                let evaluatedTransaction = try transaction.evaluate(automatedTransactions: automatedTransactions, year: year, context: lookup)
+                apply(transaction: evaluatedTransaction)
+            case .automated(let autoTransaction):
+                automatedTransactions.append(autoTransaction)
+            }
+        } catch {
+            throw "Tried to evaluate statement: \(statement), got an error: \(error)"
         }
+
     }
     
     mutating func apply(transaction: EvaluatedTransaction) {
@@ -115,6 +120,13 @@ extension EvaluatedPosting {
             throw "Expected boolean expression"
         }
         return result
+    }
+}
+
+extension EvaluatedPosting: CustomStringConvertible {
+    var description: String {
+        let displayCost = cost == nil ? "" : "@@ \(cost!)"
+        return "  \(account)  \(amount)\(displayCost)"
     }
 }
 
@@ -220,8 +232,19 @@ extension EvaluatedTransaction {
     }
 
     func verify() throws {
+        if balance.count == 2 {
+            // When there are two currencies, there is a special case: if they don't balance out to zero, and if they are of different signs, it's an implicit currency conversion
+            let keys = Array(balance.keys)
+            let firstAmount = balance[keys[0]]!
+            let secondAmount = balance[keys[1]]!
+            let implicitCurrencyConversion = firstAmount.isNegative != secondAmount.isNegative
+            guard !implicitCurrencyConversion else { return }
+        }
+        
         for (commodity, value) in balance {
-            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)" }
+            // TODO: until we have a proper LedgerDouble
+            guard abs(value) < 0.00000001 else { throw "Postings of commodity \(commodity) not balanced: \(value)\n\(self)" }
+//            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)\n\(self)" }
         }
     }
     
@@ -246,6 +269,12 @@ extension EvaluatedTransaction {
     }
 }
 
+extension EvaluatedTransaction: CustomStringConvertible {
+    var description: String {
+        let displayPostings = postings.map { $0.description }.joined(separator: "\n")
+        return "\(date)\n\(displayPostings)"
+    }
+}
 
 
 
@@ -259,7 +288,7 @@ extension Posting {
         if let cost = cost {
             switch cost.type {
             case .total:
-                costAmount = cost.amount
+                costAmount = cost.amount.matchingSign(ofAmount: amount)
             case .perUnit:
                 fatalError() // TODO
             }
