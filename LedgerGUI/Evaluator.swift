@@ -100,7 +100,10 @@ struct EvaluatedPosting {
 extension EvaluatedPosting {
     func expressionContext(name: String) -> Value? {
         switch name {
-        case "account": return .string(self.account)
+        case "account":
+            return .string(self.account)
+        case "commodity":
+            return .string(amount.commodity.value ?? "")
         default:
             return nil
         }
@@ -340,6 +343,8 @@ extension Expression {
                 return try .bool(left.op(bool: { $0 && $1 }, right))
             case "||":
                 return try .bool(left.op(bool: { $0 || $1 }, right))
+            case "==":
+                return .bool(left == right)
             default:
                 fatalError("Unknown operator: \(op)")
             }
