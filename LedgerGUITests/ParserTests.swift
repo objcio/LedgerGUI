@@ -20,7 +20,7 @@ class ParserTests: XCTestCase {
     
     func testParser<A>(_ parser: GenericParser<ImmutableCharacters,(), A>, compare: (A, A) -> Bool, success: [(String, A)], failure: [String]) {
         for (d, expected) in success {
-            let result = try! parser.run(sourceName: "", input: ImmutableCharacters(string: d))
+            let result = try! parser.run(sourceName: "", input: ImmutableCharacters(string: d + "\n"))
             XCTAssertTrue(compare(result,expected), "Expected \(result) to be \(expected)")
         }
         for d in failure {
@@ -31,7 +31,7 @@ class ParserTests: XCTestCase {
     func testParser<A: Equatable>(_ parser: GenericParser<ImmutableCharacters,(), A>, success: [(String, A)], failure: [String], file: String = #file, line: UInt = #line) {
         for (d, expected) in success {
             do {
-                let result = try parser.run(sourceName: "", input: ImmutableCharacters(string: d))
+                let result = try parser.run(sourceName: "", input: ImmutableCharacters(string: d + "\n"))
                 if result != expected {
                     self.recordFailure(withDescription: "Expected \(expected), but got \(result)", inFile: file, atLine: line, expected: true)
                 }
