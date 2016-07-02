@@ -11,8 +11,13 @@ import Foundation
 
 func parse(string: String) -> [Statement] {
     let parser = FastParser.newLine.many *> statements <* FastParser.space.many <* FastParser.eof
-    let result = try! parser.run(sourceName: "", input: ImmutableCharacters(string: string))
-    return result
+    do {
+        let result: [Statement] = try parser.run(sourceName: "", input: ImmutableCharacters(string: string))
+        return result
+    } catch {
+        print(error)
+        fatalError()
+    }
 }
 
 
@@ -27,7 +32,7 @@ let double: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift2( { sign
     return sign == "-" ? -double : double
     }, FastParser.character("-").optional, unsignedDouble)
 
-let noNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.newLine.noOccurence *> FastParser.anyCharacter
+let noNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.anyCharacter.onlyIf(peek: { $0 != "\n" })
 let spaceWithoutNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.character(" ") <|> FastParser.tab
 let noSpace: GenericParser<ImmutableCharacters, (), Character> = FastParser.space.noOccurence *> FastParser.anyCharacter
 let singleSpace: GenericParser<ImmutableCharacters, (), Character> = (FastParser.character(" ") <* FastParser.space.noOccurence).attempt
