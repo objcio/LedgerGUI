@@ -105,7 +105,7 @@ let unsignedAmount: GenericParser<ImmutableCharacters, (), Amount> =
     lift2({ Amount($1, commodity: Commodity($0)) }, lexeme(commodity), unsignedDouble) <|>
         lift2(Amount.init, lexeme(unsignedDouble), Commodity.init <^> commodity.optional)
 
-let commodity: GenericParser<ImmutableCharacters, (), String> = string("USD") <|> string("EUR") <|> string("$")
+let commodity: GenericParser<ImmutableCharacters, (), String> = (string("USD") <|> string("EUR") <|> string("$")) <?> "commodity"
 
 let balanceAssertion = lexeme(FastParser.character("=")) *> amount
 let costStart = lift2({ Cost.CostType(rawValue: $0 + ($1 ?? ""))! }, string("@"), string("@").optional)
@@ -127,8 +127,8 @@ let postingOrNote = PostingOrNote.note <^> lexeme(note) <|> PostingOrNote.postin
 let transaction: GenericParser<ImmutableCharacters, (), Transaction> = lift3(
     Transaction.init,
     transactionTitle,
-    lexeme(trailingNote.optional),
-    ((FastParser.newLine *> spaceWithoutNewline.many1).attempt *> postingOrNote).many1
+    lexeme(trailingNote.optional) <* FastParser.newLine,
+    (spaceWithoutNewline.many1 *> postingOrNote <* FastParser.newLine).many1
 )
 
 
@@ -175,6 +175,9 @@ let expression = opTable.makeExpressionParser { expression in
     expression.between(openingParen, closingParen) <|> lexeme(primitive) <?> "primitive expression"
 } <?> "expression"
 
+func lexline<A>(_ p: GenericParser<ImmutableCharacters, (), A>) -> GenericParser<ImmutableCharacters, (), A> {
+    return p <* FastParser.space.many
+}
 
 
 let statement: GenericParser<ImmutableCharacters,(),Statement> =
@@ -187,5 +190,5 @@ let statement: GenericParser<ImmutableCharacters,(),Statement> =
     tagDirective <|>
     (Statement.automated <^> automatedTransaction)
 
-let statements = (statement <* newlineAndSpacedNewlines).many
+let statements = lexline(statement).many
 
