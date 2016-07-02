@@ -671,7 +671,7 @@ public extension Parsec where StreamType.Element: Equatable {
     ///   - nextPosition: A function returning the position after the tokens.
     ///   - tokens: The collection of tokens to parse.
     /// - returns: A parser that parses a collection of tokens.
-    public static func tokens(tokensDescription: (StreamType) -> String, nextPosition: (SourcePosition, StreamType) -> SourcePosition, tokens: StreamType) -> GenericParser<StreamType, UserState, StreamType> {
+    public static func tokens<OtherStream: Stream where OtherStream.Element == StreamType.Element>(tokensDescription: (OtherStream) -> String, nextPosition: (SourcePosition, OtherStream) -> SourcePosition, tokens: OtherStream) -> GenericParser<StreamType, UserState, OtherStream> {
         
         return GenericParser(parse: { state in
             
@@ -690,7 +690,7 @@ public extension Parsec where StreamType.Element: Equatable {
             var input = state.input
             
             var hasConsumed = false
-            var consumedConstructor = Consumed<StreamType, UserState, StreamType>.none
+            var consumedConstructor = Consumed<StreamType, UserState, OtherStream>.none
             
             repeat {
                 

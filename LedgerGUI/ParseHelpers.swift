@@ -29,6 +29,15 @@ struct ImmutableCharacters: Stream {
         start += 1
         return characters[oldStart]
     }
+    
+    var first: Character? {
+        guard start < characters.count else { return nil }
+        return characters[start]
+    }
+    
+    var isEmpty: Bool {
+        return start < characters.count
+    }
 }
 
 typealias FastParser = GenericParser<ImmutableCharacters, (), Character>
@@ -36,7 +45,7 @@ typealias FastParser = GenericParser<ImmutableCharacters, (), Character>
 
 
 func string(_ string: String) -> GenericParser<ImmutableCharacters, (), String> {
-    return FastParser.string(ImmutableCharacters(string: string)) *> GenericParser(result: string)
+    return FastParser.string(Array(string.characters)) *> GenericParser(result: string)
 }
 
 func surrounded(by character: Character) -> GenericParser<ImmutableCharacters,(),String> {

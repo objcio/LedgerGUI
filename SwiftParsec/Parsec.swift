@@ -217,7 +217,14 @@ public protocol Stream: ArrayLiteralConvertible {
     ///
     /// - returns: The fhe first element of `self` or `nil`.
     mutating func popFirst() -> Element?
-    
+    var first: Element? { get }
+    var isEmpty: Bool { get }
+}
+
+extension Stream {
+    public var isEmpty: Bool {
+        return first == nil
+    }
 }
 
 extension String: Stream {
@@ -229,6 +236,10 @@ extension String: Stream {
         
         self.init(elements)
         
+    }
+    
+    public var first: Character? {
+        return characters.first
     }
     
 }

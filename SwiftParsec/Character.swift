@@ -208,7 +208,6 @@ public extension Parsec where StreamType.Element == Character, Result == Charact
     
     /// A Parser that succeeds for any character. It returns the parsed character.
     public static var anyCharacter: GenericParser<StreamType, UserState, Result> {
-        
         return satisfy { _ in true }
         
     }
@@ -252,8 +251,8 @@ public extension Parsec where StreamType.Element == Character {
     ///
     /// - parameter str: The string to parse.
     /// - returns: A parser that parses a `String`.
-    public static func string(_ str: StreamType) -> GenericParser<StreamType, UserState, StreamType> {
-        
+    public static func string<StringStream: Stream where StringStream.Element == Character>(_ str: StringStream) -> GenericParser<StreamType, UserState, StringStream> {
+                
         return tokens(
             tokensDescription: { String(reflecting: $0) },
             nextPosition: { position, charStreamType in
@@ -261,12 +260,8 @@ public extension Parsec where StreamType.Element == Character {
                 var pos = position
                 var cs = charStreamType
                 
-                var char: Character? = cs.popFirst()
-                while char != nil {
-                    
-                    pos.updatePosition(char!)
-                    char = cs.popFirst()
-                    
+                while let c = cs.popFirst() {
+                    pos.updatePosition(c)
                 }
                 
                 return pos
