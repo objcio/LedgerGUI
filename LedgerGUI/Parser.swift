@@ -34,7 +34,7 @@ let double: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift2( { sign
 
 let noNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.anyCharacter.onlyIf(peek: { $0 != "\n" })
 let spaceWithoutNewline: GenericParser<ImmutableCharacters,(),Character> = FastParser.character(" ") <|> FastParser.tab
-let noSpace: GenericParser<ImmutableCharacters, (), Character> = FastParser.space.noOccurence *> FastParser.anyCharacter
+let noSpace: GenericParser<ImmutableCharacters, (), Character> = FastParser.anyCharacter.onlyIf(peek: { !$0.isSpace })
 let singleSpace: GenericParser<ImmutableCharacters, (), Character> = (FastParser.character(" ") <* FastParser.space.noOccurence).attempt
 let newlineAndSpacedNewlines = FastParser.newLine *> FastParser.space.many
 
