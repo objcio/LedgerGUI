@@ -8,6 +8,19 @@
 // Commonly used generic combinators
 //
 
+public extension GenericParser where StreamType.Element: Equatable {
+    
+    public func onlyIf(peek check: (StreamType.Element) -> Bool) -> GenericParser<StreamType, UserState, Result> {
+        return GenericParser<StreamType, UserState, Result>(parse:  { state in
+            if let peek = state.input.first where check(peek) {
+                return self.parse(state: state)
+            }
+            return .none(.error(.unknownParseError(state.position))) // TODO: better error: expected "element"
+        })
+    }
+}
+
+
 public extension GenericParser {
     
     /// Return a parser that tries to apply the parsers in the array `parsers` in order, until one of them succeeds. It returns the value of the succeeding parser.
