@@ -20,23 +20,7 @@ public extension Parsec where StreamType.Element == Character, Result == Charact
     /// - parameter predicate: The predicate to apply on the `Character`.
     /// - returns: A parser that succeeds for any character for which the supplied function `predicate` returns `true`.
     public static func satisfy(_ predicate: (Character) -> Bool) -> GenericParser<StreamType, UserState, Result> {
-        
-        return tokenPrimitive(
-            tokenDescription: { String(reflecting: $0) },
-            nextPosition: { position, elem, _ in
-                
-                var pos = position
-                pos.updatePosition(elem)
-                
-                return pos
-                
-            },
-            match: { elem in
-                
-                predicate(elem) ? elem : nil
-                
-            })
-        
+        return anyToken.onlyIf(peek: predicate)
     }
     
     /// Return a parser that succeeds if the current character is in the supplied list of characters. It returns the parsed character.
