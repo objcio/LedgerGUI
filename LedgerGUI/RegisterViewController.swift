@@ -88,9 +88,7 @@ class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
         let transaction = transactions[row]
         cell.title = transaction.title
         
-        cell.setPostings(postings: transaction.postings.map { posting in
-            (posting.account, posting.amount)
-        })
+        cell.setPostings(postings: transaction.postings)
         let calendar = Calendar.current()
         cell.set(date: calendar.date(from: transaction.date.components)!)
         return cell
@@ -134,7 +132,7 @@ class RegisterCell: NSView {
         dateLabel.stringValue = formatter.string(from: date)
     }
     
-    func setPostings(postings: [(account: String, amount: Amount)]) {
+    func setPostings(postings: [EvaluatedPosting]) {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
         for posting in postings {
@@ -143,11 +141,20 @@ class RegisterCell: NSView {
                 fatalError("Couldn't instantiate")
             }
             let postingView = objects.flatMap { $0 as? PostingView }.first!
-            postingView.account.stringValue = posting.account
-            postingView.amount.stringValue = posting.amount.displayValue
+            let font = NSFont.systemFont(ofSize: NSFont.systemFontSize())
+            let accountFont = posting.virtual ? font.italic : font
+            let attributes = [NSFontAttributeName: accountFont]
+            postingView.account.attributedStringValue = AttributedString(string: posting.account, attributes: attributes)
+            postingView.amount.attributedStringValue = AttributedString(string: posting.amount.displayValue, attributes: attributes)
             postingView.amount.textColor = posting.amount.color
             stackView.addArrangedSubview(postingView)
         }
+    }
+}
+
+extension NSFont {
+    var italic: NSFont {
+        return NSFontManager.shared().convert(self, toHaveTrait: .italicFontMask)
     }
 }
 
@@ -279,9 +286,4 @@ class BalanceDelegate: NSObject, NSOutlineViewDataSource, NSOutlineViewDelegate 
         cell.amount.textColor = amount.color
         return cell
     }
-
-//    func outlineView(_ outlineView: NSOutlineView, objectValueFor tableColumn: NSTableColumn?, byItem item: AnyObject?) -> AnyObject? {
-//        let item = item as! BalanceTreeItem
-//        return item.title
-//    }
 }

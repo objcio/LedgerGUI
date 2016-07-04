@@ -154,7 +154,7 @@ class EvaluatorTests: XCTestCase {
     }
 
     func testPostingVariables() {
-        let posting = EvaluatedPosting(account: "Assets:Giro", amount: 100.euro, cost: nil)
+        let posting = EvaluatedPosting(account: "Assets:Giro", amount: 100.euro, cost: nil, virtual: false)
         XCTAssertTrue(posting.expressionContext(name: "account") == .string("Assets:Giro"))
 
     }
@@ -168,19 +168,19 @@ class EvaluatorTests: XCTestCase {
 
     func testTransactionVariables() {
         let date = EvaluatedDate(year: 2016, month: 1, day: 15)
-        let transaction = EvaluatedTransaction(postings: [], date: date)
+        let transaction = EvaluatedTransaction(title: "", postings: [], date: date)
         XCTAssertTrue(transaction.lookup(variable: "date") == .date(date))
     }
 
     func testStateVariables() {
-        let state = State(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:], automatedTransactions: [])
+        let state = State(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:], automatedTransactions: [], evaluatedTransactions: [])
         XCTAssertTrue(state.lookup(variable: "one") == .string("Hello"))
     }
     
     func testAutomatedTransaction() {
         let auto = Statement.automated(AutomatedTransaction(expression: .bool(true), postings: [
-            AutomatedPosting(account: "Foo", value: .amount(50.usd)),
-            AutomatedPosting(account: "Bar", value: .amount((-50).usd)),
+            AutomatedPosting(account: "Foo", value: .amount(50.usd), virtual: false),
+            AutomatedPosting(account: "Bar", value: .amount((-50).usd), virtual: false),
         ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
             Posting(account: "Expenses:Food", amount: 20.usd),
@@ -197,8 +197,8 @@ class EvaluatorTests: XCTestCase {
     
     func testAutomatedTransactionAmountMultipliers() {
         let auto = Statement.automated(AutomatedTransaction(expression: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Food")), postings: [
-            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4))),
-            AutomatedPosting(account: "Bar", value: .amount(Amount(-0.4))),
+            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4)), virtual: false),
+            AutomatedPosting(account: "Bar", value: .amount(Amount(-0.4)), virtual: false),
             ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
             Posting(account: "Expenses:Food", amount: 20.usd),
@@ -215,7 +215,7 @@ class EvaluatorTests: XCTestCase {
     
     func testAutomatedTransactionBalanceErrors() {
         let auto = Statement.automated(AutomatedTransaction(expression: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Food")), postings: [
-            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4))),
+            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4)), virtual: false),
             ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
             Posting(account: "Expenses:Food", amount: 20.usd),
@@ -232,8 +232,8 @@ class EvaluatorTests: XCTestCase {
         let expression = Expression.infix(operator: "&&", lhs: is2016, rhs: isFood)
         
         let auto = Statement.automated(AutomatedTransaction(expression: expression, postings: [
-            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4))),
-            AutomatedPosting(account: "Bar", value: .amount(Amount(-0.4)))
+            AutomatedPosting(account: "Foo", value: .amount(Amount(0.4)), virtual: false),
+            AutomatedPosting(account: "Bar", value: .amount(Amount(-0.4)), virtual: false)
             ]))
         let transaction = Transaction(date: Date(year: 2016, month: 1, day: 15), state: nil, title: "KFC", notes: [], postings: [
             Posting(account: "Expenses:Food", amount: 20.usd),
@@ -304,7 +304,8 @@ class EvaluatorTests: XCTestCase {
             print (x)
         }
     }
-    
+
+    // TODO: test virtual postings
     // TODO: test cost expressions
     // TODO: test that a posting without an amount (auto-balanced amount) matches on something like commodity='EUR'
     // TODO: test and add > >= < <= operators

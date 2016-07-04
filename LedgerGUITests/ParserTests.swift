@@ -76,9 +76,9 @@ class ParserTests: XCTestCase {
             ("Balance  -100 EUR = 0", Posting(account: "Balance", amount: Amount(-100, commodity: "EUR"), balance: Amount(0, commodity: nil), note: nil)),
             ("Assets:Brokerage  10 USD @ 0.83 EUR", Posting(account: "Assets:Brokerage", amount: Amount(10, commodity: "USD"), cost: Cost(type: .perUnit, amount: Amount(0.83, commodity: "EUR")), balance: nil, note: nil)),
             ("Assets:Brokerage  10 USD @@ 8.33 EUR", Posting(account: "Assets:Brokerage", amount: Amount(10, commodity: "USD"), cost: Cost(type: .total, amount: Amount(8.33, commodity: "EUR")), balance: nil, note: nil)),
-            ("Liabilities:VAT  (10.0 USD * 2)", Posting(account: "Liabilities:VAT", value: Expression.infix(operator: "*", lhs: .amount(Amount(10, commodity: "USD")), rhs: .amount(Amount(2, commodity: nil))), cost: nil, balance: nil, notes: [])),
-            ("Test\t\t123", Posting(account: "Test", amount: Amount(123), cost: nil, balance: nil, note: nil))
-
+            ("Liabilities:VAT  (10.0 USD * 2)", Posting(account: "Liabilities:VAT", value: Expression.infix(operator: "*", lhs: .amount(Amount(10, commodity: "USD")), rhs: .amount(Amount(2, commodity: nil))))),
+            ("Test\t\t123", Posting(account: "Test", amount: Amount(123), cost: nil, balance: nil, note: nil)),
+            ("[Funds:Tax]  100 EUR", Posting(account: "Funds:Tax", amount: 100.euro, cost: nil, balance: nil, virtual: true, note: nil)),
             ]
         let failure = [
             "Assets:Brokerage  10 USD @ -0.83 EUR",
@@ -161,19 +161,19 @@ class ParserTests: XCTestCase {
             ("2016/01/31 My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro",
                 Transaction(date: Date(year: 2016, month: 1, day: 31), state: nil, title: "My Transaction", notes: [Note("a note"), Note("another note")],
                     postings: [
-                        Posting(account: "Assets:PayPal", value: .amount(Amount(200, commodity: "$")), cost: nil, balance: nil, notes: [Note("paypal note"), Note("second paypal note")]),
+                        Posting(account: "Assets:PayPal", value: .amount(Amount(200, commodity: "$")), cost: nil, balance: nil, virtual: false, notes: [Note("paypal note"), Note("second paypal note")]),
                         Posting(account: "Giro", value: nil)
                     ])),
             ("2016/01/31 * My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro",
              Transaction(date: Date(year: 2016, month: 1, day: 31), state: .cleared, title: "My Transaction", notes: [Note("a note"), Note("another note")],
                          postings: [
-                            Posting(account: "Assets:PayPal", value: .amount(Amount(200, commodity: "$")), cost: nil, balance: nil, notes: [Note("paypal note"), Note("second paypal note")]),
+                            Posting(account: "Assets:PayPal", value: .amount(Amount(200, commodity: "$")), cost: nil, balance: nil, virtual: false, notes: [Note("paypal note"), Note("second paypal note")]),
                             Posting(account: "Giro", value: nil)
                 ])),
             ("2016/01/31 ! My Transaction\t; a note\n ; another note\n Assets:PayPal  200 $  ;paypal note\n     ;second paypal note\n Giro",
              Transaction(date: Date(year: 2016, month: 1, day: 31), state: .pending, title: "My Transaction",  notes: [Note("a note"), Note("another note")],
                          postings: [
-                            Posting(account: "Assets:PayPal", value: .amount(Amount(200, commodity: "$")), cost: nil, balance: nil, notes: [Note("paypal note"), Note("second paypal note")]),
+                            Posting(account: "Assets:PayPal", value: .amount(Amount(200, commodity: "$")), cost: nil, balance: nil, virtual: false, notes: [Note("paypal note"), Note("second paypal note")]),
                             Posting(account: "Giro", value: nil)
                 ])),
             ]
@@ -204,13 +204,13 @@ class ParserTests: XCTestCase {
         let sample: [(String,AutomatedTransaction)] = [
             ("= expr 'true'\n  [Funds:Core Data]  -0.7\n  [Assets:Giro]  0.7",
             AutomatedTransaction(expression: .bool(true), postings: [
-                AutomatedPosting(account: "[Funds:Core Data]", value: .amount(Amount(-0.7, commodity: nil))),
-                AutomatedPosting(account: "[Assets:Giro]", value: .amount(Amount(0.7, commodity: nil)))
+                AutomatedPosting(account: "Funds:Core Data", value: .amount(Amount(-0.7, commodity: nil)), virtual: true),
+                AutomatedPosting(account: "Assets:Giro", value: .amount(Amount(0.7, commodity: nil)), virtual: true)
             ])),
-            ("= /Expenses:Functional Swift/\n  [Assets:Giro]  1\n  [Funds:Functional Swift]  -1",
+            ("= /Expenses:Functional Swift/\n  [Assets:Giro]  1\n  Funds:Functional Swift  -1",
              AutomatedTransaction(expression: .infix(operator: "=~", lhs: .ident("account"), rhs: .regex("Expenses:Functional Swift")), postings: [
-                AutomatedPosting(account: "[Assets:Giro]", value: .amount(Amount(1, commodity: nil))),
-                AutomatedPosting(account: "[Funds:Functional Swift]", value: .amount(Amount(-1, commodity: nil)))
+                AutomatedPosting(account: "Assets:Giro", value: .amount(Amount(1, commodity: nil)), virtual: true),
+                AutomatedPosting(account: "Funds:Functional Swift", value: .amount(Amount(-1, commodity: nil)), virtual: false)
                 ])
             ),
         ]

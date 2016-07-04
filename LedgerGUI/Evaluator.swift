@@ -102,6 +102,7 @@ struct EvaluatedPosting {
     var account: String
     var amount: Amount
     var cost: Amount?
+    var virtual: Bool
 }
 
 extension EvaluatedPosting {
@@ -272,7 +273,7 @@ extension EvaluatedTransaction {
                     amount.commodity = evaluatedPosting.amount.commodity
                     amount.number *= evaluatedPosting.amount.number
                 }
-                postings.append(EvaluatedPosting(account: automatedPosting.account, amount: amount, cost: nil))
+                postings.append(EvaluatedPosting(account: automatedPosting.account, amount: amount, cost: nil, virtual: automatedPosting.virtual))
             }
         }
     }
@@ -302,7 +303,7 @@ extension Posting {
                 fatalError() // TODO
             }
         }
-        return EvaluatedPosting(account: account, amount: amount, cost: costAmount)
+        return EvaluatedPosting(account: account, amount: amount, cost: costAmount, virtual: virtual)
     }
 }
 
@@ -321,7 +322,7 @@ extension Transaction {
         if let postingWithoutValue = postingsWithoutValue.first {
             for (commodity, value) in evaluatedTransaction.balance {
                 let amount = Amount(-value, commodity: commodity)
-                evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount, cost: nil))
+                evaluatedTransaction.postings.append(EvaluatedPosting(account: postingWithoutValue.account, amount: amount, cost: nil, virtual: postingWithoutValue.virtual))
             }
         }
         

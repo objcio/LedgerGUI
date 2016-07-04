@@ -151,20 +151,25 @@ struct Posting: Equatable {
     var value: Expression?
     var cost: Cost?
     var balance: Amount?
+    var virtual: Bool
     var notes: [Note]
 }
 
 func ==(lhs: Posting, rhs: Posting) -> Bool {
-    return lhs.account == rhs.account && lhs.value == rhs.value && lhs.cost == rhs.cost && lhs.balance == rhs.balance && lhs.notes == rhs.notes
+    return lhs.account == rhs.account && lhs.value == rhs.value && lhs.cost == rhs.cost && lhs.balance == rhs.balance && lhs.notes == rhs.notes && lhs.virtual == rhs.virtual
 }
 
 extension Posting {
-    init(account: String, amount: Amount, cost: Cost? = nil, balance: Amount? = nil, note: Note? = nil) {
-        self = Posting(account: account, value: .amount(amount), cost: cost, balance: balance, notes: note.map { [$0] } ?? [])
+    init(account: String, amount: Amount, cost: Cost? = nil, balance: Amount? = nil, virtual: Bool = false, note: Note? = nil) {
+        self = Posting(account: account, value: .amount(amount), cost: cost, balance: balance, virtual: virtual, notes: note.map { [$0] } ?? [])
     }
     
-    init(account: String, value: Expression? = nil, cost: Cost? = nil, balance: Amount? = nil, note: Note? = nil) {
-        self = Posting(account: account, value: value, cost: cost, balance: balance, notes: note.map { [$0] } ?? [])
+    init(account: String, value: Expression? = nil, cost: Cost? = nil, balance: Amount? = nil, virtual: Bool = false, note: Note? = nil) {
+        self = Posting(account: account, value: value, cost: cost, balance: balance, virtual: virtual, notes: note.map { [$0] } ?? [])
+    }
+
+    init(account: (String, Bool), value: Expression? = nil, cost: Cost? = nil, balance: Amount? = nil, note: Note? = nil) {
+        self = Posting(account: account.0, value: value, cost: cost, balance: balance, virtual: account.1, notes: note.map { [$0] } ?? [])
     }
 }
 
@@ -172,10 +177,19 @@ extension Posting {
 struct AutomatedPosting: Equatable {
     var account: String
     var value: Expression
+    var virtual: Bool
+}
+
+extension AutomatedPosting {
+    init(account: (String, Bool), value: Expression) {
+        self.account = account.0
+        self.value = value
+        self.virtual = account.1
+    }
 }
 
 func ==(lhs: AutomatedPosting, rhs: AutomatedPosting) -> Bool {
-    return lhs.account == rhs.account && lhs.value == rhs.value
+    return lhs.account == rhs.account && lhs.value == rhs.value && lhs.virtual == rhs.virtual
 }
 
 

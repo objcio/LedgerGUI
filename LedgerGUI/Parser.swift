@@ -96,7 +96,10 @@ let transactionTitle: GenericParser<ImmutableCharacters, (), (Date, TransactionS
 
 
 
-let account = lift2({ String( $1.prepending($0) ) }, noSpace, (noSpace <|> singleSpace).many)
+let accountCharacter = noSpace.onlyIf { $0 != "]" }
+let account = lift2({ String( $1.prepending($0) ) }, accountCharacter, (accountCharacter <|> singleSpace).many)
+let virtualAccount = account.between(FastParser.character("["), FastParser.character("]"))
+let accountOrVirtualAccount = ({ ($0, true) } <^> virtualAccount) <|> ({ ($0, false) } <^> account)
 
 let amount: GenericParser<ImmutableCharacters, (), Amount> =
     lift2({ Amount($1, commodity: Commodity($0)) }, lexeme(commodity), double) <|>
@@ -115,7 +118,7 @@ let amountOrExpression = (Expression.amount <^> amount <|> (openingParen *> expr
 
 let posting: GenericParser<ImmutableCharacters, (), Posting> = lift5(
     Posting.init,
-    lexeme(account),
+    lexeme(accountOrVirtualAccount),
     lexeme(amountOrExpression.optional),
     lexeme(cost.optional),
     lexeme(balanceAssertion.optional),
@@ -132,7 +135,7 @@ let transaction: GenericParser<ImmutableCharacters, (), Transaction> = lift3(
 )
 
 
-let automatedPosting: GenericParser<ImmutableCharacters, (), AutomatedPosting> = lift2(AutomatedPosting.init, lexeme(account), lexeme(amountOrExpression))
+let automatedPosting: GenericParser<ImmutableCharacters, (), AutomatedPosting> = lift2(AutomatedPosting.init, lexeme(accountOrVirtualAccount), lexeme(amountOrExpression))
 let automatedPostings = ((FastParser.newLine *> spaceWithoutNewline.many1).attempt *> automatedPosting).many1
 let automatedExpression = (lexeme(string("expr")) *> (lexeme(FastParser.character("'")) *> lexeme(expression) <* FastParser.character("'"))) <|>
     { Expression.infix(operator: "=~", lhs: .ident("account"), rhs: .regex($0)) } <^> regex
