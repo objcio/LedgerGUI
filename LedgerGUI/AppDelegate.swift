@@ -12,18 +12,17 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBOutlet weak var window: NSWindow!
+    var windowController: NSWindowController?
 
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-//        typealias MyParser = FastParser
-//        let path = "/Users/chris/objc.io/LedgerGUI/sample.txt"
-//        let contents = try! String(contentsOfFile: path)
-//        let result = parse(string: contents)
-//        print("Done")
+        windowController = NSWindowController(window: window)
+        let registerViewController = RegisterViewController()
+//        windowController?.contentViewController = registerViewController
+        window.contentViewController = registerViewController
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
     }
 
 

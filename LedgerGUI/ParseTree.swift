@@ -108,7 +108,7 @@ extension Amount {
 
 extension Amount: CustomStringConvertible {
     var description: String {
-        return "\(number)\(commodity)"
+        return "\(number.value)\(commodity)"
     }
 }
 

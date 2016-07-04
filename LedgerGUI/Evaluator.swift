@@ -20,6 +20,7 @@ struct State {
     var tags: Set<String> = []
     var balance: Balance = [:]
     var automatedTransactions: [AutomatedTransaction] = []
+    var evaluatedTransactions: [EvaluatedTransaction] = []
 }
 
 extension State {
@@ -54,6 +55,7 @@ extension State {
         for posting in transaction.postings {
             balance[posting.account, or: [:]][posting.amount.commodity, or: 0] += posting.amount.number
         }
+        evaluatedTransactions.append(transaction)
     }
     
     func valid(account: String) -> Bool {
@@ -196,6 +198,12 @@ struct EvaluatedDate: Equatable {
     var day: Int
 }
 
+extension EvaluatedDate {
+    var components: DateComponents {
+        return DateComponents(year: year, month: month, day: day)
+    }
+}
+
 func ==(lhs: EvaluatedDate, rhs: EvaluatedDate) -> Bool {
     return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day
 }
@@ -217,6 +225,7 @@ extension EvaluatedDate {
 
 
 struct EvaluatedTransaction {
+    var title: String
     var postings: [EvaluatedPosting]
     var date: EvaluatedDate
 }
@@ -302,7 +311,7 @@ extension Transaction {
     func evaluate(automatedTransactions: [AutomatedTransaction], year: Int?, context: ExpressionContext) throws -> EvaluatedTransaction {
         var postingsWithValue = postings
         let postingsWithoutValue = postingsWithValue.remove { $0.value == nil }
-        var evaluatedTransaction = try EvaluatedTransaction(postings: [], date: EvaluatedDate(date: date, year: year))
+        var evaluatedTransaction = try EvaluatedTransaction(title: title, postings: [], date: EvaluatedDate(date: date, year: year))
         
         for posting in postingsWithValue {
             try evaluatedTransaction.append(posting: posting, context: context)

@@ -40,6 +40,9 @@
 		83667D271D21B27E009DCEE7 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83667D121D21B27E009DCEE7 /* UnicodeScalarExtension.swift */; };
 		839E90891D1BCE8400AD9CBF /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839E90881D1BCE8400AD9CBF /* Parser.swift */; };
 		83C2412C1D2A69B000C5CCDC /* LedgerDouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */; };
+		83C2412E1D2A6E1D00C5CCDC /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C2412D1D2A6E1D00C5CCDC /* RegisterViewController.swift */; };
+		83C241301D2A873D00C5CCDC /* RegisterCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83C2412F1D2A873D00C5CCDC /* RegisterCell.xib */; };
+		83C241321D2A8CB400C5CCDC /* Posting.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83C241311D2A8CB400C5CCDC /* Posting.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +93,9 @@
 		83667D121D21B27E009DCEE7 /* UnicodeScalarExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnicodeScalarExtension.swift; sourceTree = "<group>"; };
 		839E90881D1BCE8400AD9CBF /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LedgerDouble.swift; sourceTree = "<group>"; };
+		83C2412D1D2A6E1D00C5CCDC /* RegisterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
+		83C2412F1D2A873D00C5CCDC /* RegisterCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RegisterCell.xib; sourceTree = "<group>"; };
+		83C241311D2A8CB400C5CCDC /* Posting.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Posting.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +149,9 @@
 				8324DB621D21878500436BE9 /* ParseTree.swift */,
 				17D8A3031D256E1A00661EA6 /* Helpers.swift */,
 				83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */,
+				83C2412D1D2A6E1D00C5CCDC /* RegisterViewController.swift */,
+				83C2412F1D2A873D00C5CCDC /* RegisterCell.xib */,
+				83C241311D2A8CB400C5CCDC /* Posting.xib */,
 			);
 			path = LedgerGUI;
 			sourceTree = "<group>";
@@ -279,6 +288,8 @@
 				83667D1C1D21B27E009DCEE7 /* Info.plist in Resources */,
 				17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */,
 				83667D181D21B27E009DCEE7 /* Localizable.strings in Resources */,
+				83C241301D2A873D00C5CCDC /* RegisterCell.xib in Resources */,
+				83C241321D2A8CB400C5CCDC /* Posting.xib in Resources */,
 				17A47E151D1AC04E0010998A /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -298,6 +309,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83C2412E1D2A6E1D00C5CCDC /* RegisterViewController.swift in Sources */,
 				83667D211D21B27E009DCEE7 /* RangeReplaceableCollectionTypeExtension.swift in Sources */,
 				83667D1F1D21B27E009DCEE7 /* Permutation.swift in Sources */,
 				83667D161D21B27E009DCEE7 /* Combinator.swift in Sources */,
