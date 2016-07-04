@@ -19,7 +19,40 @@ extension NSView {
     }
 }
 
+class LedgerWindowController: NSWindowController {
+    var state: State?
+
+    override func windowDidLoad() {
+        loadData()
+
+        let balanceVC = self.contentViewController?.childViewControllers.flatMap( { $0 as? BalanceViewController }).first
+        let registerVC = self.contentViewController?.childViewControllers.flatMap( { $0 as? RegisterViewController}).first
+
+        balanceVC?.state = state
+        registerVC?.state = state
+
+    }
+
+    func loadData() {
+        let contents = try! String(contentsOfFile: "/Users/chris/objc.io/LedgerGUI/sample.txt")
+        var state = State()
+        let statements = parse(string: contents)
+        for statement in statements {
+            try! state.apply(statement)
+        }
+        self.state = state
+    }
+
+}
+
 class RegisterViewController: NSViewController {
+    var state: State? {
+
+        didSet {
+            delegate.transactions = state?.evaluatedTransactions ?? []
+            tableView?.reloadData()
+        }
+    }
     let delegate = RegisterDelegate()
     var tableView: NSTableView?
     
@@ -43,20 +76,8 @@ class RegisterViewController: NSViewController {
         scrollView.hasVerticalScroller = true
         
         self.tableView = tableView
-
-        loadData()
     }
     
-    func loadData() {
-        let contents = try! String(contentsOfFile: "/Users/chris/objc.io/LedgerGUI/sample.txt")
-        var state = State()
-        let statements = parse(string: contents)
-        for statement in statements {
-            try! state.apply(statement)
-        }
-        delegate.transactions = state.evaluatedTransactions
-        tableView?.reloadData()
-    }
 }
 
 class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
@@ -141,4 +162,126 @@ extension Amount {
     var color: NSColor {
         return isNegative ? .red() : .black()
     }
+}
+
+class BalanceViewController: NSViewController {
+    @IBOutlet weak var outlineView: NSOutlineView! {
+        didSet {
+            outlineView.dataSource = delegate
+            outlineView.delegate = delegate
+        }
+    }
+    var state: State? {
+        didSet {
+            let balance = state?.balance ?? [:]
+            delegate.balanceTree = balanceTree(items: balance)
+            outlineView.reloadData()
+            outlineView.expandItem(nil, expandChildren: true)
+        }
+    }
+
+    var delegate = BalanceDelegate()
+}
+
+func balanceTree(items: State.Balance) -> [BalanceTreeItem] {
+    let sortedAccounts = Array(items).sorted { p1, p2 in
+        return p1.key < p2.key
+    }
+
+    let rootItem = BalanceTreeItem(title:"", amount: [:])
+
+    for account in sortedAccounts {
+        let components = account.key.components(separatedBy: ":")
+        rootItem.insert(child: components, amount: account.value)
+    }
+
+    print(rootItem.children)
+
+    return rootItem.children
+
+}
+
+class BalanceTreeItem {
+    var title: String
+    var amount: [Commodity:LedgerDouble]
+    var children: [BalanceTreeItem]
+    init(title: String, amount: [Commodity:LedgerDouble]) {
+        self.title = title
+        self.amount = amount
+        self.children = []
+    }
+
+}
+
+extension BalanceTreeItem {
+    func insert(child name: [String], amount: [Commodity:LedgerDouble]) {
+        guard name.count > 0 else { return }
+
+        var restName = name
+        let namePrefix = restName.remove(at: 0)
+        for (commodity, value) in amount {
+            if value != 0 {
+                self.amount[commodity, or: 0] += value
+            }
+        }
+
+        for child in children {
+            if child.title == namePrefix {
+                child.insert(child: restName, amount: amount)
+                return
+            }
+        }
+
+        let newChild = BalanceTreeItem(title: namePrefix, amount: amount)
+        newChild.insert(child: restName, amount: amount)
+        children.append(newChild)
+    }
+}
+
+class BalanceCell: NSTableCellView {
+    @IBOutlet weak var amount: NSTextField!
+    @IBOutlet weak var titleLabel: NSTextField!
+
+}
+
+class BalanceDelegate: NSObject, NSOutlineViewDataSource, NSOutlineViewDelegate {
+    var balanceTree: [BalanceTreeItem] = []
+
+    func children(item: AnyObject?) -> [BalanceTreeItem] {
+        guard let item = item else { return balanceTree }
+        return (item as! BalanceTreeItem).children
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+        return children(item: item).count
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+        return children(item: item).count > 0
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+        return children(item: item)[index]
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
+        let item = item as! BalanceTreeItem
+
+        let cell = outlineView.make(withIdentifier: "Cell", owner: self)! as! BalanceCell
+        cell.titleLabel.stringValue = item.title
+        let (key, value) = item.amount.first!
+        if item.amount.count > 1 {
+            Swift.print("Cannot display multiple amounts yet...")
+        }
+
+        let amount = Amount(value, commodity: key)
+        cell.amount.stringValue = amount.displayValue
+        cell.amount.textColor = amount.color
+        return cell
+    }
+
+//    func outlineView(_ outlineView: NSOutlineView, objectValueFor tableColumn: NSTableColumn?, byItem item: AnyObject?) -> AnyObject? {
+//        let item = item as! BalanceTreeItem
+//        return item.title
+//    }
 }
