@@ -33,19 +33,19 @@
                     </textFieldCell>
                 </textField>
                 <stackView distribution="fillEqually" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="56T-1l-d7c">
-                    <rect key="frame" x="8" y="8" width="464" height="231"/>
+                    <rect key="frame" x="114" y="20" width="358" height="219"/>
                 </stackView>
             </subviews>
             <constraints>
                 <constraint firstItem="ui5-g6-vyw" firstAttribute="leading" secondItem="xS1-DJ-YRv" secondAttribute="trailing" constant="38" id="2Nt-Xo-mdO"/>
                 <constraint firstItem="56T-1l-d7c" firstAttribute="top" secondItem="xS1-DJ-YRv" secondAttribute="bottom" constant="8" id="FB0-au-F4i"/>
                 <constraint firstItem="xS1-DJ-YRv" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="8" id="JPR-Mg-qR1"/>
-                <constraint firstItem="56T-1l-d7c" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="8" id="OQU-es-CB9"/>
+                <constraint firstItem="ui5-g6-vyw" firstAttribute="leading" secondItem="56T-1l-d7c" secondAttribute="leading" id="O91-uB-B3p"/>
                 <constraint firstItem="xS1-DJ-YRv" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="8" id="hYk-l1-Oqh"/>
                 <constraint firstAttribute="trailing" secondItem="ui5-g6-vyw" secondAttribute="trailing" constant="8" id="n3P-af-JJj"/>
                 <constraint firstItem="ui5-g6-vyw" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="8" id="naX-CO-cni"/>
                 <constraint firstAttribute="trailing" secondItem="56T-1l-d7c" secondAttribute="trailing" constant="8" id="rcL-YK-4Me"/>
-                <constraint firstAttribute="bottom" secondItem="56T-1l-d7c" secondAttribute="bottom" constant="8" id="wVu-Yc-Bt4"/>
+                <constraint firstAttribute="bottom" secondItem="56T-1l-d7c" secondAttribute="bottom" constant="20" id="wVu-Yc-Bt4"/>
             </constraints>
             <connections>
                 <outlet property="dateLabel" destination="xS1-DJ-YRv" id="Aaa-Kd-XnP"/>

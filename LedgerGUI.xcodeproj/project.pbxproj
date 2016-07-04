@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		17A47E101D1AC04D0010998A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E0F1D1AC04D0010998A /* AppDelegate.swift */; };
 		17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E111D1AC04D0010998A /* Assets.xcassets */; };
-		17A47E151D1AC04E0010998A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E131D1AC04E0010998A /* MainMenu.xib */; };
 		17A47E201D1AC04E0010998A /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E1F1D1AC04E0010998A /* ParserTests.swift */; };
 		17D8A3041D256E1A00661EA6 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3031D256E1A00661EA6 /* Helpers.swift */; };
 		17D8A3061D256E5D00661EA6 /* ParseHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */; };
@@ -17,6 +16,7 @@
 		8324DB611D217C8100436BE9 /* sample.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8324DB601D217C8100436BE9 /* sample.txt */; };
 		8324DB631D21878500436BE9 /* ParseTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324DB621D21878500436BE9 /* ParseTree.swift */; };
 		833A8FF21D23C0DF00FFB2DB /* EvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833A8FF11D23C0DF00FFB2DB /* EvaluatorTests.swift */; };
+		835BB50B1D2AA03A00DEE54E /* Storyboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 835BB50A1D2AA03A00DEE54E /* Storyboard.storyboard */; };
 		83667D131D21B27E009DCEE7 /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83667CFD1D21B27E009DCEE7 /* Character.swift */; };
 		83667D141D21B27E009DCEE7 /* CharacterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83667CFE1D21B27E009DCEE7 /* CharacterExtension.swift */; };
 		83667D151D21B27E009DCEE7 /* CollectionTypeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83667CFF1D21B27E009DCEE7 /* CollectionTypeExtension.swift */; };
@@ -59,7 +59,6 @@
 		17A47E0C1D1AC04D0010998A /* LedgerGUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LedgerGUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		17A47E0F1D1AC04D0010998A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		17A47E111D1AC04D0010998A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		17A47E141D1AC04E0010998A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		17A47E161D1AC04E0010998A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		17A47E1B1D1AC04E0010998A /* LedgerGUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LedgerGUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		17A47E1F1D1AC04E0010998A /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
@@ -70,6 +69,7 @@
 		8324DB601D217C8100436BE9 /* sample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = sample.txt; path = ../sample.txt; sourceTree = "<group>"; };
 		8324DB621D21878500436BE9 /* ParseTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseTree.swift; sourceTree = "<group>"; };
 		833A8FF11D23C0DF00FFB2DB /* EvaluatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatorTests.swift; sourceTree = "<group>"; };
+		835BB50A1D2AA03A00DEE54E /* Storyboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Storyboard.storyboard; sourceTree = "<group>"; };
 		83667CFD1D21B27E009DCEE7 /* Character.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
 		83667CFE1D21B27E009DCEE7 /* CharacterExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterExtension.swift; sourceTree = "<group>"; };
 		83667CFF1D21B27E009DCEE7 /* CollectionTypeExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionTypeExtension.swift; sourceTree = "<group>"; };
@@ -140,8 +140,8 @@
 			isa = PBXGroup;
 			children = (
 				17A47E0F1D1AC04D0010998A /* AppDelegate.swift */,
+				835BB50A1D2AA03A00DEE54E /* Storyboard.storyboard */,
 				17A47E111D1AC04D0010998A /* Assets.xcassets */,
-				17A47E131D1AC04E0010998A /* MainMenu.xib */,
 				17A47E161D1AC04E0010998A /* Info.plist */,
 				839E90881D1BCE8400AD9CBF /* Parser.swift */,
 				17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */,
@@ -290,7 +290,7 @@
 				83667D181D21B27E009DCEE7 /* Localizable.strings in Resources */,
 				83C241301D2A873D00C5CCDC /* RegisterCell.xib in Resources */,
 				83C241321D2A8CB400C5CCDC /* Posting.xib in Resources */,
-				17A47E151D1AC04E0010998A /* MainMenu.xib in Resources */,
+				835BB50B1D2AA03A00DEE54E /* Storyboard.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,14 +359,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		17A47E131D1AC04E0010998A /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				17A47E141D1AC04E0010998A /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
 		83667D021D21B27E009DCEE7 /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -472,7 +464,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_DISABLE_SAFETY_CHECKS = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -488,7 +480,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.objc.LedgerGUI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_DISABLE_SAFETY_CHECKS = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

@@ -16,10 +16,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        windowController = NSWindowController(window: window)
-        let registerViewController = RegisterViewController()
-//        windowController?.contentViewController = registerViewController
-        window.contentViewController = registerViewController
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

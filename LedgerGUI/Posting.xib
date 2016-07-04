@@ -13,18 +13,15 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="249" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="KuB-C7-vJg">
-                    <rect key="frame" x="-2" y="0.0" width="376" height="17"/>
+                    <rect key="frame" x="-2" y="0.0" width="431" height="17"/>
                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Label" id="G4u-qo-9di">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="R7d-Wr-B8m">
-                    <rect key="frame" x="378" y="0.0" width="104" height="17"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="100" id="wxR-pu-tDg"/>
-                    </constraints>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="R7d-Wr-B8m">
+                    <rect key="frame" x="445" y="0.0" width="37" height="17"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Label" id="uOd-1i-sHd">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -35,7 +32,7 @@
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="R7d-Wr-B8m" secondAttribute="trailing" id="7Os-kN-GRu"/>
                 <constraint firstItem="KuB-C7-vJg" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="8EM-3x-2ld"/>
-                <constraint firstItem="R7d-Wr-B8m" firstAttribute="leading" secondItem="KuB-C7-vJg" secondAttribute="trailing" constant="8" id="JFX-EB-VRA"/>
+                <constraint firstItem="R7d-Wr-B8m" firstAttribute="leading" secondItem="KuB-C7-vJg" secondAttribute="trailing" constant="20" id="JFX-EB-VRA"/>
                 <constraint firstItem="KuB-C7-vJg" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" id="T9x-sg-qiQ"/>
                 <constraint firstItem="R7d-Wr-B8m" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="V1I-uu-vtC"/>
                 <constraint firstAttribute="bottom" secondItem="R7d-Wr-B8m" secondAttribute="bottom" id="bqs-aR-3az"/>
