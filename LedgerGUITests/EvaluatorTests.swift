@@ -11,13 +11,13 @@ import XCTest
 @testable import LedgerGUI
 
 
-extension LedgerDouble {
+extension Double {
     var euro: Amount {
-        return Amount(self, commodity: Commodity("EUR"))
+        return Amount(LedgerDouble(self), commodity: Commodity("EUR"))
     }
 
     var usd: Amount {
-        return Amount(self, commodity: Commodity("$"))
+        return Amount(LedgerDouble(self), commodity: Commodity("$"))
     }
 }
 

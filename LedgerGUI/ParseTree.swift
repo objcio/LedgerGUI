@@ -26,8 +26,6 @@ enum TransactionState: Character {
 
 extension TransactionState: Equatable { }
 
-typealias LedgerDouble = Double // TODO use infinite precision arithmetic
-
 enum PostingOrNote {
     case posting(Posting)
     case note(Note)
@@ -95,12 +93,6 @@ struct Amount: Equatable {
 
 func ==(lhs: Amount, rhs: Amount) -> Bool {
     return lhs.commodity == rhs.commodity && lhs.number == rhs.number
-}
-
-extension LedgerDouble {
-    var isNegative: Bool {
-        return self < 0
-    }
 }
 
 extension Amount {

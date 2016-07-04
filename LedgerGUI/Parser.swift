@@ -25,8 +25,8 @@ let naturalString: GenericParser<ImmutableCharacters, (), String> = FastParser.d
 let naturalWithCommaString = (FastParser.digit <|> FastParser.character(",")).many1.map( { digitsAndCommas in String(digitsAndCommas.filter { $0 != "," }) })
 let natural: GenericParser<ImmutableCharacters, (), Int> = naturalString.map { Int($0)! }
 let unsignedDouble: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift2( { integerPart, fractionalPart in
-    guard let fraction = fractionalPart else { return Double(integerPart)! }
-    return Double("\(integerPart).\(fraction)")!
+    guard let fraction = fractionalPart else { return LedgerDouble(integerPart)! }
+    return LedgerDouble("\(integerPart).\(fraction)")!
     }, naturalWithCommaString, (FastParser.character(".") *> naturalString).optional)
 let double: GenericParser<ImmutableCharacters, (), LedgerDouble> = lift2( { sign, double in
     return sign == "-" ? -double : double

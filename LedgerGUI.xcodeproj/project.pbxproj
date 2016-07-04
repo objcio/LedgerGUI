@@ -39,6 +39,7 @@
 		83667D261D21B27E009DCEE7 /* UInt16Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83667D111D21B27E009DCEE7 /* UInt16Extension.swift */; };
 		83667D271D21B27E009DCEE7 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83667D121D21B27E009DCEE7 /* UnicodeScalarExtension.swift */; };
 		839E90891D1BCE8400AD9CBF /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839E90881D1BCE8400AD9CBF /* Parser.swift */; };
+		83C2412C1D2A69B000C5CCDC /* LedgerDouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,7 @@
 		83667D111D21B27E009DCEE7 /* UInt16Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UInt16Extension.swift; sourceTree = "<group>"; };
 		83667D121D21B27E009DCEE7 /* UnicodeScalarExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnicodeScalarExtension.swift; sourceTree = "<group>"; };
 		839E90881D1BCE8400AD9CBF /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
+		83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LedgerDouble.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +142,7 @@
 				17D8A3071D25768900661EA6 /* Evaluator.swift */,
 				8324DB621D21878500436BE9 /* ParseTree.swift */,
 				17D8A3031D256E1A00661EA6 /* Helpers.swift */,
+				83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */,
 			);
 			path = LedgerGUI;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 				83667D191D21B27E009DCEE7 /* Error.swift in Sources */,
 				83667D1B1D21B27E009DCEE7 /* GenericParser.swift in Sources */,
 				83667D1D1D21B27E009DCEE7 /* Language.swift in Sources */,
+				83C2412C1D2A69B000C5CCDC /* LedgerDouble.swift in Sources */,
 				83667D131D21B27E009DCEE7 /* Character.swift in Sources */,
 				83667D241D21B27E009DCEE7 /* StringExtension.swift in Sources */,
 				83667D1A1D21B27E009DCEE7 /* Expression.swift in Sources */,
