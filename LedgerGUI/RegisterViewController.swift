@@ -20,39 +20,73 @@ extension NSView {
 }
 
 class LedgerWindowController: NSWindowController {
-    var state: State?
+    var state: State? {
+        didSet {
+            reload()
+        }
+    }
 
-    override func windowDidLoad() {
-        loadData()
-
+    func reload() {
         let balanceVC = self.contentViewController?.childViewControllers.flatMap( { $0 as? BalanceViewController }).first
         let registerVC = self.contentViewController?.childViewControllers.flatMap( { $0 as? RegisterViewController}).first
-
         balanceVC?.state = state
         registerVC?.state = state
-
     }
+}
 
-    func loadData() {
-        let contents = try! String(contentsOfFile: "/Users/chris/objc.io/LedgerGUI/sample.txt")
-        var state = State()
+
+class LedgerDocument: NSDocument {
+    var windowController: LedgerWindowController? {
+        didSet {
+            updateWindowController()
+        }
+    }
+    
+    var state: State? {
+        didSet {
+            updateWindowController()
+        }
+    }
+    
+    func updateWindowController() {
+        DispatchQueue.main.async {
+            self.windowController?.state = self.state
+        }
+    }
+    
+    override func read(from data: Data, ofType typeName: String) throws {
+        guard let contents = String(data: data, encoding: .utf8) else { throw "Couldn't read data" }
+        var newState = State()
         let statements = parse(string: contents)
         for statement in statements {
-            try! state.apply(statement)
+            try! newState.apply(statement)
         }
-        self.state = state
+        self.state = newState
     }
-
+    
+    override func presentedItemDidChange() {
+        Swift.print("x")
+    }
+    
+    override func makeWindowControllers() {
+        let storyboard = NSStoryboard(name: "Storyboard", bundle: nil)
+        let wc = storyboard.instantiateController(withIdentifier: "WindowController") as! LedgerWindowController
+        wc.document = self
+        addWindowController(wc)
+        windowController = wc
+        wc.showWindow(nil)
+    }
 }
+
 
 class RegisterViewController: NSViewController {
     var state: State? {
-
         didSet {
             delegate.transactions = state?.evaluatedTransactions ?? []
             tableView?.reloadData()
         }
     }
+    
     let delegate = RegisterDelegate()
     var tableView: NSTableView?
     
