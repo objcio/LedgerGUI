@@ -54,6 +54,10 @@ class LedgerDocument: NSDocument {
         }
     }
     
+    override class func canConcurrentlyReadDocuments(ofType typeName: String) -> Bool {
+        return true
+    }
+    
     override func read(from data: Data, ofType typeName: String) throws {
         guard let contents = String(data: data, encoding: .utf8) else { throw "Couldn't read data" }
         var newState = State()
@@ -62,10 +66,6 @@ class LedgerDocument: NSDocument {
             try! newState.apply(statement)
         }
         self.state = newState
-    }
-    
-    override func presentedItemDidChange() {
-        Swift.print("x")
     }
     
     override func makeWindowControllers() {
@@ -110,6 +110,8 @@ class RegisterViewController: NSViewController {
         scrollView.hasVerticalScroller = true
         
         self.tableView = tableView
+        
+        view.widthAnchor.constraint(greaterThanOrEqualToConstant: 500).isActive = true
     }
     
 }

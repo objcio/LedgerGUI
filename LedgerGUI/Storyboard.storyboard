@@ -734,20 +734,20 @@
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView identifier="Cell" misplaced="YES" id="bm2-I3-Ehb" customClass="BalanceCell" customModule="LedgerGUI" customModuleProvider="target">
-                                                            <rect key="frame" x="1" y="1" width="445" height="17"/>
+                                                        <tableCellView identifier="Cell" id="bm2-I3-Ehb" customClass="BalanceCell" customModule="LedgerGUI" customModuleProvider="target">
+                                                            <rect key="frame" x="1" y="1" width="300" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <textField horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TJV-EV-zey">
-                                                                    <rect key="frame" x="1" y="0.0" width="356" height="17"/>
+                                                                <textField horizontalHuggingPriority="249" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TJV-EV-zey">
+                                                                    <rect key="frame" x="-2" y="0.0" width="261" height="17"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="Z9g-da-53J">
                                                                         <font key="font" metaFont="system"/>
                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>
                                                                 </textField>
-                                                                <textField horizontalHuggingPriority="500" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1000" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Wg-1x-3aT">
-                                                                    <rect key="frame" x="361" y="0.0" width="83" height="17"/>
+                                                                <textField horizontalHuggingPriority="1000" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="9Wg-1x-3aT">
+                                                                    <rect key="frame" x="265" y="0.0" width="37" height="17"/>
                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Label" id="j8z-Ab-AJN">
                                                                         <font key="font" metaFont="system"/>
                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -757,11 +757,11 @@
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="9Wg-1x-3aT" firstAttribute="top" secondItem="bm2-I3-Ehb" secondAttribute="top" id="Dcj-Ff-XLj"/>
-                                                                <constraint firstItem="9Wg-1x-3aT" firstAttribute="leading" secondItem="TJV-EV-zey" secondAttribute="trailing" constant="8" id="IH4-bI-smD"/>
+                                                                <constraint firstItem="9Wg-1x-3aT" firstAttribute="leading" secondItem="TJV-EV-zey" secondAttribute="trailing" constant="10" id="IH4-bI-smD"/>
                                                                 <constraint firstItem="TJV-EV-zey" firstAttribute="top" secondItem="bm2-I3-Ehb" secondAttribute="top" id="NKr-Hs-qNH"/>
                                                                 <constraint firstAttribute="bottom" secondItem="9Wg-1x-3aT" secondAttribute="bottom" id="Uon-np-f3T"/>
-                                                                <constraint firstItem="TJV-EV-zey" firstAttribute="leading" secondItem="bm2-I3-Ehb" secondAttribute="leading" constant="3" id="cVc-Bm-aDu"/>
-                                                                <constraint firstAttribute="trailing" secondItem="9Wg-1x-3aT" secondAttribute="trailing" constant="3" id="gaO-tc-Bas"/>
+                                                                <constraint firstItem="TJV-EV-zey" firstAttribute="leading" secondItem="bm2-I3-Ehb" secondAttribute="leading" id="cVc-Bm-aDu"/>
+                                                                <constraint firstAttribute="trailing" secondItem="9Wg-1x-3aT" secondAttribute="trailing" id="gaO-tc-Bas"/>
                                                                 <constraint firstAttribute="bottom" secondItem="TJV-EV-zey" secondAttribute="bottom" id="oBf-C7-LOu"/>
                                                             </constraints>
                                                             <connections>
@@ -777,6 +777,9 @@
                                     </subviews>
                                     <nil key="backgroundColor"/>
                                 </clipView>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="Xm6-v7-d7s"/>
+                                </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="utq-ON-ac3">
                                     <rect key="frame" x="1" y="119" width="238" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
