@@ -13,6 +13,10 @@
 		17D8A3041D256E1A00661EA6 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3031D256E1A00661EA6 /* Helpers.swift */; };
 		17D8A3061D256E5D00661EA6 /* ParseHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */; };
 		17D8A3081D25768900661EA6 /* Evaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3071D25768900661EA6 /* Evaluator.swift */; };
+		17DCEC681D2D443400DCE475 /* Balance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DCEC671D2D443400DCE475 /* Balance.swift */; };
+		17DCEC6A1D2D447100DCE475 /* UIHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DCEC691D2D447100DCE475 /* UIHelpers.swift */; };
+		17DCEC6C1D2D448F00DCE475 /* LedgerDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DCEC6B1D2D448F00DCE475 /* LedgerDocument.swift */; };
+		17DCEC6E1D2D44B300DCE475 /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DCEC6D1D2D44B200DCE475 /* WindowController.swift */; };
 		8324DB611D217C8100436BE9 /* sample.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8324DB601D217C8100436BE9 /* sample.txt */; };
 		8324DB631D21878500436BE9 /* ParseTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8324DB621D21878500436BE9 /* ParseTree.swift */; };
 		833A8FF21D23C0DF00FFB2DB /* EvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833A8FF11D23C0DF00FFB2DB /* EvaluatorTests.swift */; };
@@ -66,6 +70,10 @@
 		17D8A3031D256E1A00661EA6 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseHelpers.swift; sourceTree = "<group>"; };
 		17D8A3071D25768900661EA6 /* Evaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluator.swift; sourceTree = "<group>"; };
+		17DCEC671D2D443400DCE475 /* Balance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Balance.swift; sourceTree = "<group>"; };
+		17DCEC691D2D447100DCE475 /* UIHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIHelpers.swift; sourceTree = "<group>"; };
+		17DCEC6B1D2D448F00DCE475 /* LedgerDocument.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LedgerDocument.swift; sourceTree = "<group>"; };
+		17DCEC6D1D2D44B200DCE475 /* WindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		8324DB601D217C8100436BE9 /* sample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = sample.txt; path = ../sample.txt; sourceTree = "<group>"; };
 		8324DB621D21878500436BE9 /* ParseTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseTree.swift; sourceTree = "<group>"; };
 		833A8FF11D23C0DF00FFB2DB /* EvaluatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatorTests.swift; sourceTree = "<group>"; };
@@ -150,6 +158,10 @@
 				17D8A3031D256E1A00661EA6 /* Helpers.swift */,
 				83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */,
 				83C2412D1D2A6E1D00C5CCDC /* RegisterViewController.swift */,
+				17DCEC6B1D2D448F00DCE475 /* LedgerDocument.swift */,
+				17DCEC6D1D2D44B200DCE475 /* WindowController.swift */,
+				17DCEC691D2D447100DCE475 /* UIHelpers.swift */,
+				17DCEC671D2D443400DCE475 /* Balance.swift */,
 				83C2412F1D2A873D00C5CCDC /* RegisterCell.xib */,
 				83C241311D2A8CB400C5CCDC /* Posting.xib */,
 			);
@@ -311,6 +323,7 @@
 			files = (
 				83C2412E1D2A6E1D00C5CCDC /* RegisterViewController.swift in Sources */,
 				83667D211D21B27E009DCEE7 /* RangeReplaceableCollectionTypeExtension.swift in Sources */,
+				17DCEC6A1D2D447100DCE475 /* UIHelpers.swift in Sources */,
 				83667D1F1D21B27E009DCEE7 /* Permutation.swift in Sources */,
 				83667D161D21B27E009DCEE7 /* Combinator.swift in Sources */,
 				17D8A3061D256E5D00661EA6 /* ParseHelpers.swift in Sources */,
@@ -325,6 +338,7 @@
 				8324DB631D21878500436BE9 /* ParseTree.swift in Sources */,
 				83667D221D21B27E009DCEE7 /* SequenceTypeExtension.swift in Sources */,
 				83667D171D21B27E009DCEE7 /* Configuration.swift in Sources */,
+				17DCEC6C1D2D448F00DCE475 /* LedgerDocument.swift in Sources */,
 				83667D251D21B27E009DCEE7 /* Token.swift in Sources */,
 				83667D201D21B27E009DCEE7 /* Position.swift in Sources */,
 				83667D261D21B27E009DCEE7 /* UInt16Extension.swift in Sources */,
@@ -335,7 +349,9 @@
 				83667D131D21B27E009DCEE7 /* Character.swift in Sources */,
 				83667D241D21B27E009DCEE7 /* StringExtension.swift in Sources */,
 				83667D1A1D21B27E009DCEE7 /* Expression.swift in Sources */,
+				17DCEC681D2D443400DCE475 /* Balance.swift in Sources */,
 				83667D1E1D21B27E009DCEE7 /* Parsec.swift in Sources */,
+				17DCEC6E1D2D44B300DCE475 /* WindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

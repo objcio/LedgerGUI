@@ -798,7 +798,7 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="outlineView" destination="bzu-i6-up6" id="nvi-Ou-N6o"/>
+                        <outlet property="outlineView" destination="bzu-i6-up6" id="8aw-LG-mgA"/>
                     </connections>
                 </viewController>
                 <customObject id="Sf8-Wj-Hk6" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
