@@ -17,6 +17,13 @@ class RegisterViewController: NSViewController {
         }
     }
     
+    var search: Search? {
+        didSet {
+            delegate.search = search
+            tableView?.reloadData()
+        }
+    }
+
     let delegate = RegisterDelegate()
     var tableView: NSTableView?
     
@@ -49,13 +56,20 @@ class RegisterViewController: NSViewController {
 
 class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
     var transactions: [EvaluatedTransaction] = []
+    var search: Search?
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let cell = tableView.make(withIdentifier: "Cell", owner: self)! as! RegisterCell
         let transaction = transactions[row]
         cell.title = transaction.title
         
-        cell.setPostings(postings: transaction.postings)
+        var highlight: ((EvaluatedPosting) -> Bool)? = nil
+        if let search = search {
+            highlight = { posting in
+                posting.matches(search)
+            }
+        }
+        cell.setPostings(postings: transaction.postings, highlight: highlight)
         let calendar = Calendar.current()
         cell.set(date: calendar.date(from: transaction.date.components)!)
         return cell
@@ -99,7 +113,7 @@ class RegisterCell: NSView {
         dateLabel.stringValue = formatter.string(from: date)
     }
     
-    func setPostings(postings: [EvaluatedPosting]) {
+    func setPostings(postings: [EvaluatedPosting], highlight: ((EvaluatedPosting) -> Bool)?) {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
         for posting in postings {
@@ -110,10 +124,18 @@ class RegisterCell: NSView {
             let postingView = objects.flatMap { $0 as? PostingView }.first!
             let font = NSFont.systemFont(ofSize: NSFont.systemFontSize())
             let accountFont = posting.virtual ? font.italic : font
-            let attributes = [NSFontAttributeName: accountFont]
+            let shouldHighlight = highlight?(posting) ?? false
+            var attributes: [String:AnyObject] = [NSFontAttributeName: accountFont]
+            if shouldHighlight {
+                attributes[NSBackgroundColorAttributeName] = NSColor.yellow()
+            }
+
+
+
             postingView.account.attributedStringValue = AttributedString(string: posting.account, attributes: attributes)
             postingView.amount.attributedStringValue = AttributedString(string: posting.amount.displayValue, attributes: attributes)
             postingView.amount.textColor = posting.amount.color
+
             stackView.addArrangedSubview(postingView)
         }
     }

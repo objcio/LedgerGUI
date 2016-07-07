@@ -8,29 +8,50 @@
 
 import Cocoa
 
+enum Search {
+    case account(name: String)
+}
+
+extension EvaluatedTransaction {
+    func matches(_ search: Search) -> Bool {
+        switch search {
+        case .account:
+            return postings.first { $0.matches(search) } != nil
+        }
+    }
+}
+
+extension EvaluatedPosting {
+    func matches(_ search: Search) -> Bool {
+        switch search {
+        case .account(let name):
+            return account.hasPrefix(name)
+        }
+    }
+}
+
+// Pull this out into two parts
 final class DocumentState {
     var state: State = State() {
         didSet { update() }
     }
-    var accountFilter: String? {
+    var search: Search? {
         didSet {
-            // TODO
             let filteredTransactions: [EvaluatedTransaction]
-            if let filter = accountFilter {
-                filteredTransactions = state.evaluatedTransactions.filter { transaction in
-                    transaction.postings.filter { $0.account.hasPrefix(filter) }.count > 0
-                }
+            if let filter = search {
+                filteredTransactions = state.evaluatedTransactions.filter { $0.matches(filter) }
             } else {
                 filteredTransactions = state.evaluatedTransactions
             }
             self.windowController?.registerViewController?.transactions = filteredTransactions
+            self.windowController?.registerViewController?.search = search
         }
     }
     
     var windowController: LedgerWindowController? {
         didSet {
             windowController?.balanceViewController?.didSelect { account in
-                self.accountFilter = account
+                self.search = account.map { .account(name: $0) }
             }
             update()
         }
