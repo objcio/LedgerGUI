@@ -15,10 +15,15 @@ final class DocumentState {
     var accountFilter: String? {
         didSet {
             // TODO
-            print(accountFilter)
-            self.windowController?.registerViewController?.transactions = self.state.evaluatedTransactions.filter { transaction in
-                transaction.postings.filter { $0.account == accountFilter }.count > 0
+            let filteredTransactions: [EvaluatedTransaction]
+            if let filter = accountFilter {
+                filteredTransactions = state.evaluatedTransactions.filter { transaction in
+                    transaction.postings.filter { $0.account.hasPrefix(filter) }.count > 0
+                }
+            } else {
+                filteredTransactions = state.evaluatedTransactions
             }
+            self.windowController?.registerViewController?.transactions = filteredTransactions
         }
     }
     
