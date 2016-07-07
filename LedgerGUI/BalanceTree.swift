@@ -48,6 +48,17 @@ struct BalanceTreeNode: Tree {
     }
 }
 
+extension Array {
+    mutating func index(where f: (Element) -> Bool, orAppend element: Element) -> Index {
+        if let index = index(where: f) {
+            return index
+        }
+
+        append(element)
+        return endIndex-1
+    }
+}
+
 extension BalanceTreeNode {
     private mutating func add(amount: [Commodity: LedgerDouble]) {
         for (commodity, value) in amount {
@@ -59,16 +70,11 @@ extension BalanceTreeNode {
         guard path.count > 0 else { return }
         var remainingPath = path
         let namePrefix = remainingPath.remove(at: 0)
-        
         add(amount: node.amount)
 
-        if let index = children.index(where: { $0.title == namePrefix }) {
-            children[index].insert(node: node, path: remainingPath)
-        } else {
-            var newNode = remainingPath.isEmpty ? node : BalanceTreeNode(path: self.path + [namePrefix])
-            newNode.insert(node: node, path: remainingPath)
-            children.append(newNode)
-        }
+        let parentNode = remainingPath.isEmpty ? node : BalanceTreeNode(path: self.path + [namePrefix])
+        let index = children.index(where: { $0.title == namePrefix }, orAppend: parentNode)
+        children[index].insert(node: node, path: remainingPath)
     }
     
     mutating func insert(node: BalanceTreeNode) {
