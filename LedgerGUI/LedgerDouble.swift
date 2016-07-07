@@ -29,6 +29,9 @@ struct LedgerDouble: Equatable, IntegerLiteralConvertible, FloatLiteralConvertib
 }
 
 func ==(lhs: LedgerDouble, rhs: LedgerDouble) -> Bool {
+    if rhs.value == 0 {
+       return abs(lhs.value) < 0.000000001
+    }
     return lhs.value == rhs.value
 }
 

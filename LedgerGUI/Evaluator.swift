@@ -253,8 +253,8 @@ extension EvaluatedTransaction {
         
         for (commodity, value) in balance {
             // TODO: until we have a proper LedgerDouble
-            guard abs(value.value) < 0.00000001 else { throw "Postings of commodity \(commodity) not balanced: \(value)\n\(self)" }
-//            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)\n\(self)" }
+//            guard abs(value.value) < 0.00000001 else { throw "Postings of commodity \(commodity) not balanced: \(value)\n\(self)" }
+            guard value == 0 else { throw "Postings of commodity \(commodity) not balanced: \(value)\n\(self)" }
         }
     }
     

@@ -26,6 +26,7 @@ class RegisterViewController: NSViewController {
         tableView.addTableColumn(column)
         tableView.dataSource = delegate
         tableView.delegate = delegate
+        tableView.headerView = nil
         let nib = NSNib(nibNamed: "RegisterCell", bundle: nil)
         tableView.register(nib, forIdentifier: "Cell")
         
@@ -117,4 +118,3 @@ class RegisterCell: NSView {
         }
     }
 }
-
