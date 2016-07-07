@@ -39,8 +39,7 @@ class BalanceViewController: NSViewController {
     
     var state: State? {
         didSet {
-            let balance = state?.balance ?? [:]
-            dataSourceAndDelegate.rootItems = balanceTree(items: balance)
+            dataSourceAndDelegate.rootItems = state?.balanceTree ?? []
             outlineView?.reloadData() // TODO use a diff?
             outlineView?.expandItem(nil, expandChildren: true)
         }

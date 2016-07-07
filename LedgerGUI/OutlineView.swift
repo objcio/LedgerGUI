@@ -59,7 +59,7 @@ class OutlineDataSourceAndDelegate<A: Tree, Cell: NSTableCellView>: NSObject, NS
     
     func outlineViewSelectionDidChange(_ notification: Notification) {
         let outlineView = notification.object as! NSOutlineView
-        didSelect((outlineView.item(atRow: outlineView.selectedRow) as! TreeBox<A>).unbox)
+        didSelect((outlineView.item(atRow: outlineView.selectedRow) as? TreeBox<A>)?.unbox)
     }
     
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {

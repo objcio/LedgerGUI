@@ -8,19 +8,21 @@
 
 import Foundation
 
-func balanceTree(items: State.Balance) -> [BalanceTreeNode] {
-    let sortedAccounts = Array(items).sorted { p1, p2 in
-        return p1.key < p2.key
+extension State {
+    var balanceTree: [BalanceTreeNode] {
+        let sortedAccounts = Array(balance).sorted { p1, p2 in
+            return p1.key < p2.key
+        }
+        
+        var rootItem = BalanceTreeNode(accountName: nil, amount: [:])
+        
+        for account in sortedAccounts {
+            let node = BalanceTreeNode(accountName: account.key, amount: account.value)
+            rootItem.insert(node: node)
+        }
+        
+        return rootItem.children
     }
-    
-    var rootItem = BalanceTreeNode(accountName: nil, amount: [:])
-    
-    for account in sortedAccounts {
-        let node = BalanceTreeNode(accountName: account.key, amount: account.value)
-        rootItem.insert(node: node)
-    }
-    
-    return rootItem.children
 }
 
 
@@ -57,6 +59,13 @@ extension Array {
         append(element)
         return endIndex-1
     }
+    
+    var decompose: (Element, [Element])? {
+        guard !isEmpty else { return nil }
+        var copy = self
+        let firstElement = copy.remove(at: 0)
+        return (firstElement, copy)
+    }
 }
 
 extension BalanceTreeNode {
@@ -67,9 +76,8 @@ extension BalanceTreeNode {
     }
     
     private mutating func insert(node: BalanceTreeNode, path: [String]) {
-        guard path.count > 0 else { return }
-        var remainingPath = path
-        let namePrefix = remainingPath.remove(at: 0)
+        guard let (namePrefix, remainingPath) = path.decompose else { return }
+
         add(amount: node.amount)
 
         let parentNode = remainingPath.isEmpty ? node : BalanceTreeNode(path: self.path + [namePrefix])

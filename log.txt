@@ -1,0 +1,51 @@
+034c874e0d0ecbbda625ffa2baa8fbc85371a651
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (2.422 seconds).
+---
+c14a82bec6289a32c5158258150d85f02d362c7c
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (5.414 seconds).
+---
+f14c8aef6ce2b5d214247dc007f31f1737810551
+---
+f3b1fad6ca2517d4def43e22b6adc398ca239e31
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (5.648 seconds).
+---
+be20390dff65d1bccf359b7e292f9d9183e3ecd3
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (5.436 seconds).
+---
+f413a1920fbc2fdbccc04911fde5975f49088b5f
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (5.472 seconds).
+---
+3d110c047d3af12b1049abe1499db50e12e177ff
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (5.470 seconds).
+---
+2cb4b93e70754da53f3fcfaef7f79eeae24e6e4d
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (5.469 seconds).
+---
+66ef51054b5c4ad6d6dbba7ecb62ad6ff7da4d2a
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (2.347 seconds).
+---
+51e382049c1214516450a97121d0cedd3f4a853c
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.851 seconds).
+---
+c2642fd77852dd49a164e23e0356b4aeb4f3845a
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.870 seconds).
+---
+027f5895a9cd7c4854ddd85fa35c5d562c7d9003
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.755 seconds).
+---
+9aecbea321a9bc31467d9e7d58613bf26eedd3c0
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.519 seconds).
+---
+516b7342583979b2eab282d18751d90ac04c5745
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.520 seconds).
+---
+d7f7594f6d03af9dfa8b63caa355ee26b36c4076
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.523 seconds).
+---
+d7f7594f6d03af9dfa8b63caa355ee26b36c4076
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.534 seconds).
+---
+96f0debe32a1b573355dd60335876c8563df72a3
+Test Case '-[LedgerGUITests.ParserTests testFile]' passed (1.226 seconds).
+    SWIFT_OPTIMIZATION_LEVEL = -Owholemodule
+---
