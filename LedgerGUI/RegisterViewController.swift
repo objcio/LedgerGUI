@@ -33,8 +33,10 @@ class RegisterViewController: NSViewController {
         tableView.dataSource = delegate
         tableView.delegate = delegate
         tableView.headerView = nil
-        let nib = NSNib(nibNamed: "RegisterCell", bundle: nil)
-        tableView.register(nib, forIdentifier: "Cell")
+        let nib = NSNib(nibNamed: "TransactionCell", bundle: nil)
+        tableView.register(nib, forIdentifier: "TransactionCell")
+        let postingNib = NSNib(nibNamed: "PostingCell", bundle: nil)
+        tableView.register(postingNib, forIdentifier: "PostingCell")
         
         let scrollView = NSScrollView()
         let clipView = NSClipView()
@@ -53,45 +55,74 @@ class RegisterViewController: NSViewController {
     
 }
 
+enum RegisterRow {
+    case title(EvaluatedTransaction)
+    case posting(EvaluatedPosting)
+}
+
 class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
-    var transactions: [EvaluatedTransaction] = []
+    var rows: [RegisterRow] = []
+    var transactions: [EvaluatedTransaction] = [] {
+        didSet {
+            rows = transactions.flatMap { transaction in
+                [.title(transaction)] + transaction.postings.map { .posting($0) }
+            }
+        }
+    }
+    
     var filter: Filter?
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        let cell = tableView.make(withIdentifier: "Cell", owner: self)! as! RegisterCell
-        let transaction = transactions[row]
-        cell.title = transaction.title
-        
-        var highlight: ((EvaluatedPosting) -> Bool)? = nil
-        if let filter = filter {
-            highlight = { posting in
-                posting.matches(filter)
-            }
+        switch rows[row] {
+        case .title(let transaction):
+            return transactionCell(tableView, transaction)
+        case .posting(let posting):
+            return postingCell(tableView, posting)
         }
-        cell.setPostings(postings: transaction.postings, highlight: highlight)
+    }
+    
+    func transactionCell(_ tableView: NSTableView, _ transaction: EvaluatedTransaction) -> NSView {
+        let cell = tableView.make(withIdentifier: "TransactionCell", owner: self)! as! TransactionCell
+        cell.title = transaction.title
         cell.set(date: transaction.date.date)
         return cell
     }
     
+    func postingCell(_ tableView: NSTableView, _ posting: EvaluatedPosting) -> NSView {
+        let cell = tableView.make(withIdentifier: "PostingCell", owner: self)! as! PostingCell
+        let highlighted = filter.map(posting.matches) ?? false
+
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize())
+        let accountFont = posting.virtual ? font.italic : font
+        var attributes: [String:AnyObject] = [NSFontAttributeName: accountFont]
+        if highlighted {
+            attributes[NSBackgroundColorAttributeName] = NSColor.yellow()
+        }
+        
+        cell.account.attributedStringValue = AttributedString(string: posting.account, attributes: attributes)
+        cell.amount.attributedStringValue = AttributedString(string: posting.amount.displayValue, attributes: attributes)
+        cell.amount.textColor = posting.amount.color
+        return cell
+    }
+    
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        let postings = transactions[row].postings
-        return 54 + CGFloat(postings.count) * (17+8)
+        switch rows[row] {
+        case .posting: return 20
+        case .title: return 34
+        }
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int {
-        return transactions.count
+        return rows.count
     }
 }
 
-class PostingView: NSView {
+class PostingCell: NSView {
     @IBOutlet weak var account: NSTextField!
     @IBOutlet weak var amount: NSTextField!
 }
 
-class RegisterCell: NSView {
-    static let postingNib = NSNib(nibNamed: "Posting", bundle: nil)!
-    
-    @IBOutlet weak var stackView: NSStackView!
+class TransactionCell: NSView {
     @IBOutlet weak var dateLabel: NSTextField!
     @IBOutlet private weak var titleLabel: NSTextField!
     
@@ -109,30 +140,5 @@ class RegisterCell: NSView {
         formatter.dateStyle = .shortStyle
         formatter.timeStyle = .noStyle
         dateLabel.stringValue = formatter.string(from: date)
-    }
-    
-    func setPostings(postings: [EvaluatedPosting], highlight: ((EvaluatedPosting) -> Bool)?) {
-        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-
-        for posting in postings {
-            var objects: NSArray = NSArray()
-            guard RegisterCell.postingNib.instantiate(withOwner: nil, topLevelObjects: &objects) else {
-                fatalError("Couldn't instantiate")
-            }
-            let postingView = objects.flatMap { $0 as? PostingView }.first!
-            let font = NSFont.systemFont(ofSize: NSFont.systemFontSize())
-            let accountFont = posting.virtual ? font.italic : font
-            let shouldHighlight = highlight?(posting) ?? false
-            var attributes: [String:AnyObject] = [NSFontAttributeName: accountFont]
-            if shouldHighlight {
-                attributes[NSBackgroundColorAttributeName] = NSColor.yellow()
-            }
-
-            postingView.account.attributedStringValue = AttributedString(string: posting.account, attributes: attributes)
-            postingView.amount.attributedStringValue = AttributedString(string: posting.amount.displayValue, attributes: attributes)
-            postingView.amount.textColor = posting.amount.color
-
-            stackView.addArrangedSubview(postingView)
-        }
     }
 }

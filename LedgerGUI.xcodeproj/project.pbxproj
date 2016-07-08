@@ -47,8 +47,8 @@
 		83BCD9971D2E569200EFAE6F /* OutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BCD9961D2E569200EFAE6F /* OutlineView.swift */; };
 		83C2412C1D2A69B000C5CCDC /* LedgerDouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */; };
 		83C2412E1D2A6E1D00C5CCDC /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C2412D1D2A6E1D00C5CCDC /* RegisterViewController.swift */; };
-		83C241301D2A873D00C5CCDC /* RegisterCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83C2412F1D2A873D00C5CCDC /* RegisterCell.xib */; };
-		83C241321D2A8CB400C5CCDC /* Posting.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83C241311D2A8CB400C5CCDC /* Posting.xib */; };
+		83C241301D2A873D00C5CCDC /* TransactionCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83C2412F1D2A873D00C5CCDC /* TransactionCell.xib */; };
+		83C241321D2A8CB400C5CCDC /* PostingCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83C241311D2A8CB400C5CCDC /* PostingCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,8 +106,8 @@
 		83BCD9961D2E569200EFAE6F /* OutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutlineView.swift; sourceTree = "<group>"; };
 		83C2412B1D2A69B000C5CCDC /* LedgerDouble.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LedgerDouble.swift; sourceTree = "<group>"; };
 		83C2412D1D2A6E1D00C5CCDC /* RegisterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
-		83C2412F1D2A873D00C5CCDC /* RegisterCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RegisterCell.xib; sourceTree = "<group>"; };
-		83C241311D2A8CB400C5CCDC /* Posting.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Posting.xib; sourceTree = "<group>"; };
+		83C2412F1D2A873D00C5CCDC /* TransactionCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TransactionCell.xib; sourceTree = "<group>"; };
+		83C241311D2A8CB400C5CCDC /* PostingCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PostingCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,8 +166,8 @@
 				17DCEC6D1D2D44B200DCE475 /* WindowController.swift */,
 				17DCEC691D2D447100DCE475 /* UIHelpers.swift */,
 				17DCEC671D2D443400DCE475 /* BalanceViewController.swift */,
-				83C2412F1D2A873D00C5CCDC /* RegisterCell.xib */,
-				83C241311D2A8CB400C5CCDC /* Posting.xib */,
+				83C2412F1D2A873D00C5CCDC /* TransactionCell.xib */,
+				83C241311D2A8CB400C5CCDC /* PostingCell.xib */,
 				83BCD9941D2E568100EFAE6F /* BalanceTree.swift */,
 				83BCD9961D2E569200EFAE6F /* OutlineView.swift */,
 			);
@@ -306,8 +306,8 @@
 				83667D1C1D21B27E009DCEE7 /* Info.plist in Resources */,
 				17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */,
 				83667D181D21B27E009DCEE7 /* Localizable.strings in Resources */,
-				83C241301D2A873D00C5CCDC /* RegisterCell.xib in Resources */,
-				83C241321D2A8CB400C5CCDC /* Posting.xib in Resources */,
+				83C241301D2A873D00C5CCDC /* TransactionCell.xib in Resources */,
+				83C241321D2A8CB400C5CCDC /* PostingCell.xib in Resources */,
 				835BB50B1D2AA03A00DEE54E /* Storyboard.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

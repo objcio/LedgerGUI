@@ -40,7 +40,6 @@ extension EvaluatedPosting {
     }
 }
 
-// Pull this out into two parts
 struct DocumentState {
     var ledger: Ledger = Ledger()
     var filter: Filter?

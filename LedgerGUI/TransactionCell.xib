@@ -3,18 +3,17 @@
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11129.15"/>
-        <capability name="stacking Non-gravity area distributions on NSStackView" minToolsVersion="7.0" minSystemVersion="10.11"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner"/>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customView id="c22-O7-iKe" customClass="RegisterCell" customModule="LedgerGUI" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="480" height="272"/>
+        <customView id="c22-O7-iKe" customClass="TransactionCell" customModule="LedgerGUI" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="480" height="34"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ui5-g6-vyw">
-                    <rect key="frame" x="112" y="246" width="362" height="18"/>
+                    <rect key="frame" x="112" y="8" width="362" height="18"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Label" id="fBj-fI-OZ4">
                         <font key="font" metaFont="systemBold" size="14"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -22,7 +21,7 @@
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xS1-DJ-YRv">
-                    <rect key="frame" x="6" y="247" width="72" height="17"/>
+                    <rect key="frame" x="6" y="9" width="72" height="17"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="68" id="wgr-xO-tB8"/>
                     </constraints>
@@ -32,26 +31,20 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <stackView distribution="fillEqually" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="56T-1l-d7c">
-                    <rect key="frame" x="114" y="20" width="358" height="219"/>
-                </stackView>
             </subviews>
             <constraints>
                 <constraint firstItem="ui5-g6-vyw" firstAttribute="leading" secondItem="xS1-DJ-YRv" secondAttribute="trailing" constant="38" id="2Nt-Xo-mdO"/>
-                <constraint firstItem="56T-1l-d7c" firstAttribute="top" secondItem="xS1-DJ-YRv" secondAttribute="bottom" constant="8" id="FB0-au-F4i"/>
                 <constraint firstItem="xS1-DJ-YRv" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="8" id="JPR-Mg-qR1"/>
-                <constraint firstItem="ui5-g6-vyw" firstAttribute="leading" secondItem="56T-1l-d7c" secondAttribute="leading" id="O91-uB-B3p"/>
                 <constraint firstItem="xS1-DJ-YRv" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="8" id="hYk-l1-Oqh"/>
                 <constraint firstAttribute="trailing" secondItem="ui5-g6-vyw" secondAttribute="trailing" constant="8" id="n3P-af-JJj"/>
                 <constraint firstItem="ui5-g6-vyw" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="8" id="naX-CO-cni"/>
-                <constraint firstAttribute="trailing" secondItem="56T-1l-d7c" secondAttribute="trailing" constant="8" id="rcL-YK-4Me"/>
-                <constraint firstAttribute="bottom" secondItem="56T-1l-d7c" secondAttribute="bottom" constant="20" id="wVu-Yc-Bt4"/>
+                <constraint firstAttribute="bottom" secondItem="ui5-g6-vyw" secondAttribute="bottom" constant="8" id="r7r-kw-Opr"/>
             </constraints>
             <connections>
                 <outlet property="dateLabel" destination="xS1-DJ-YRv" id="Aaa-Kd-XnP"/>
-                <outlet property="stackView" destination="56T-1l-d7c" id="jVZ-Za-kyR"/>
                 <outlet property="titleLabel" destination="ui5-g6-vyw" id="KXw-CQ-3fg"/>
             </connections>
+            <point key="canvasLocation" x="139" y="48.5"/>
         </customView>
     </objects>
 </document>
