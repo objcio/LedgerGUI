@@ -224,7 +224,7 @@ extension Value {
     }
 }
 
-struct EvaluatedDate: Equatable {
+struct EvaluatedDate: Equatable, Comparable {
     var year: Int
     var month: Int
     var day: Int
@@ -244,6 +244,15 @@ extension EvaluatedDate {
 func ==(lhs: EvaluatedDate, rhs: EvaluatedDate) -> Bool {
     return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day
 }
+
+func <(lhs: EvaluatedDate, rhs: EvaluatedDate) -> Bool {
+    if lhs.year < rhs.year { return true }
+    if lhs.year > rhs.year { return false }
+    if lhs.month < rhs.month { return true }
+    if lhs.month > rhs.month { return false }
+    return lhs.day < rhs.day
+}
+
 
 extension EvaluatedDate {
     init(date: Date, year: Int?) throws {

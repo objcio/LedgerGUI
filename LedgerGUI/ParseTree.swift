@@ -18,7 +18,6 @@ func ==(lhs: Date, rhs: Date) -> Bool {
     return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day
 }
 
-
 enum TransactionState: Character {
     case cleared = "*"
     case pending = "!"

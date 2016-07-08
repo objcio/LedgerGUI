@@ -33,5 +33,19 @@ extension Array {
         self = newSelf
         return result
     }
+    
+    func all(_ f: (Element) -> Bool) -> Bool {
+        for x in self {
+            if !f(x) { return false }
+        }
+        return true
+    }
+    
+    func some(_ f: (Element) -> Bool) -> Bool {
+        for x in self {
+            if f(x) { return true }
+        }
+        return false
+    }
 }
 

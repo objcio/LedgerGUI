@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		176042221D2FE10B000FA288 /* FilterParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176042211D2FE10B000FA288 /* FilterParserTests.swift */; };
 		17A47E101D1AC04D0010998A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E0F1D1AC04D0010998A /* AppDelegate.swift */; };
 		17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E111D1AC04D0010998A /* Assets.xcassets */; };
 		17A47E201D1AC04E0010998A /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E1F1D1AC04E0010998A /* ParserTests.swift */; };
+		17CF47861D2FF40A00671715 /* FilterParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17CF47841D2FF25B00671715 /* FilterParser.swift */; };
 		17D8A3041D256E1A00661EA6 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3031D256E1A00661EA6 /* Helpers.swift */; };
 		17D8A3061D256E5D00661EA6 /* ParseHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */; };
 		17D8A3081D25768900661EA6 /* Evaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D8A3071D25768900661EA6 /* Evaluator.swift */; };
@@ -62,6 +64,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		176042211D2FE10B000FA288 /* FilterParserTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterParserTests.swift; sourceTree = "<group>"; };
 		17A47E0C1D1AC04D0010998A /* LedgerGUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LedgerGUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		17A47E0F1D1AC04D0010998A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		17A47E111D1AC04D0010998A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -69,6 +72,7 @@
 		17A47E1B1D1AC04E0010998A /* LedgerGUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LedgerGUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		17A47E1F1D1AC04E0010998A /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		17A47E211D1AC04E0010998A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		17CF47841D2FF25B00671715 /* FilterParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FilterParser.swift; path = LedgerGUITests/FilterParser.swift; sourceTree = SOURCE_ROOT; };
 		17D8A3031D256E1A00661EA6 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		17D8A3051D256E5D00661EA6 /* ParseHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseHelpers.swift; sourceTree = "<group>"; };
 		17D8A3071D25768900661EA6 /* Evaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluator.swift; sourceTree = "<group>"; };
@@ -166,6 +170,7 @@
 				17DCEC6D1D2D44B200DCE475 /* WindowController.swift */,
 				17DCEC691D2D447100DCE475 /* UIHelpers.swift */,
 				17DCEC671D2D443400DCE475 /* BalanceViewController.swift */,
+				17CF47841D2FF25B00671715 /* FilterParser.swift */,
 				83C2412F1D2A873D00C5CCDC /* TransactionCell.xib */,
 				83C241311D2A8CB400C5CCDC /* PostingCell.xib */,
 				83BCD9941D2E568100EFAE6F /* BalanceTree.swift */,
@@ -181,6 +186,7 @@
 				17A47E1F1D1AC04E0010998A /* ParserTests.swift */,
 				17A47E211D1AC04E0010998A /* Info.plist */,
 				833A8FF11D23C0DF00FFB2DB /* EvaluatorTests.swift */,
+				176042211D2FE10B000FA288 /* FilterParserTests.swift */,
 			);
 			path = LedgerGUITests;
 			sourceTree = "<group>";
@@ -341,6 +347,7 @@
 				83667D231D21B27E009DCEE7 /* SetExtension.swift in Sources */,
 				83667D151D21B27E009DCEE7 /* CollectionTypeExtension.swift in Sources */,
 				839E90891D1BCE8400AD9CBF /* Parser.swift in Sources */,
+				17CF47861D2FF40A00671715 /* FilterParser.swift in Sources */,
 				17A47E101D1AC04D0010998A /* AppDelegate.swift in Sources */,
 				8324DB631D21878500436BE9 /* ParseTree.swift in Sources */,
 				83667D221D21B27E009DCEE7 /* SequenceTypeExtension.swift in Sources */,
@@ -367,6 +374,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				176042221D2FE10B000FA288 /* FilterParserTests.swift in Sources */,
 				17A47E201D1AC04E0010998A /* ParserTests.swift in Sources */,
 				833A8FF21D23C0DF00FFB2DB /* EvaluatorTests.swift in Sources */,
 			);

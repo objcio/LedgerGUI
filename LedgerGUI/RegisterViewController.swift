@@ -16,9 +16,9 @@ class RegisterViewController: NSViewController {
         }
     }
     
-    var filter: Filter? {
+    var filters: [Filter] = [] {
         didSet {
-            delegate.filter = filter
+            delegate.filters = filters
             tableView?.reloadData()
         }
     }
@@ -70,7 +70,7 @@ class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
         }
     }
     
-    var filter: Filter?
+    var filters: [Filter] = []
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         switch rows[row] {
@@ -90,7 +90,7 @@ class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
     
     func postingCell(_ tableView: NSTableView, _ posting: EvaluatedPosting) -> NSView {
         let cell = tableView.make(withIdentifier: "PostingCell", owner: self)! as! PostingCell
-        let highlighted = filter.map(posting.matches) ?? false
+        let highlighted = filters.some(posting.matches)
 
         let font = NSFont.systemFont(ofSize: NSFont.systemFontSize())
         let accountFont = posting.virtual ? font.italic : font
