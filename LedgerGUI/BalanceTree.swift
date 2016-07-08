@@ -8,13 +8,13 @@
 
 import Foundation
 
-extension State {
+extension Ledger {
     var balanceTree: [BalanceTreeNode] {
         let sortedAccounts = Array(balance).sorted { p1, p2 in
             return p1.key < p2.key
         }
         
-        var rootItem = BalanceTreeNode(accountName: nil, amount: [:])
+        var rootItem = BalanceTreeNode(accountName: nil, amount: MultiCommodityAmount())
         
         for account in sortedAccounts {
             let node = BalanceTreeNode(accountName: account.key, amount: account.value)
@@ -27,7 +27,7 @@ extension State {
 
 
 struct BalanceTreeNode: Tree {
-    var amount: [Commodity:LedgerDouble]
+    var amount: MultiCommodityAmount
     var children: [BalanceTreeNode] = []
     var path: [String]
     
@@ -39,12 +39,12 @@ struct BalanceTreeNode: Tree {
         return path.joined(separator: ":")
     }
 
-    init(accountName: String?, amount: [Commodity:LedgerDouble]) {
+    init(accountName: String?, amount: MultiCommodityAmount) {
         path = accountName?.components(separatedBy: ":") ?? []
         self.amount = amount
     }
     
-    init(path: [String], amount: [Commodity: LedgerDouble] = [:]) {
+    init(path: [String], amount: MultiCommodityAmount = MultiCommodityAmount()) {
         self.path = path
         self.amount = amount
     }
@@ -69,16 +69,10 @@ extension Array {
 }
 
 extension BalanceTreeNode {
-    private mutating func add(amount: [Commodity: LedgerDouble]) {
-        for (commodity, value) in amount {
-            self.amount[commodity, or: 0] += value
-        }
-    }
-    
     private mutating func insert(node: BalanceTreeNode, path: [String]) {
         guard let (namePrefix, remainingPath) = path.decompose else { return }
 
-        add(amount: node.amount)
+        self.amount += node.amount
 
         let parentNode = remainingPath.isEmpty ? node : BalanceTreeNode(path: self.path + [namePrefix])
         let index = children.index(where: { $0.title == namePrefix }, orAppend: parentNode)

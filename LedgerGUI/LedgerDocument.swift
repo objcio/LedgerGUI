@@ -9,8 +9,9 @@
 import Cocoa
 
 enum Filter {
-    case account(name: String)
+    case account(String)
     case string(String)
+    case period(from: Foundation.Date, to: Foundation.Date)
 }
 
 extension EvaluatedTransaction {
@@ -20,6 +21,8 @@ extension EvaluatedTransaction {
             return postings.first { $0.matches(search) } != nil
         case .string(let string):
             return title.lowercased().contains(string.lowercased()) || postings.first { $0.matches(search) } != nil
+        case .period(let from, let to):
+            return date.date >= from && date.date <= to
         }
     }
 }
@@ -31,36 +34,37 @@ extension EvaluatedPosting {
             return account.hasPrefix(name)
         case .string(let string):
             return account.lowercased().contains(string.lowercased()) || amount.displayValue.contains(string)
-
+        case .period:
+            return false
         }
     }
 }
 
 // Pull this out into two parts
-final class DocumentState {
-    var state: State = State() {
-        didSet { update() }
+struct DocumentState {
+    var ledger: Ledger = Ledger()
+    var filter: Filter?
+
+    var filteredTransactions: [EvaluatedTransaction] {
+        guard let filter = filter else { return ledger.evaluatedTransactions }
+        return ledger.evaluatedTransactions.filter { $0.matches(filter) }
     }
-    var filter: Filter? {
+}
+
+final class DocumentController {
+    var documentState = DocumentState() {
         didSet {
-            let filteredTransactions: [EvaluatedTransaction]
-            if let filter = filter {
-                filteredTransactions = state.evaluatedTransactions.filter { $0.matches(filter) }
-            } else {
-                filteredTransactions = state.evaluatedTransactions
-            }
-            self.windowController?.registerViewController?.transactions = filteredTransactions
-            self.windowController?.registerViewController?.filter = filter
+            update()
         }
     }
     
     var windowController: LedgerWindowController? {
         didSet {
             windowController?.balanceViewController?.didSelect { account in
-                self.filter = account.map { .account(name: $0) }
+                self.documentState.filter = account.map { .account($0) }
             }
             windowController?.didSearch = { search in
-                self.filter = search.isEmpty ? nil : .string(search)
+                self.documentState.filter = search.isEmpty ? nil : .string(search)
             }
             update()
         }
@@ -68,14 +72,20 @@ final class DocumentState {
 
     func update() {
         DispatchQueue.main.async {
-            self.windowController?.balanceViewController?.state = self.state
-            self.windowController?.registerViewController?.transactions = self.state.evaluatedTransactions
+            self.windowController?.balanceViewController?.ledger = self.ledger
+            self.windowController?.registerViewController?.transactions = self.documentState.filteredTransactions
+            self.windowController?.registerViewController?.filter = self.documentState.filter
         }
+    }
+    
+    var ledger: Ledger {
+        get { return documentState.ledger }
+        set { documentState.ledger = newValue }
     }
 }
 
 final class LedgerDocument: NSDocument {
-    var documentState: DocumentState = DocumentState()
+    var controller = DocumentController()
     
     override class func canConcurrentlyReadDocuments(ofType typeName: String) -> Bool {
         return true
@@ -83,12 +93,12 @@ final class LedgerDocument: NSDocument {
     
     override func read(from data: Data, ofType typeName: String) throws {
         guard let contents = String(data: data, encoding: .utf8) else { throw "Couldn't read data" }
-        var state = State()
+        var ledger = Ledger()
         let statements = parse(string: contents)
         for statement in statements {
-            try! state.apply(statement)
+            try! ledger.apply(statement)
         }
-        documentState.state = state
+        controller.ledger = ledger
     }
     
     override func makeWindowControllers() {
@@ -97,7 +107,7 @@ final class LedgerDocument: NSDocument {
         wc.document = self
         addWindowController(wc)
         wc.showWindow(nil)
-        documentState.windowController = wc
+        controller.windowController = wc
     }
 }
 

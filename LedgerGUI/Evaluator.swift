@@ -11,8 +11,31 @@ import Foundation
 extension String: ErrorProtocol {}
 
 
-struct State {
-    typealias Balance = [String: [Commodity:LedgerDouble]]
+struct MultiCommodityAmount: Equatable {
+    var value: [Commodity: LedgerDouble] = [:]
+    
+    subscript(_ key: Commodity) -> LedgerDouble {
+        get {
+            return value[key, or: 0]
+        }
+        set {
+            value[key] = newValue
+        }
+    }
+}
+
+func ==(lhs: MultiCommodityAmount, rhs: MultiCommodityAmount) -> Bool {
+    return lhs.value == rhs.value
+}
+
+func +=(lhs: inout MultiCommodityAmount, rhs: MultiCommodityAmount) {
+    for (commodity, value) in rhs.value {
+        lhs[commodity] += value
+    }
+}
+
+struct Ledger: Equatable {
+    typealias Balance = [String: MultiCommodityAmount]
     var year: Int? = nil
     var definitions: [String: Value] = [:]
     var accounts: Set<String> = []
@@ -23,7 +46,11 @@ struct State {
     var evaluatedTransactions: [EvaluatedTransaction] = []
 }
 
-extension State {
+func ==(lhs: Ledger, rhs: Ledger) -> Bool {
+    return lhs.year == rhs.year && lhs.definitions == rhs.definitions && lhs.accounts == rhs.accounts && lhs.commodities == rhs.commodities && lhs.tags == rhs.tags && lhs.balance == rhs.balance && lhs.automatedTransactions == rhs.automatedTransactions && lhs.evaluatedTransactions == rhs.evaluatedTransactions
+}
+
+extension Ledger {
     mutating func apply(_ statement: Statement) throws {
         do {
             switch statement {
@@ -53,7 +80,7 @@ extension State {
     
     mutating func apply(transaction: EvaluatedTransaction) {
         for posting in transaction.postings {
-            balance[posting.account, or: [:]][posting.amount.commodity, or: 0] += posting.amount.number
+            balance[posting.account, or: MultiCommodityAmount()][posting.amount.commodity] += posting.amount.number
         }
         evaluatedTransactions.append(transaction)
     }
@@ -70,8 +97,8 @@ extension State {
         return tags.contains(tag)
     }
     
-    func balance(account: String) -> [Commodity:LedgerDouble] {
-        return self.balance[account] ?? [:]
+    func balance(account: String) -> MultiCommodityAmount {
+        return self.balance[account] ?? MultiCommodityAmount()
     }
     
     func lookup(variable name: String) -> Value? {
@@ -98,11 +125,15 @@ func ??(lhs: ExpressionContext, rhs: ExpressionContext) -> ExpressionContext {
 }
 
 
-struct EvaluatedPosting {
+struct EvaluatedPosting: Equatable {
     var account: String
     var amount: Amount
     var cost: Amount?
     var virtual: Bool
+}
+
+func ==(lhs: EvaluatedPosting, rhs: EvaluatedPosting) -> Bool {
+    return lhs.account == rhs.account && lhs.amount == rhs.amount && lhs.cost == rhs.cost && lhs.virtual == rhs.virtual
 }
 
 extension EvaluatedPosting {
@@ -203,6 +234,11 @@ extension EvaluatedDate {
     var components: DateComponents {
         return DateComponents(year: year, month: month, day: day)
     }
+    
+    var date: Foundation.Date {
+        let calendar = Calendar.current()
+        return calendar.date(from: components)!
+    }
 }
 
 func ==(lhs: EvaluatedDate, rhs: EvaluatedDate) -> Bool {
@@ -225,10 +261,14 @@ extension EvaluatedDate {
 }
 
 
-struct EvaluatedTransaction {
+struct EvaluatedTransaction: Equatable {
     var title: String
     var postings: [EvaluatedPosting]
     var date: EvaluatedDate
+}
+
+func ==(lhs: EvaluatedTransaction, rhs: EvaluatedTransaction) -> Bool {
+    return lhs.title == rhs.title && lhs.postings == rhs.postings && lhs.date == rhs.date
 }
 
 extension EvaluatedTransaction {

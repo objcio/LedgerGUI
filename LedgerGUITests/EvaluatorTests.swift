@@ -21,6 +21,15 @@ extension Double {
     }
 }
 
+extension MultiCommodityAmount: DictionaryLiteralConvertible {
+    init(dictionaryLiteral elements: (Commodity, LedgerDouble)...) {
+        value = [:]
+        for (commodity, number) in elements {
+            value[commodity] = number
+        }
+    }
+}
+
 class EvaluatorTests: XCTestCase {
     func forceUnwrap(_ f: @autoclosure () throws -> (), file: String = #file, line: UInt = #line) {
         do {
@@ -32,14 +41,14 @@ class EvaluatorTests: XCTestCase {
     }
         
     func testYear() {
-        var state = State()
+        var state = Ledger()
         try! state.apply(.year(2005))
         XCTAssert(state.year == 2005)
     }
     
     func testDefine() {
         let name = "exchange_rate"
-        var state = State()
+        var state = Ledger()
 
         try! state.apply(.definition(name: name, expression: .amount(2.euro)))
         XCTAssert(state.lookup(variable: name) == .amount(2.euro))
@@ -50,7 +59,7 @@ class EvaluatorTests: XCTestCase {
     
     func testAccount() {
         let name = "Some:Account"
-        var state = State()
+        var state = Ledger()
         XCTAssertFalse(state.valid(account: name))
         try! state.apply(.account(name))
         XCTAssertTrue(state.valid(account: name))
@@ -58,7 +67,7 @@ class EvaluatorTests: XCTestCase {
     
     func testCommodity() {
         let name = "EUR"
-        var state = State()
+        var state = Ledger()
         XCTAssertFalse(state.valid(commodity: name))
         try! state.apply(.commodity(name))
         XCTAssertTrue(state.valid(commodity: name))
@@ -66,7 +75,7 @@ class EvaluatorTests: XCTestCase {
     
     func testTag() {
         let name = "tag"
-        var state = State()
+        var state = Ledger()
         XCTAssertFalse(state.valid(tag: name))
         try! state.apply(.tag(name))
         XCTAssertTrue(state.valid(tag: name))
@@ -94,7 +103,7 @@ class EvaluatorTests: XCTestCase {
     }
     
     func testTransaction() {
-        var state = State()
+        var state = Ledger()
         let date = LedgerGUI.Date(year: 2015, month: 1, day: 16)
         let posting1 = Posting(account: "Giro", amount: Amount(100, commodity: "USD"), cost: nil, balance: nil, note: nil)
         let posting2 = Posting(account: "Cash", amount: Amount(-100, commodity: "USD"), cost: nil, balance: nil, note: nil)
@@ -108,7 +117,7 @@ class EvaluatorTests: XCTestCase {
     }
     
     func testAutoBalancing() {
-        var state = State()
+        var state = Ledger()
         let date = LedgerGUI.Date(year: 2015, month: 1, day: 16)
         let posting1 = Posting(account: "Giro", amount: Amount(100, commodity: "USD"))
         let posting2 = Posting(account: "Cash", value: nil)
@@ -118,12 +127,12 @@ class EvaluatorTests: XCTestCase {
         XCTAssert(state.balance(account: "Giro") == [Commodity("USD"): 100])
         XCTAssert(state.balance(account: "Cash") == [Commodity("USD"): -100])
         
-        state = State()
+        state = Ledger()
         try! state.apply(.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting1, posting1, posting2])))
         XCTAssert(state.balance(account: "Giro") == [Commodity("USD"): 200])
         XCTAssert(state.balance(account: "Cash") == [Commodity("USD"): -200])
         
-        state = State()
+        state = Ledger()
         try! state.apply(.transaction(Transaction(date: date, state: nil, title: "My Transaction", notes: [], postings: [posting1, posting2, posting3])))
         XCTAssert(state.balance(account: "Giro") == [Commodity("USD"): 100, Commodity("EUR"): 200])
         XCTAssert(state.balance(account: "Cash") == [Commodity("USD"): -100, Commodity("EUR"): -200])
@@ -132,7 +141,7 @@ class EvaluatorTests: XCTestCase {
     }
     
     func testBalanceVerification() {
-        var state = State()
+        var state = Ledger()
         let date = LedgerGUI.Date(year: 2015, month: 1, day: 16)
         let posting1 = Posting(account: "Giro", amount: Amount(100, commodity: "USD"), cost: nil, balance: nil, note: nil)
         let posting2 = Posting(account: "Cash", amount: Amount(-200, commodity: "USD"), cost: nil, balance: nil, note: nil)
@@ -173,7 +182,7 @@ class EvaluatorTests: XCTestCase {
     }
 
     func testStateVariables() {
-        let state = State(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:], automatedTransactions: [], evaluatedTransactions: [])
+        let state = Ledger(year: 2016, definitions: ["one": .string("Hello")], accounts: [], commodities: [], tags: [], balance: [:], automatedTransactions: [], evaluatedTransactions: [])
         XCTAssertTrue(state.lookup(variable: "one") == .string("Hello"))
     }
     
@@ -186,7 +195,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Expenses:Food", amount: 20.usd),
             Posting(account: "Cash"),
         ])
-        var state = State()
+        var state = Ledger()
         try! state.apply(auto)
         try! state.apply(.transaction(transaction))
         XCTAssert(state.balance(account: "Foo") == [Commodity("$"): 100])
@@ -204,7 +213,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Expenses:Food", amount: 20.usd),
             Posting(account: "Cash"),
             ])
-        var state = State()
+        var state = Ledger()
         try! state.apply(auto)
         try! state.apply(.transaction(transaction))
         XCTAssert(state.balance(account: "Foo") == [Commodity("$"): 0.4*20])
@@ -221,7 +230,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Expenses:Food", amount: 20.usd),
             Posting(account: "Cash", amount: 20.usd),
             ])
-        var state = State()
+        var state = Ledger()
         try! state.apply(auto)
         XCTAssertNil(try? state.apply(.transaction(transaction)))
     }
@@ -239,7 +248,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Expenses:Food", amount: 20.usd),
             Posting(account: "Cash", amount: (-20).usd),
             ])
-        var state = State()
+        var state = Ledger()
         try! state.apply(auto)
         try! state.apply(.transaction(transaction))
         XCTAssert(state.balance(account: "Foo") == [Commodity("$"): 0.4*20])
@@ -253,7 +262,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Assets:Giro", amount: 10.euro, cost: Cost(type: .total, amount: 12.usd)),
             Posting(account: "Assets:Paypal", amount: (-12).usd),
         ])
-        var state = State()
+        var state = Ledger()
         try! state.apply(.transaction(transaction))
         XCTAssert(state.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
         XCTAssert(state.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
@@ -262,7 +271,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Assets:Giro", amount: 10.euro, cost: Cost(type: .total, amount: 12.usd)),
             Posting(account: "Assets:Paypal"),
         ])
-        var state2 = State()
+        var state2 = Ledger()
         try! state2.apply(.transaction(transaction2))
         XCTAssert(state2.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
         XCTAssert(state2.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
@@ -271,7 +280,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Assets:Giro", amount: (-10).euro, cost: Cost(type: .total, amount: 12.usd)),
             Posting(account: "Assets:Paypal", amount: 12.usd),
             ])
-        var state3 = State()
+        var state3 = Ledger()
         try! state3.apply(.transaction(transaction3))
         XCTAssert(state3.balance(account: "Assets:Giro") == [Commodity("EUR"): -10])
         XCTAssert(state3.balance(account: "Assets:Paypal") == [Commodity("$"): 12])
@@ -282,7 +291,7 @@ class EvaluatorTests: XCTestCase {
             Posting(account: "Assets:Giro", amount: 10.euro),
             Posting(account: "Assets:Paypal", amount: (-12).usd),
             ])
-        var state = State()
+        var state = Ledger()
         try! state.apply(.transaction(transaction))
         XCTAssert(state.balance(account: "Assets:Giro") == [Commodity("EUR"): 10])
         XCTAssert(state.balance(account: "Assets:Paypal") == [Commodity("$"): -12])
@@ -293,7 +302,7 @@ class EvaluatorTests: XCTestCase {
         let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
         let contents = try! String(contentsOfFile: path)
         let statements = parse(string: contents)
-        var state = State()
+        var state = Ledger()
         for statement in statements {
             forceUnwrap(try state.apply(statement))
         }

@@ -69,8 +69,7 @@ class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
             }
         }
         cell.setPostings(postings: transaction.postings, highlight: highlight)
-        let calendar = Calendar.current()
-        cell.set(date: calendar.date(from: transaction.date.components)!)
+        cell.set(date: transaction.date.date)
         return cell
     }
     
