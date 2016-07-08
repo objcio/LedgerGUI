@@ -8,24 +8,30 @@
 
 import Cocoa
 
-enum Search {
+enum Filter {
     case account(name: String)
+    case string(String)
 }
 
 extension EvaluatedTransaction {
-    func matches(_ search: Search) -> Bool {
+    func matches(_ search: Filter) -> Bool {
         switch search {
         case .account:
+            return postings.first { $0.matches(search) } != nil
+        case .string:
             return postings.first { $0.matches(search) } != nil
         }
     }
 }
 
 extension EvaluatedPosting {
-    func matches(_ search: Search) -> Bool {
+    func matches(_ search: Filter) -> Bool {
         switch search {
         case .account(let name):
             return account.hasPrefix(name)
+        case .string(let string):
+            return account.lowercased().contains(string.lowercased()) || amount.displayValue.contains(string)
+
         }
     }
 }
@@ -35,23 +41,26 @@ final class DocumentState {
     var state: State = State() {
         didSet { update() }
     }
-    var search: Search? {
+    var filter: Filter? {
         didSet {
             let filteredTransactions: [EvaluatedTransaction]
-            if let filter = search {
+            if let filter = filter {
                 filteredTransactions = state.evaluatedTransactions.filter { $0.matches(filter) }
             } else {
                 filteredTransactions = state.evaluatedTransactions
             }
             self.windowController?.registerViewController?.transactions = filteredTransactions
-            self.windowController?.registerViewController?.search = search
+            self.windowController?.registerViewController?.filter = filter
         }
     }
     
     var windowController: LedgerWindowController? {
         didSet {
             windowController?.balanceViewController?.didSelect { account in
-                self.search = account.map { .account(name: $0) }
+                self.filter = account.map { .account(name: $0) }
+            }
+            windowController?.didSearch = { search in
+                self.filter = search.isEmpty ? nil : .string(search)
             }
             update()
         }

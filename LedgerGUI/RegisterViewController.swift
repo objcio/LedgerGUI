@@ -8,18 +8,17 @@
 
 import Cocoa
 
-
 class RegisterViewController: NSViewController {
     var transactions: [EvaluatedTransaction] = [] {
         didSet {
-            delegate.transactions = transactions
+            delegate.transactions = transactions.reversed()
             tableView?.reloadData()
         }
     }
     
-    var search: Search? {
+    var filter: Filter? {
         didSet {
-            delegate.search = search
+            delegate.filter = filter
             tableView?.reloadData()
         }
     }
@@ -56,7 +55,7 @@ class RegisterViewController: NSViewController {
 
 class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
     var transactions: [EvaluatedTransaction] = []
-    var search: Search?
+    var filter: Filter?
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let cell = tableView.make(withIdentifier: "Cell", owner: self)! as! RegisterCell
@@ -64,9 +63,9 @@ class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
         cell.title = transaction.title
         
         var highlight: ((EvaluatedPosting) -> Bool)? = nil
-        if let search = search {
+        if let filter = filter {
             highlight = { posting in
-                posting.matches(search)
+                posting.matches(filter)
             }
         }
         cell.setPostings(postings: transaction.postings, highlight: highlight)

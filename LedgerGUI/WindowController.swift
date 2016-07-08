@@ -10,6 +10,12 @@ import Cocoa
 
 
 class LedgerWindowController: NSWindowController {
+
+    var didSearch: ((String) -> ())? = { _ in }
+
+    @IBAction func search(_ sender: NSSearchField) {
+        didSearch?(sender.stringValue)
+    }
     var balanceViewController: BalanceViewController? {
         return contentViewController?.childViewControllers.flatMap( { $0 as? BalanceViewController }).first
     }
