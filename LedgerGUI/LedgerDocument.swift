@@ -18,8 +18,8 @@ extension EvaluatedTransaction {
         switch search {
         case .account:
             return postings.first { $0.matches(search) } != nil
-        case .string:
-            return postings.first { $0.matches(search) } != nil
+        case .string(let string):
+            return title.lowercased().contains(string.lowercased()) || postings.first { $0.matches(search) } != nil
         }
     }
 }

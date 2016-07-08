@@ -129,8 +129,6 @@ class RegisterCell: NSView {
                 attributes[NSBackgroundColorAttributeName] = NSColor.yellow()
             }
 
-
-
             postingView.account.attributedStringValue = AttributedString(string: posting.account, attributes: attributes)
             postingView.amount.attributedStringValue = AttributedString(string: posting.amount.displayValue, attributes: attributes)
             postingView.amount.textColor = posting.amount.color
