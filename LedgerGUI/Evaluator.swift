@@ -236,7 +236,7 @@ extension EvaluatedDate {
     }
     
     var date: Foundation.Date {
-        let calendar = Calendar.current()
+        let calendar = Calendar.current
         return calendar.date(from: components)!
     }
 }

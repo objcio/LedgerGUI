@@ -204,7 +204,7 @@ public final class GenericParser<StreamType: Stream, UserState, Result>: Parsec 
         return GenericParser(parse: { state in
             
             let consumed = self.parse(state: state)
-            if case .some(let reply) = consumed, .error = reply {
+            if case .some(let reply) = consumed, case .error = reply {
                 
                 return .none(reply)
                 
@@ -226,7 +226,7 @@ public final class GenericParser<StreamType: Stream, UserState, Result>: Parsec 
         return GenericParser(parse: { state in
             
             let consumed = self.parse(state: state)
-            if case .some(let reply) = consumed, .ok(let result, _, _) = reply {
+            if case .some(let reply) = consumed, case .ok(let result, _, _) = reply {
                 
                 return .none(.ok(result, state, ParseError.unknownParseError(state.position)))
                 

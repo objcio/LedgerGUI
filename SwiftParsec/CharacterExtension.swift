@@ -8,12 +8,12 @@
 
 import Foundation
 
-private let uppercaseSet = NSCharacterSet.uppercaseLetters()
-private let lowercaseSet = NSCharacterSet.lowercaseLetters()
-private let alphaSet = NSCharacterSet.letters()
-private let alphaNumericSet = NSCharacterSet.alphanumerics()
-private let symbolSet = NSCharacterSet.symbols()
-private let digitSet = NSCharacterSet.decimalDigits()
+private let uppercaseSet = NSCharacterSet.uppercaseLetters
+private let lowercaseSet = NSCharacterSet.lowercaseLetters
+private let alphaSet = NSCharacterSet.letters
+private let alphaNumericSet = NSCharacterSet.alphanumerics
+private let symbolSet = NSCharacterSet.symbols
+private let digitSet = NSCharacterSet.decimalDigits
 
 extension Character {
     

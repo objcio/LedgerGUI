@@ -137,8 +137,8 @@ class TransactionCell: NSView {
 
     func set(date: Foundation.Date) {
         let formatter = DateFormatter()
-        formatter.dateStyle = .shortStyle
-        formatter.timeStyle = .noStyle
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
         dateLabel.stringValue = formatter.string(from: date)
     }
 }
