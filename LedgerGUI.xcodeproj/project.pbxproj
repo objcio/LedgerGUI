@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		176042221D2FE10B000FA288 /* FilterParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176042211D2FE10B000FA288 /* FilterParserTests.swift */; };
+		17A36F7A1D7832880080C61F /* LedgerDocumentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A36F791D7832880080C61F /* LedgerDocumentController.swift */; };
 		17A47E101D1AC04D0010998A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E0F1D1AC04D0010998A /* AppDelegate.swift */; };
 		17A47E121D1AC04D0010998A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17A47E111D1AC04D0010998A /* Assets.xcassets */; };
 		17A47E201D1AC04E0010998A /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A47E1F1D1AC04E0010998A /* ParserTests.swift */; };
@@ -65,6 +66,7 @@
 
 /* Begin PBXFileReference section */
 		176042211D2FE10B000FA288 /* FilterParserTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterParserTests.swift; sourceTree = "<group>"; };
+		17A36F791D7832880080C61F /* LedgerDocumentController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LedgerDocumentController.swift; sourceTree = "<group>"; };
 		17A47E0C1D1AC04D0010998A /* LedgerGUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LedgerGUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		17A47E0F1D1AC04D0010998A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		17A47E111D1AC04D0010998A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				83C241311D2A8CB400C5CCDC /* PostingCell.xib */,
 				83BCD9941D2E568100EFAE6F /* BalanceTree.swift */,
 				83BCD9961D2E569200EFAE6F /* OutlineView.swift */,
+				17A36F791D7832880080C61F /* LedgerDocumentController.swift */,
 			);
 			path = LedgerGUI;
 			sourceTree = "<group>";
@@ -333,6 +336,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17A36F7A1D7832880080C61F /* LedgerDocumentController.swift in Sources */,
 				83C2412E1D2A6E1D00C5CCDC /* RegisterViewController.swift in Sources */,
 				83667D211D21B27E009DCEE7 /* RangeReplaceableCollectionTypeExtension.swift in Sources */,
 				83BCD9951D2E568100EFAE6F /* BalanceTree.swift in Sources */,
