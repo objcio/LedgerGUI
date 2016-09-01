@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension String: ErrorProtocol {}
+extension String: Error {}
 
 
 struct MultiCommodityAmount: Equatable {
@@ -209,7 +209,7 @@ extension Value {
             throw "Cannot convert \(self) to string for reg-ex matching"
         }
         let range = NSRange(location: 0, length: (string as NSString).length)
-        return try RegularExpression(pattern: regex, options: []).firstMatch(in: string, options: [], range: range) != nil
+        return try NSRegularExpression(pattern: regex, options: []).firstMatch(in: string, options: [], range: range) != nil
     }
     
     var stringRepresentation: String? {

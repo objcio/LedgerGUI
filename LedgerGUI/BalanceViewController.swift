@@ -28,9 +28,9 @@ class BalanceViewController: NSViewController {
         }
     }
 
-    func didSelect(_ didSelect: (account: String?) -> ()) {
+    func didSelect(_ didSelect: @escaping (_ account: String?) -> ()) {
         dataSourceAndDelegate.didSelect = { balanceTreeItem in
-            didSelect(account: balanceTreeItem?.accountName)
+            didSelect(balanceTreeItem?.accountName)
         }
     }
 

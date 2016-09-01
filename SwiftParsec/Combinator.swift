@@ -10,10 +10,10 @@
 
 public extension GenericParser where StreamType.Element: Equatable {
     
-    public func onlyIf(peek check: (StreamType.Element) -> Bool) -> GenericParser<StreamType, UserState, Result> {
+    public func onlyIf(peek check: @escaping (StreamType.Element) -> Bool) -> GenericParser<StreamType, UserState, Result> {
         return GenericParser<StreamType, UserState, Result>(parse:  { state in
-            if let peek = state.input.first where check(peek) {
-                return self.parse(state: state)
+            if let peek = state.input.first, check(peek) {
+                return self.parse(state)
             }
             return .none(.error(.unknownParseError(state.position))) // TODO: better error: expected "element"
         })
@@ -27,9 +27,9 @@ public extension GenericParser {
     ///
     /// - parameter parsers: An array of parsers to try.
     /// - returns: A parser that tries to apply the parsers in the array `parsers` in order, until one of them succeeds.
-    public static func choice<S: Sequence where S.Iterator.Element == GenericParser>(_ parsers: S) -> GenericParser {
+    public static func choice<S: Sequence>(_ parsers: S) -> GenericParser where S.Iterator.Element == GenericParser {
         
-        return parsers.reduce(GenericParser.empty, combine: <|>)
+        return parsers.reduce(GenericParser.empty, <|>)
         
     }
     
@@ -210,7 +210,7 @@ public extension GenericParser {
         
         return GenericParser<StreamType, UserState, [Result]> { state in
             
-            return count(n, results: []).parse(state: state)
+            return count(n, results: []).parse(state)
             
         }
         
@@ -361,7 +361,7 @@ public extension GenericParser {
     ///
     /// - parameter combine: A function receiving a placeholder parser as parameter that can be nested in other expressions.
     /// - returns: A recursive parser combined with itself.
-    public static func recursive(_ combine: @noescape(GenericParser) -> GenericParser) -> GenericParser {
+    public static func recursive(_ combine: (GenericParser) -> GenericParser) -> GenericParser {
         
         var expression: GenericParser!
         let placeholder = GenericParser { expression }

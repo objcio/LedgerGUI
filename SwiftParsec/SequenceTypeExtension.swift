@@ -14,7 +14,7 @@ extension Sequence {
     /// - returns:
     ///   - included: The elements that satisfied the predicate.
     ///   - remainder: The remainder of `self`.
-    func part(_ includeElement: @noescape(Self.Iterator.Element) throws -> Bool) rethrows -> (included: [Self.Iterator.Element], remainder: [Self.Iterator.Element]) {
+    func part(_ includeElement: (Self.Iterator.Element) throws -> Bool) rethrows -> (included: [Self.Iterator.Element], remainder: [Self.Iterator.Element]) {
         
         var included: [Self.Iterator.Element] = []
         var remainder: [Self.Iterator.Element] = []
@@ -67,7 +67,7 @@ extension Sequence where Iterator.Element == Int {
         
         for elem in self {
             
-            chars.append(Character(UnicodeScalar(elem)))
+            chars.append(Character(UnicodeScalar(elem)!))
             
         }
         

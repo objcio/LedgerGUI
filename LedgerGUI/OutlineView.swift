@@ -37,23 +37,23 @@ class OutlineDataSourceAndDelegate<A: Tree, Cell: NSTableCellView>: NSObject, NS
         }
     }
     
-    init(configure: (A, Cell) -> ()) {
+    init(configure: @escaping (A, Cell) -> ()) {
         self.configure = configure
     }
     
     let cellIdentifier = "Cell"
     
     
-    private func children(item: AnyObject?) -> [TreeBox<A>] {
+    private func children(item: Any?) -> [TreeBox<A>] {
         guard let item = item else { return tree }
         return (item as! TreeBox<A>).children
     }
-    
-    func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+
+    func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
         return children(item: item).count
     }
     
-    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
         return children(item: item).count > 0
     }
     
@@ -62,11 +62,11 @@ class OutlineDataSourceAndDelegate<A: Tree, Cell: NSTableCellView>: NSObject, NS
         didSelect((outlineView.item(atRow: outlineView.selectedRow) as? TreeBox<A>)?.unbox)
     }
     
-    func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+    func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
         return children(item: item)[index]
     }
     
-    func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
+    func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
         guard let boxed = item as? TreeBox<A> else {
             fatalError("Expected a box, got an \(item)")
         }

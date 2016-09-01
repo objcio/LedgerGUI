@@ -41,7 +41,7 @@ extension Filter {
             period = (EvaluatedDate(year: year, month: 1, day: 1), EvaluatedDate(year: year, month: 12, day: 31)) // TODO
         case let (_, month?):
             let lastDayInMonth = 31 // TODO
-            let year = Calendar.current.component(Calendar.Unit.year, from: Foundation.Date())
+            let year = Calendar.current.component(.year, from: Foundation.Date())
             period = (EvaluatedDate(year: year, month: month, day: 1), EvaluatedDate(year: year, month: month, day: lastDayInMonth))
         default: ()
         }
@@ -70,8 +70,8 @@ let year: GenericParser<ImmutableCharacters, (), FilterToken> = natural >>- { nu
 }
 
 let months: [(String, Int)] = {
-    let calendar = Calendar(calendarIdentifier: .gregorian)!
-    calendar.locale = Locale(localeIdentifier: "en_US")
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.locale = Locale(identifier: "en_US")
     let enumeratedSymbols = Array(calendar.monthSymbols.enumerated()) + Array(calendar.shortMonthSymbols.enumerated())
     return enumeratedSymbols.map { idx, symbol in
         (symbol.lowercased(), idx + 1)

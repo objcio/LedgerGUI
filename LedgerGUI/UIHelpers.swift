@@ -19,11 +19,11 @@ extension Amount {
         let formatter = NumberFormatter()
         formatter.currencySymbol = commodity.value
         formatter.numberStyle = .currencyAccounting
-        return formatter.string(from: number.value) ?? ""
+        return formatter.string(from: number.value as NSNumber) ?? ""
     }
     
     var color: NSColor {
-        return isNegative ? .red() : .black()
+        return isNegative ? .red : .black
     }
 }
 

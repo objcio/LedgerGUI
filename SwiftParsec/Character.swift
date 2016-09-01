@@ -8,7 +8,7 @@
 // Commonly used character parsers.
 //
 
-import class Foundation.NSCharacterSet
+import struct Foundation.CharacterSet
 
 /// String parser with an empty `UserState`.
 public typealias StringParser = GenericParser<String, (), Character>
@@ -19,7 +19,7 @@ public extension Parsec where StreamType.Element == Character, Result == Charact
     ///
     /// - parameter predicate: The predicate to apply on the `Character`.
     /// - returns: A parser that succeeds for any character for which the supplied function `predicate` returns `true`.
-    public static func satisfy(_ predicate: (Character) -> Bool) -> GenericParser<StreamType, UserState, Result> {
+    public static func satisfy(_ predicate: @escaping (Character) -> Bool) -> GenericParser<StreamType, UserState, Result> {
         return anyToken.onlyIf(peek: predicate)
     }
     
@@ -207,7 +207,7 @@ public extension Parsec where StreamType.Element == Character, Result == Charact
     ///
     /// - parameter set: The `NSCharacterSet` used to test for membership.
     /// - returns: The parsed character.
-    static func memberOf(_ set: NSCharacterSet) -> GenericParser<StreamType, UserState, Result> {
+    static func memberOf(_ set: CharacterSet) -> GenericParser<StreamType, UserState, Result> {
         
         return satisfy { $0.isMember(of: set) }
         
@@ -235,7 +235,7 @@ public extension Parsec where StreamType.Element == Character {
     ///
     /// - parameter str: The string to parse.
     /// - returns: A parser that parses a `String`.
-    public static func string<StringStream: Stream where StringStream.Element == Character>(_ str: StringStream) -> GenericParser<StreamType, UserState, StringStream> {
+    public static func string<StringStream: Stream>(_ str: StringStream) -> GenericParser<StreamType, UserState, StringStream> where StringStream.Element == Character {
                 
         return tokens(
             tokensDescription: { String(reflecting: $0) },

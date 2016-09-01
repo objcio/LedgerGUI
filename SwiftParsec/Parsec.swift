@@ -26,7 +26,7 @@ public protocol Parsec {
     ///
     /// - parameter transform: A mapping function.
     /// - returns: A new parser with the mapped content.
-    func map<T>(_ transform: (Result) -> T) -> GenericParser<StreamType, UserState, T>
+    func map<T>(_ transform: @escaping (Result) -> T) -> GenericParser<StreamType, UserState, T>
     
     /// Return a parser by applying the function contained in the supplied parser to self.
     ///
@@ -50,7 +50,7 @@ public protocol Parsec {
     ///
     /// - parameter transform: A mapping function returning a parser.
     /// - returns: A new parser with the mapped content.
-    func flatMap<T>(_ transform: (Result) -> GenericParser<StreamType, UserState, T>) -> GenericParser<StreamType, UserState, T>
+    func flatMap<T>(_ transform: @escaping (Result) -> GenericParser<StreamType, UserState, T>) -> GenericParser<StreamType, UserState, T>
     
     /// This combinator is used whenever arbitrary look ahead is needed. Since it pretends that it hasn't consumed any input when `self` fails, the ('<|>') combinator will try its second alternative even when the first parser failed while consuming input.
     ///
@@ -82,7 +82,7 @@ public protocol Parsec {
     ///
     /// - parameter accumulator: An accumulator function that process the value returned by `self`. The first argument is the value returned by `self` and the second argument is the previous processed values returned by this accumulator function. It returns the result of processing the passed value and the accumulated values.
     /// - returns: The processed values of the accumulator function.
-    func manyAccumulator(_ accumulator: (Result, [Result]) -> [Result]) -> GenericParser<StreamType, UserState, [Result]>
+    func manyAccumulator(_ accumulator: @escaping (Result, [Result]) -> [Result]) -> GenericParser<StreamType, UserState, [Result]>
     
     /// A parser that always fails without consuming any input.
     static var empty: Self { get }
@@ -119,7 +119,7 @@ public protocol Parsec {
     ///
     /// - parameter update: The function applied to the `UserState`. It returns the updated `UserState`.
     /// - returns: An empty parser that will update the `UserState`.
-    static func updateUserState(_ update: (UserState) -> UserState) -> GenericParser<StreamType, UserState, ()>
+    static func updateUserState(_ update: @escaping (UserState) -> UserState) -> GenericParser<StreamType, UserState, ()>
     
     /// Run the parser and return the result of the parsing and the user state.
     ///
@@ -133,19 +133,39 @@ public protocol Parsec {
     
 }
 
-infix operator <^> { associativity left precedence 130 }
+precedencegroup SequencePrecedence {
+    associativity: left
+    higherThan: ChoicePrecedence
+}
 
-infix operator <*> { associativity left precedence 130 }
+precedencegroup ChoicePrecedence {
+    associativity: left
+    higherThan: BindPrecedence
+}
 
-infix operator *> { associativity left precedence 130 }
+precedencegroup BindPrecedence {
+    associativity: left
+    higherThan: LabelPrecedence
+}
 
-infix operator <* { associativity left precedence 130 }
+precedencegroup LabelPrecedence {
+    higherThan: AssignmentPrecedence
+    lowerThan: AdditionPrecedence
+}
 
-infix operator <|> { associativity left precedence 110 }
+infix operator <^>: SequencePrecedence
 
-infix operator >>- { associativity left precedence 100 }
+infix operator <*>: SequencePrecedence
 
-infix operator <?> { precedence 0 }
+infix operator *>: SequencePrecedence
+
+infix operator <*: SequencePrecedence
+
+infix operator <|>: ChoicePrecedence
+
+infix operator >>-: BindPrecedence
+
+infix operator <?>: LabelPrecedence
 
 /// Infix operator for `Parsec.alternative`. It has the same precedence as the equality operator (`&&`).
 ///
@@ -198,11 +218,11 @@ public extension Parsec where UserState == () {
         } catch let parseError as ParseError {
             
             let parseErrorMsg = NSLocalizedString("parse error at ", comment: "Primitive parsers.")
-            print(parseErrorMsg + String(parseError))
+            print(parseErrorMsg + String(describing: parseError))
             
         } catch let error {
             
-            print(String(error))
+            print(String(describing: error))
             
         }
         
@@ -211,7 +231,7 @@ public extension Parsec where UserState == () {
 }
 
 /// A `Stream` instance is responsible for maintaining the position of the parser's stream.
-public protocol Stream: ArrayLiteralConvertible {
+public protocol Stream: ExpressibleByArrayLiteral {
     
     /// If `!self.isEmpty`, remove the first element and return it, otherwise return `nil`.
     ///
@@ -219,12 +239,6 @@ public protocol Stream: ArrayLiteralConvertible {
     mutating func popFirst() -> Element?
     var first: Element? { get }
     var isEmpty: Bool { get }
-}
-
-extension Stream {
-    public var isEmpty: Bool {
-        return first == nil
-    }
 }
 
 extension String: Stream {

@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct LedgerDouble: Equatable, IntegerLiteralConvertible, FloatLiteralConvertible {
+struct LedgerDouble: Equatable, ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     var value: Double
     init(_ value: Double) {
         self.value = value

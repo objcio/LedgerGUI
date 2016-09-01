@@ -28,7 +28,7 @@ public enum Operator<StreamType: Stream, UserState, Result> {
     
 }
 
-public struct OperatorTable<StreamType: Stream, UserState, Result>: RangeReplaceableCollection, ArrayLiteralConvertible {
+public struct OperatorTable<StreamType: Stream, UserState, Result>: RangeReplaceableCollection, ExpressibleByArrayLiteral {
     
     /// Represents a valid position in the operator table.
     public typealias Index = Int
@@ -128,13 +128,13 @@ public struct OperatorTable<StreamType: Stream, UserState, Result>: RangeReplace
     /// - parameter combine: A function receiving a 'simple expression' as parameter that can be nested in other expressions.
     /// - returns: An expression parser for terms returned by `combined` with operators from `self`.
     /// - SeeAlso: GenericParser.recursive(combine: GenericParser -> GenericParser) -> GenericParser
-    public func makeExpressionParser(_ combine: @noescape (expression: GenericParser<StreamType, UserState, Result>) -> GenericParser<StreamType, UserState, Result>) -> GenericParser<StreamType, UserState, Result> {
+    public func makeExpressionParser(_ combine: (_ expression: GenericParser<StreamType, UserState, Result>) -> GenericParser<StreamType, UserState, Result>) -> GenericParser<StreamType, UserState, Result> {
         
         var term: GenericParser<StreamType, UserState, Result>!
         let lazyTerm = GenericParser<StreamType, UserState, Result> { term }
         
         let expr = reduce(lazyTerm) { buildParser($0, operators: $1) }
-        term = combine(expression: expr)
+        term = combine(expr)
         
         return expr
         
@@ -148,7 +148,7 @@ public struct OperatorTable<StreamType: Stream, UserState, Result>: RangeReplace
     
     private func buildParser(_ term: GenericParser<StreamType, UserState, Result>, operators: [Operator<StreamType, UserState, Result>]) -> GenericParser<StreamType, UserState, Result> {
         
-        let ops: OperatorsTuple = operators.reduce(([], [], [], [], []), combine: splitOperators)
+        let ops: OperatorsTuple = operators.reduce(([], [], [], [], []), splitOperators)
         
         let rightAssocOp = GenericParser.choice(ops.right)
         let leftAssocOp = GenericParser.choice(ops.left)
@@ -315,7 +315,7 @@ public struct OperatorTable<StreamType: Stream, UserState, Result>: RangeReplace
     /// - parameters:
     ///   - subRange: Range of elements to replace.
     ///   - newElements: New elements replacing the previous elements contained in `subRange`.
-    public mutating func replaceSubrange<C: Collection where C.Iterator.Element == Iterator.Element>(_ subrange: Range<Index>, with newElements: C) {
+    public mutating func replaceSubrange<C: Collection>(_ subrange: Range<Index>, with newElements: C) where C.Iterator.Element == Iterator.Element {
         
         table.replaceSubrange(subrange, with: newElements)
         

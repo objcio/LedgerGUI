@@ -19,7 +19,7 @@
 ///
 ///     let parser = permutation.parser.stringValue
 ///
-public struct Permutation<StreamType: Stream, UserState, Result>: RangeReplaceableCollection, ArrayLiteralConvertible {
+public struct Permutation<StreamType: Stream, UserState, Result>: RangeReplaceableCollection, ExpressibleByArrayLiteral {
     
     /// Represents a valid position in the permutation.
     public typealias Index = Int
@@ -169,7 +169,7 @@ public struct Permutation<StreamType: Stream, UserState, Result>: RangeReplaceab
     /// - parameters:
     ///   - subRange: Range of elements to replace.
     ///   - newElements: New elements replacing the previous elements contained in `subRange`.
-    public mutating func replaceSubrange<C: Collection where C.Iterator.Element == Iterator.Element>(_ subrange: Range<Index>, with newElements: C) {
+    public mutating func replaceSubrange<C: Collection>(_ subrange: Range<Index>, with newElements: C) where C.Iterator.Element == Iterator.Element {
         
         parsers.replaceSubrange(subrange, with: newElements)
         

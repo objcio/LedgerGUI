@@ -76,7 +76,7 @@ public func <(leftMsg: Message, rightMsg: Message) -> Bool {
 }
 
 /// `ParseError` represents parse errors. It provides the source position (`SourcePosition`) of the error and an array of error messages (`Message`). A `ParseError` can be returned by the function `parse`.
-public struct ParseError: ErrorProtocol, CustomStringConvertible {
+public struct ParseError: Error, CustomStringConvertible {
     
     /// Return an unknown parse error.
     ///
@@ -118,7 +118,7 @@ public struct ParseError: ErrorProtocol, CustomStringConvertible {
     /// A textual representation of `self`.
     public var description: String {
         
-        return String(position) + ":\n" + messagesDescription
+        return String(describing: position) + ":\n" + messagesDescription
         
     }
     
@@ -272,7 +272,7 @@ public struct ParseError: ErrorProtocol, CustomStringConvertible {
 extension Sequence where Iterator.Element == String {
     
     /// Return an array with duplicate and empty strings removed.
-    private func removingDuplicatesAndEmpties() -> [Self.Iterator.Element] {
+    fileprivate func removingDuplicatesAndEmpties() -> [Self.Iterator.Element] {
         
         return self.removingDuplicates().filter { !$0.isEmpty }
         

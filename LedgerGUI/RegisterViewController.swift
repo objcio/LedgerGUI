@@ -96,11 +96,11 @@ class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
         let accountFont = posting.virtual ? font.italic : font
         var attributes: [String:AnyObject] = [NSFontAttributeName: accountFont]
         if highlighted {
-            attributes[NSBackgroundColorAttributeName] = NSColor.yellow()
+            attributes[NSBackgroundColorAttributeName] = NSColor.yellow
         }
         
-        cell.account.attributedStringValue = AttributedString(string: posting.account, attributes: attributes)
-        cell.amount.attributedStringValue = AttributedString(string: posting.amount.displayValue, attributes: attributes)
+        cell.account.attributedStringValue = NSAttributedString(string: posting.account, attributes: attributes)
+        cell.amount.attributedStringValue = NSAttributedString(string: posting.amount.displayValue, attributes: attributes)
         cell.amount.textColor = posting.amount.color
         return cell
     }
