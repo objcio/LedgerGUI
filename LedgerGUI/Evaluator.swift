@@ -118,7 +118,7 @@ extension EvaluatedTransaction {
     }
 }
 
-func ??(lhs: ExpressionContext, rhs: ExpressionContext) -> ExpressionContext {
+func ??(lhs: @escaping ExpressionContext, rhs: @escaping ExpressionContext) -> ExpressionContext {
     return { x in
         return lhs(x) ?? rhs(x)
     }
@@ -148,7 +148,7 @@ extension EvaluatedPosting {
         }
     }
     
-    func match(expression: Expression, context: ExpressionContext) throws -> Bool {
+    func match(expression: Expression, context: @escaping ExpressionContext) throws -> Bool {
         let value = try expression.evaluate(context: expressionContext ?? context)
         guard case .bool(let result) = value else {
             throw "Expected boolean expression"
@@ -305,11 +305,11 @@ extension EvaluatedTransaction {
         }
     }
     
-    mutating func append(posting: Posting, context: ExpressionContext) throws {
+    mutating func append(posting: Posting, context: @escaping ExpressionContext) throws {
         try postings.append(posting.evaluate(context: lookup ?? context))
     }
     
-    mutating func apply(automatedTransaction: AutomatedTransaction, context: ExpressionContext) throws {
+    mutating func apply(automatedTransaction: AutomatedTransaction, context: @escaping ExpressionContext) throws {
         let transactionLookup = lookup ?? context
         for evaluatedPosting in postings {
             guard try evaluatedPosting.match(expression: automatedTransaction.expression, context: transactionLookup) else { continue }
@@ -356,7 +356,7 @@ extension Posting {
 
 extension Transaction {
     // TODO: refactor this? we are using two variables from State
-    func evaluate(automatedTransactions: [AutomatedTransaction], year: Int?, context: ExpressionContext) throws -> EvaluatedTransaction {
+    func evaluate(automatedTransactions: [AutomatedTransaction], year: Int?, context: @escaping ExpressionContext) throws -> EvaluatedTransaction {
         var postingsWithValue = postings
         let postingsWithoutValue = postingsWithValue.remove { $0.value == nil }
         var evaluatedTransaction = try EvaluatedTransaction(title: title, postings: [], date: EvaluatedDate(date: date, year: year))
