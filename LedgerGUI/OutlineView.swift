@@ -25,7 +25,7 @@ private final class TreeBox<A: Tree> {
 
 class OutlineDataSourceAndDelegate<A: Tree, Cell: NSTableCellView>: NSObject, NSOutlineViewDelegate, NSOutlineViewDataSource {
     private var tree: [TreeBox<A>] = []
-    var configure: (A, Cell) -> () = { _ in }
+    var configure: (A, Cell) -> () = { _,_  in }
     var didSelect: (A?) -> () = { _ in }
     
     var rootItems: [A] {
@@ -70,7 +70,7 @@ class OutlineDataSourceAndDelegate<A: Tree, Cell: NSTableCellView>: NSObject, NS
         guard let boxed = item as? TreeBox<A> else {
             fatalError("Expected a box, got an \(item)")
         }
-        let cell = outlineView.make(withIdentifier: cellIdentifier, owner: self)! as! Cell
+        let cell = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: cellIdentifier), owner: self)! as! Cell
         configure(boxed.unbox, cell)
         return cell
     }

@@ -744,7 +744,7 @@ extension TokenParser {
         
     }
     
-    private static func sign<Number: SignedNumber>() -> GenericParser<String, UserState, (Number) -> Number> {
+    private static func sign<Number: SignedNumeric & Comparable>() -> GenericParser<String, UserState, (Number) -> Number> {
         
         return GenericParser.character("-") *> GenericParser(result: -) <|>
             GenericParser.character("+") *> GenericParser(result: { $0 }) <|>

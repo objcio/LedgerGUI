@@ -21,8 +21,8 @@ extension Double {
     }
 }
 
-extension MultiCommodityAmount: DictionaryLiteralConvertible {
-    init(dictionaryLiteral elements: (Commodity, LedgerDouble)...) {
+extension MultiCommodityAmount: ExpressibleByDictionaryLiteral {
+    public init(dictionaryLiteral elements: (Commodity, LedgerDouble)...) {
         value = [:]
         for (commodity, number) in elements {
             value[commodity] = number
@@ -216,8 +216,8 @@ class EvaluatorTests: XCTestCase {
         var state = Ledger()
         try! state.apply(auto)
         try! state.apply(.transaction(transaction))
-        XCTAssert(state.balance(account: "Foo") == [Commodity("$"): 0.4*20])
-        XCTAssert(state.balance(account: "Bar") == [Commodity("$"): -0.4*20])
+        XCTAssert(state.balance(account: "Foo") == [Commodity("$"): LedgerDouble(0.4*20)])
+        XCTAssert(state.balance(account: "Bar") == [Commodity("$"): LedgerDouble(-0.4*20)])
         XCTAssert(state.balance(account: "Expenses:Food") == [Commodity("$"): 20])
         XCTAssert(state.balance(account: "Cash") == [Commodity("$"): -20])
     }
@@ -251,8 +251,8 @@ class EvaluatorTests: XCTestCase {
         var state = Ledger()
         try! state.apply(auto)
         try! state.apply(.transaction(transaction))
-        XCTAssert(state.balance(account: "Foo") == [Commodity("$"): 0.4*20])
-        XCTAssert(state.balance(account: "Bar") == [Commodity("$"): -0.4*20])
+        XCTAssert(state.balance(account: "Foo") == [Commodity("$"): LedgerDouble(0.4*20)])
+        XCTAssert(state.balance(account: "Bar") == [Commodity("$"): LedgerDouble(-0.4*20)])
         XCTAssert(state.balance(account: "Expenses:Food") == [Commodity("$"): 20])
         XCTAssert(state.balance(account: "Cash") == [Commodity("$"): -20])
     }
@@ -299,7 +299,7 @@ class EvaluatorTests: XCTestCase {
     
     func testSample() {
         typealias MyParser = FastParser
-        let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
+        let path = Bundle(for: ParserTests.self).path(forResource: "sample", ofType: "txt")!
         let contents = try! String(contentsOfFile: path)
         let statements = parse(string: contents)
         var state = Ledger()

@@ -232,6 +232,7 @@ public extension Parsec where UserState == () {
 
 /// A `Stream` instance is responsible for maintaining the position of the parser's stream.
 public protocol Stream: ExpressibleByArrayLiteral {
+    typealias Element = ArrayLiteralElement
     
     /// If `!self.isEmpty`, remove the first element and return it, otherwise return `nil`.
     ///
@@ -243,25 +244,18 @@ public protocol Stream: ExpressibleByArrayLiteral {
 
 extension String: Stream {
     
-    public typealias Element = String.CharacterView.Iterator.Element
-    
+
     /// Create an instance containing `elements`.
     public init(arrayLiteral elements: Element...) {
         
         self.init(elements)
         
     }
-    
-    public var first: Character? {
-        return characters.first
-    }
-    
 }
 
-extension String.CharacterView: Stream {
-    
-    public typealias Element = String.CharacterView.Iterator.Element
-    
+extension Substring: Stream {
+
+
     /// Create an instance containing `elements`.
     public init(arrayLiteral elements: Element...) {
         

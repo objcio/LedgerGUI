@@ -32,7 +32,7 @@ public extension Parsec where StreamType.Element == Character, Result == Charact
     /// - SeeAlso: `GenericParser.satisfy(predicate: Character -> Bool) -> GenericParser`
     public static func oneOf(_ list: String) -> GenericParser<StreamType, UserState, Result> {
         
-        return satisfy(list.characters.contains)
+        return satisfy(list.contains)
         
     }
     
@@ -57,7 +57,7 @@ public extension Parsec where StreamType.Element == Character, Result == Charact
     /// - returns: A parser that succeeds if the current character is _not_ in the supplied list of characters.
     public static func noneOf(_ list: String) -> GenericParser<StreamType, UserState, Result> {
         
-        return satisfy { !list.characters.contains($0) }
+        return satisfy { !list.contains($0) }
         
     }
     

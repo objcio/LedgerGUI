@@ -10,33 +10,33 @@ import Foundation
 
 
 struct ImmutableCharacters: Stream {
-    var characters: [Character]
-    var start: Int
+    var substring: Substring
+    var start: String.Index
     
     init(string: String) {
-        characters = Array(string.characters)
-        start = 0
+        substring = Substring(string)
+        start = substring.startIndex
     }
     
     init(arrayLiteral elements: Character...) {
-        characters = elements
-        start = 0
+        substring = Substring(elements)
+        start = substring.startIndex
     }
     
     mutating func popFirst() -> Character? {
-        guard start < characters.count else { return nil }
+        guard start < substring.endIndex else { return nil }
         let oldStart = start
-        start += 1
-        return characters[oldStart]
+        start = substring.index(start, offsetBy: 1)
+        return substring[oldStart]
     }
     
     var first: Character? {
-        guard start < characters.count else { return nil }
-        return characters[start]
+        guard start < substring.endIndex else { return nil }
+        return substring[start]
     }
     
     var isEmpty: Bool {
-        return start < characters.count
+        return start < substring.endIndex
     }
 }
 
@@ -45,7 +45,7 @@ typealias FastParser = GenericParser<ImmutableCharacters, (), Character>
 
 
 func string(_ string: String) -> GenericParser<ImmutableCharacters, (), String> {
-    return FastParser.string(Array(string.characters)) *> GenericParser(result: string)
+    return FastParser.string(string) *> GenericParser(result: string)
 }
 
 func surrounded(by character: Character) -> GenericParser<ImmutableCharacters,(),String> {

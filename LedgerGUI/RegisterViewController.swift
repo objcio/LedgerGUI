@@ -28,15 +28,15 @@ class RegisterViewController: NSViewController {
     
     override func viewDidLoad() {
         let tableView = NSTableView()
-        let column = NSTableColumn(identifier: "first")
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(rawValue: "first"))
         tableView.addTableColumn(column)
         tableView.dataSource = delegate
         tableView.delegate = delegate
         tableView.headerView = nil
-        let nib = NSNib(nibNamed: "TransactionCell", bundle: nil)
-        tableView.register(nib, forIdentifier: "TransactionCell")
-        let postingNib = NSNib(nibNamed: "PostingCell", bundle: nil)
-        tableView.register(postingNib, forIdentifier: "PostingCell")
+        let nib = NSNib(nibNamed: NSNib.Name(rawValue: "TransactionCell"), bundle: nil)
+        tableView.register(nib, forIdentifier: NSUserInterfaceItemIdentifier(rawValue: "TransactionCell"))
+        let postingNib = NSNib(nibNamed: NSNib.Name(rawValue: "PostingCell"), bundle: nil)
+        tableView.register(postingNib, forIdentifier: NSUserInterfaceItemIdentifier(rawValue: "PostingCell"))
         
         let scrollView = NSScrollView()
         let clipView = NSClipView()
@@ -82,21 +82,21 @@ class RegisterDelegate: NSObject, NSTableViewDelegate, NSTableViewDataSource {
     }
     
     func transactionCell(_ tableView: NSTableView, _ transaction: EvaluatedTransaction) -> NSView {
-        let cell = tableView.make(withIdentifier: "TransactionCell", owner: self)! as! TransactionCell
+        let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "TransactionCell"), owner: self)! as! TransactionCell
         cell.title = transaction.title
         cell.set(date: transaction.date.date)
         return cell
     }
     
     func postingCell(_ tableView: NSTableView, _ posting: EvaluatedPosting) -> NSView {
-        let cell = tableView.make(withIdentifier: "PostingCell", owner: self)! as! PostingCell
+        let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "PostingCell"), owner: self)! as! PostingCell
         let highlighted = filters.some(posting.matches)
 
-        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize())
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
         let accountFont = posting.virtual ? font.italic : font
-        var attributes: [String:AnyObject] = [NSFontAttributeName: accountFont]
+        var attributes: [NSAttributedStringKey: AnyObject] = [.font: accountFont]
         if highlighted {
-            attributes[NSBackgroundColorAttributeName] = NSColor.yellow
+            attributes[.backgroundColor] = NSColor.yellow
         }
         
         cell.account.attributedStringValue = NSAttributedString(string: posting.account, attributes: attributes)

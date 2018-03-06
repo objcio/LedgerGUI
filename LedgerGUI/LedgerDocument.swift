@@ -27,8 +27,8 @@ final class LedgerDocument: NSDocument {
     }
     
     override func makeWindowControllers() {
-        let storyboard = NSStoryboard(name: "Storyboard", bundle: nil)
-        let wc = storyboard.instantiateController(withIdentifier: "WindowController") as! LedgerWindowController
+        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Storyboard"), bundle: nil)
+        let wc = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier(rawValue: "WindowController")) as! LedgerWindowController
         wc.document = self
         addWindowController(wc)
         wc.showWindow(nil)
