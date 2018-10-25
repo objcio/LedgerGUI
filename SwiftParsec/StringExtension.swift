@@ -70,8 +70,7 @@ extension String {
     ///
     /// - returns: A `String` with the duplicate characters removed.
     func removingDuplicates() -> String {
-        
-        return String(removingDuplicates())
+        return String(self[...].removingDuplicates())
         
     }
     
