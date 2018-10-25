@@ -33,7 +33,7 @@ class ParserTests: XCTestCase {
             do {
                 let result = try parser.run(sourceName: "", input: ImmutableCharacters(string: d + "\n"))
                 if result != expected {
-                    self.recordFailure(withDescription: "Expected \(expected), but got \(result)", inFile: file, atLine: line, expected: true)
+                    self.recordFailure(withDescription: "Expected \(expected), but got \(result)", inFile: file, atLine: Int(line), expected: true)
                 }
             } catch {
                 XCTFail("\(error)")
@@ -233,7 +233,7 @@ class ParserTests: XCTestCase {
 
     func testFile() {
         typealias MyParser = FastParser
-        let path = Bundle(for: ParserTests.self).pathForResource("sample", ofType: "txt")!
+        let path = Bundle(for: ParserTests.self).path(forResource: "sample", ofType: "txt")!
         let contents = try! String(contentsOfFile: path)
         _ = parse(string: contents)
         print("Done")

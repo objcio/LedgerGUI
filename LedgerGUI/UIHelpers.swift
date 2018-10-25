@@ -10,7 +10,7 @@ import Cocoa
 
 extension NSFont {
     var italic: NSFont {
-        return NSFontManager.shared().convert(self, toHaveTrait: .italicFontMask)
+        return NSFontManager.shared.convert(self, toHaveTrait: .italicFontMask)
     }
 }
 

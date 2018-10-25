@@ -890,7 +890,7 @@ public func *><StreamType, UserState, Param1, Param2>(leftParser: GenericParser<
 /// - returns: A parser returning the result of the first parser.
 public func <*<StreamType, UserState, Param1, Param2>(leftParser: GenericParser<StreamType, UserState, Param1>, rightParser: GenericParser<StreamType, UserState, Param2>) -> GenericParser<StreamType, UserState, Param1> {
     
-    return GenericParser.lift2({ $0.0 }, parser1: leftParser, parser2: rightParser)
+    return GenericParser.lift2({l,r in l }, parser1: leftParser, parser2: rightParser)
     
 }
 
