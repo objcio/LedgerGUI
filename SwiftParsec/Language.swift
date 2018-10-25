@@ -275,21 +275,22 @@ private let swiftIdentifierStartCharacters3 =
     (0xFE30...0xFE44).stringValue +
     (0xFE47...0xFFFD).stringValue
 
-private let swiftIdentifierStartCharacters4 =
-    (0x10000...0x1FFFD).stringValue +
-    (0x20000...0x2FFFD).stringValue +
-    (0x30000...0x3FFFD).stringValue +
-    (0x40000...0x4FFFD).stringValue +
-    (0x50000...0x5FFFD).stringValue +
-    (0x60000...0x6FFFD).stringValue +
-    (0x70000...0x7FFFD).stringValue +
-    (0x80000...0x8FFFD).stringValue +
-    (0x90000...0x9FFFD).stringValue +
-    (0xA0000...0xAFFFD).stringValue +
-    (0xB0000...0xBFFFD).stringValue +
-    (0xC0000...0xCFFFD).stringValue +
-    (0xD0000...0xDFFFD).stringValue +
+private let swiftIdentifierStartCharacters4: String =
+    [(0x10000...0x1FFFD).stringValue,
+    (0x20000...0x2FFFD).stringValue,
+    (0x30000...0x3FFFD).stringValue,
+    (0x40000...0x4FFFD).stringValue,
+    (0x50000...0x5FFFD).stringValue,
+    (0x60000...0x6FFFD).stringValue,
+    (0x70000...0x7FFFD).stringValue,
+    (0x80000...0x8FFFD).stringValue,
+    (0x90000...0x9FFFD).stringValue,
+    (0xA0000...0xAFFFD).stringValue,
+    (0xB0000...0xBFFFD).stringValue,
+    (0xC0000...0xCFFFD).stringValue,
+    (0xD0000...0xDFFFD).stringValue,
     (0xE0000...0xEFFFD).stringValue
+    ].joined(separator: "")
 
 private let swiftIdentifierStartSet = CharacterSet(charactersIn: swiftIdentifierStartCharacters)
 
